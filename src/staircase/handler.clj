@@ -85,12 +85,11 @@
                   (GET    "/" [] (get-resource histories id))
                   (GET    "/head" [] (get-end-of-history histories id))
                   (PUT    "/" {body :body} (update-resource histories id body))
-                  (DELETE "/" [] (delete-resource histories id)))
-                          ;;(context "/steps" []
-                          ;;        (GET "/" [] (get-steps-of histories id))
-                          ;;        (GET "/:idx" [idx] (get-step-of histories id idx))
-                          ;;        (POST "/" {body :body} (add-step-to histories steps id body))))
-                          )
+                  (DELETE "/" [] (delete-resource histories id))
+                  (context "/steps" []
+                          (GET "/" [] (get-steps-of histories id))
+                          (GET "/:idx" [idx] (get-step-of histories id idx))
+                          (POST "/" {body :body} (add-step-to histories steps id body)))))
           step-routes (routes
                 (GET  "/" [] (get-resources steps))
                 (context "/:id" [id]

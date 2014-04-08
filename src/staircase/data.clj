@@ -40,7 +40,12 @@
   (delete [this id] "Destroy a thing")
   (create [this doc] "Create a new thing"))
 
-(defn uuid [] (str (java.util.UUID/randomUUID)))
+(defn new-id [] (str (java.util.UUID/randomUUID)))
+
+(defn string->uuid [name] 
+  (try
+    (java.util.UUID/fromString name)
+    (catch IllegalArgumentException e nil)))
 
 (defn now [] (java.util.Date.))
 
@@ -88,34 +93,39 @@
         (into [] results))))
 
   (exists? [_ id]
-    (sql/with-connection (:connection db)
-      (sql/with-query-results results
-        ["select count(*) as n from histories where id = ?", id]
-        (get-in results [0 :n]))))
+    (if-let [uuid (string->uuid id)]
+      (sql/with-connection (:connection db)
+        (sql/with-query-results results
+          ["select count(*) as n from histories where id = ?", uuid]
+          (get-in results [0 :n])))
+      false))
 
   (get-one [histories id]
-    (sql/with-connection (:connection db)
-      (sql/with-query-results results
-        ["select h.*, hs.step_id
-           from histories as h
-           left join history_step as hs on h.id = hs.history_id
-           where h.id = ?
-           order by hs.created_at desc
-         " id]
-        (when results (apply build-history results)))))
+    (when-let [uuid (string->uuid id)]
+      (sql/with-connection (:connection db)
+        (sql/with-query-results results
+          ["select h.*, hs.step_id
+            from histories as h
+            left join history_step as hs on h.id = hs.history_id
+            where h.id = ?
+            order by hs.created_at desc
+          " uuid]
+          (when results (apply build-history results))))))
 
   (update [histories id doc]
-    (let [document (assoc doc "id" id)]
+    (let [uuid (java.util.UUID/fromString id)
+          document (assoc doc "id" uuid)]
       (sql/with-connection (:connection db)
-        (sql/update-values :histories ["id=?" id] document))
+        (sql/update-values :histories ["id=?" uuid] document))
       document))
 
   (delete [histories id]
-    (sql/with-connection (:connection db)
-      (sql/delete-rows :histories ["id=?" id])))
+    (let [uuid (java.util.UUID/fromString id)]
+      (sql/with-connection (:connection db)
+        (sql/delete-rows :histories ["id=?" uuid]))))
 
   (create [histories doc]
-    (let [id (uuid)
+    (let [id (new-id)
           values (assoc doc "id" id)]
       (sql/with-connection (:connection db)
         (sql/insert-record :histories values))
@@ -187,9 +197,9 @@
       (sql/delete-rows :steps ["id=?" id])))
 
   (create [_ doc]
-    (let [id (uuid)
+    (let [id (new-id)
           step (dissoc "history_id" (assoc doc "id" id))
-          link {"history_id" (doc "history_id") 
+          link {"history_id" (java.util.UUID/fromString (doc "history_id"))
                 "step_id" id
                 "created_at" (now)}]
       (sql/with-connection (:connection db)
@@ -201,10 +211,11 @@
 (defn new-steps-resource [] (map->StepsResource {}))
 
 (defn get-steps-of [{db :db} id & {:keys [limit] :or {limit nil}}]
-  (let [query-base "select s.* from steps as s, history_step as hs where hs.history_id = ? order by hs.created_at DESC"
-        limit-clause (if limit (str " LIMIT " limit) "")
-        query (str query-base limit-clause)]
-    (sql/with-connection (:connection db)
-      (sql/with-query-results results
-        [query id]
-        (into [] results)))))
+  (when-let [uuid (string->uuid id)]
+    (let [query-base "select s.* from steps as s, history_step as hs where hs.history_id = ? order by hs.created_at DESC"
+          limit-clause (if limit (str " LIMIT " limit) "")
+          query (str query-base limit-clause)]
+      (sql/with-connection (:connection db)
+        (sql/with-query-results results
+          [query uuid]
+          (into [] results))))))
