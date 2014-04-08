@@ -1,129 +1,125 @@
 (ns staircase.handler
-  (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:use compojure.core)
   (:use cheshire.core)
   (:use ring.util.response)
+  (:use [clojure.tools.logging :only (debug info error)])
   (:require [compojure.handler :as handler]
+            [com.stuartsierra.component :as component]
+            [staircase.data :as data]
+            [staircase.config]
             [ring.middleware.json :as middleware]
             [clojure.java.jdbc :as sql]
-            [compojure.route :as route]))
+            [compojure.route :as route])
+  (:import staircase.data.Resource)
+  (:import com.mchange.v2.c3p0.ComboPooledDataSource))
 
-(def db-config
-  {:classname "org.h2.Driver"
-    :subprotocol "h2"
-    :subname "mem:histories"
-    :user ""
-    :password ""})
+(def conf (staircase.config/config (or (System/getenv "ENVIRONMENT") :development)))
 
-(defn pool
-      [config]
-      (let [cpds (doto (ComboPooledDataSource.)
-                   (.setDriverClass (:classname config))
-                   (.setJdbcUrl (str "jdbc:" (:subprotocol config) ":" (:subname config)))
-                   (.setUser (:user config))
-                   (.setPassword (:password config))
-                   (.setMaxPoolSize 6)
-                   (.setMinPoolSize 1)
-                   (.setInitialPoolSize 1))]
-        {:datasource cpds}))
+(info "Config:" conf)
 
-(def pooled-db (delay (pool db-config)))
+(def NOT_FOUND {:status 404})
+(def ACCEPTED {:status 204})
 
-(defn db-connection [] @pooled-db)
+(defn get-resource [rs id]
+   (if-let [ret (.get-one rs id)]
+     (response ret)
+     NOT_FOUND))
 
-(sql/with-connection (db-connection)
-  (sql/create-table :histories [:id "varchar(256)" "primary key"]
-                               [:title "varchar(1024)"]
-                               [:text :varchar])
-  (sql/create-table :history-step
-                    [:history_id "varchar(256)"]
-                    [:created_at "datetime"]
-                    [:step_id "varchar(256)"])
-  (sql/create-table :steps [:id "varchar(256)" "primary key"]
-                           [:title "varchar(1024)"]
-                           [:tool "varchar(1024)"]
-                           [:data :varchar]))
+(defn get-resources [rs]
+  (response (.get-all rs)))
 
-(defn find-history [id]
-  (sql/with-connection (db-connection)
-    (sql/with-query-results results
-      ["select h.*, hs.step_id from histories as h, history-step as hs where h.id = ? and h.id = hs.history_id" id]
-      (when results (apply build-history results)))))
+(defn create-new [rs doc]
+  (let [id (.create rs doc)]
+    (get-resource rs id)))
 
-(defn build-history [row & rows]
-  (let [init (assoc row :steps (into [] (:step_id row)))
-        add-step (fn [h row] (update-in h [:steps] conj (:step_id row)))]
-    (reduce add-step init rows)))
+(defn update-resource [rs id doc]
+  (if (.exists? rs id)
+    (response (.update rs id doc))
+    NOT_FOUND))
 
-(defn get-history [id]
-   (if-let [history (find-history id)]
-     (response history)
-     {:status 404}))
+(defn delete-resource [rs id]
+  (if (.exists? rs id)
+    (do 
+      (.delete rs id)
+      ACCEPTED)
+    NOT_FOUND))
 
-(defn get-all-histories []
-  (response (sql/with-connection (db-connection)
-    (sql/with-query-results results
-      ["select * from histories"]
-      (into [] results)))))
+(defn get-end-of-history [histories id]
+  (or
+    (when-let [end (first (data/get-steps-of histories id :limit 1))]
+      (response end))
+    NOT_FOUND))
 
-(defn uuid [] (str (java.util.UUID/randomUUID)))
+(defn get-steps-of [histories id]
+  (or
+    (when (.exists? histories id)
+      (response (data/get-steps-of histories id)))
+    NOT_FOUND))
 
-(defn create-new-history [doc]
-  (let [id (uuid)
-        document (assoc doc "id" id)]
-    (sql/with-connection (db-connection)
-      (sql/insert-record :histories document))
-    (get-history id)))
+(defn get-step-of [histories id idx]
+  (or
+    (when (.exists? histories id)
+      (when-let [step (first (reduce conj '() (data/get-steps-of histories id)))]
+        (response step)))
+    NOT_FOUND))
 
-(defn update-history [id doc]
-  (sql/with-connection (db-connection)
-    (let [document (assoc doc "id" id)]
-      (sql/update-values :histories ["id=?" id] document)))
-  (get-history id))
+(defn add-step-to [histories steps id doc]
+  (if (.exists? histories id)
+    (let [to-insert (assoc doc "history_id" id)
+          step-id (.create steps to-insert)]
+      (response (.get-one steps step-id)))
+    NOT_FOUND))
 
-(defn delete-history [id]
-  (if (find-history id)
-    (do (sql/with-connection (db-connection)
-      (sql/delete-rows :histories ["id=?" id]))
-      {:status 204})
-    {:status 404}))
+(defrecord App [histories steps db handler]
+  component/Lifecycle
 
-(defn get-end-of-history [id]
-  (sql/with-connection (db-connection)
-    (sql/with-query-results results
-      ["select s.* from steps as s, history-step as hs where hs.history_id = ?" id]
-      (if (results)
-        (response (first results))
-        {:status 404}))))
+  (start [app]
+    (let [app-routes (routes 
+                        (GET "/" [] "Hello World")
+                        (route/resources "/")
+                        (route/not-found "Not Found"))
+          hist-routes (routes
+                (GET  "/" [] (get-resources histories))
+                (POST "/" {body :body} (create-new histories body))
+                (context "/:id" [id]
+                  (GET    "/" [] (get-resource histories id))
+                  (GET    "/head" [] (get-end-of-history histories id))
+                  (PUT    "/" {body :body} (update-resource histories id body))
+                  (DELETE "/" [] (delete-resource histories id)))
+                          ;;(context "/steps" []
+                          ;;        (GET "/" [] (get-steps-of histories id))
+                          ;;        (GET "/:idx" [idx] (get-step-of histories id idx))
+                          ;;        (POST "/" {body :body} (add-step-to histories steps id body))))
+                          )
+          step-routes (routes
+                (GET  "/" [] (get-resources steps))
+                (context "/:id" [id]
+                          (GET    "/" [] (get-resource steps id))
+                          (DELETE "/" [] (delete-resource steps id))))
+          api-routes (routes (context "/histories" [] hist-routes) (context "/steps" [] step-routes))
+          handler (routes (-> (handler/api api-routes)
+                            (middleware/wrap-json-body)
+                            (middleware/wrap-json-response))
+                          (handler/site app-routes))]
+      (assoc app :handler handler)))
 
-(defroutes app-routes
-  (GET "/" [] "Hello World")
-  (route/resources "/")
-  (route/not-found "Not Found"))
+  (stop [app] app))
 
-(defroutes api-routes
-  (context "/histories" [] (defroutes histories-routes
-            (GET  "/" [] (get-all-histories))
-            (POST "/" {body :body} (create-new-history body))
-            (context "/:id" [id] (defroutes history-routes
-                      (GET    "/" [] (get-history id))
-                      (GET    "/head" [] (get-end-of-history id))
-                      (PUT    "/" {body :body} (update-history id body))
-                      (DELETE "/" [] (delete-history id)))
-                      (context "/steps" (defroutes history-steps-routes
-                               (GET "/" [] (get-steps-of id))
-                               (GET "/:idx" [idx] (get-step-of id idx))
-                               (POST "/" {body :body} (add-step-to id body)))))))
-                      
-  (context "/steps" [] (defroutes steps-routes
-            (GET  "/" [] (get-all-steps))
-            (context "/:id" [id] (defroutes step-routes
-                      (GET    "/" [] (get-step id))
-                      (DELETE "/" [] (delete-step id)))))))
+(defn new-app [] (map->App {}))
 
-(def app
-  (routes
-    (-> (handler/api api-routes)
-        (middleware/wrap-json-body)
-        (middleware/wrap-json-response))
-    (handler/site app-routes)))
+;; Inject dependencies and build up the system.
+(defn build-system [options]
+  (component/start
+    (let [{:keys [db]} options]
+      (-> (component/system-map
+            :db (data/new-pooled-db db)
+            :histories (data/new-history-resource)
+            :steps (data/new-steps-resource)
+            :app (new-app))
+          (component/system-using
+            {:app [:db :histories :steps]
+            :steps [:db]
+            :histories [:db]})))))
+
+(def app (get-in (build-system conf) [:app :handler]))
+
