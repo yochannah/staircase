@@ -6,6 +6,7 @@
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [compojure "1.1.6"] ;; Request handlers
                  [ring/ring-json "0.1.2"] ;; JSON marshalling
+                 [javax.servlet/servlet-api "2.5"] ;; Apparently needed for compilation.
                  [ring-mock "0.1.5"] ;; For testing request handlers.
                  [c3p0/c3p0 "0.9.1.2"] ;; DB pooling
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
