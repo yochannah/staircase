@@ -3,8 +3,6 @@
            :db {
                     :classname "org.postgresql.Driver"
                     :subprotocol "postgresql"
-                    :user "alex"
-                    :password "alex"
                 }
            }
  :development {
