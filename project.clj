@@ -13,7 +13,7 @@
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
                  [cheshire "4.0.3"]] ;; JSON serialisation
   :plugins [[lein-ring "0.8.10"]]
-  :ring {:handler staircase.handler/app}
+  :ring {:handler staircase.app/handler}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})

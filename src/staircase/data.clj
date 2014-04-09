@@ -1,6 +1,7 @@
 (ns staircase.data
   (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:import java.sql.SQLException)
+  (:import staircase.protocols.Resource)
   (:use [clojure.tools.logging :only (debug info error)])
   (:require [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
@@ -30,15 +31,8 @@
     (dissoc component :connection)))
 
 (defn new-pooled-db [config]
+  (info "Creating new pooled db with config: " config)
   (map->PooledDatabase {:config config}))
-
-(defprotocol Resource
-  (exists? [this id] "Does the thing exist?")
-  (get-all [this] "Get all the things")
-  (get-one [this id] "Get one of the things")
-  (update [this id doc] "Update a thing")
-  (delete [this id] "Destroy a thing")
-  (create [this doc] "Create a new thing"))
 
 (defn new-id [] (str (java.util.UUID/randomUUID)))
 

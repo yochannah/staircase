@@ -5,17 +5,11 @@
   (:use [clojure.tools.logging :only (debug info error)])
   (:require [compojure.handler :as handler]
             [com.stuartsierra.component :as component]
-            [staircase.data :as data]
-            [staircase.config]
             [ring.middleware.json :as middleware]
-            [clojure.java.jdbc :as sql]
+            [staircase.protocols] ;; Compile, so import will work.
+            [staircase.data :as data]
             [compojure.route :as route])
-  (:import staircase.data.Resource)
-  (:import com.mchange.v2.c3p0.ComboPooledDataSource))
-
-(def conf (staircase.config/config (or (System/getenv "ENVIRONMENT") :development)))
-
-(info "Config:" conf)
+  (:import staircase.protocols.Resource))
 
 (def NOT_FOUND {:status 404})
 (def ACCEPTED {:status 204})
@@ -25,8 +19,8 @@
      (response ret)
      NOT_FOUND))
 
-(defn get-resources [rs]
-  (response (.get-all rs)))
+;; Have to vectorise, since lazy seqs won't be jsonified.
+(defn get-resources [rs] (response (into [] (.get-all rs))))
 
 (defn create-new [rs doc]
   (let [id (.create rs doc)]
@@ -70,10 +64,10 @@
       (response (.get-one steps step-id)))
     NOT_FOUND))
 
-(defrecord App [histories steps db handler]
+(defrecord Router [histories steps handler]
   component/Lifecycle
 
-  (start [app]
+  (start [this]
     (let [app-routes (routes 
                         (GET "/" [] "Hello World")
                         (route/resources "/")
@@ -100,25 +94,9 @@
                             (middleware/wrap-json-body)
                             (middleware/wrap-json-response))
                           (handler/site app-routes))]
-      (assoc app :handler handler)))
+      (assoc this :handler handler)))
 
-  (stop [app] app))
+  (stop [this] this))
 
-(defn new-app [] (map->App {}))
-
-;; Inject dependencies and build up the system.
-(defn build-system [options]
-  (component/start
-    (let [{:keys [db]} options]
-      (-> (component/system-map
-            :db (data/new-pooled-db db)
-            :histories (data/new-history-resource)
-            :steps (data/new-steps-resource)
-            :app (new-app))
-          (component/system-using
-            {:app [:db :histories :steps]
-            :steps [:db]
-            :histories [:db]})))))
-
-(def app (get-in (build-system conf) [:app :handler]))
+(defn new-router [] (map->Router {}))
 
