@@ -62,8 +62,18 @@
       (let [req (json-request :get "/histories")
             response (app req)]
         (is (= (:status response) 200))
-        (data-is response [])))))
+        (data-is response [])))
 
+    (testing "GET /steps"
+      (let [req (json-request :get "/steps")
+            response (app req)]
+        (is (= (:status response) 200))
+        (data-is response [])))
+
+    (testing "GET /steps/1"
+      (let [req (json-request :get "/steps/1")
+            response (app req)]
+        (is (= (:status response) 404))))))
 
 (deftest test-app-with-stuff
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))
@@ -93,20 +103,6 @@
         (is (= (:status response) 200))
         (data-is response {:data "mock" :id 1})))
 
-    (with-redefs [data/get-steps-of (constantly (get-all steps))]
-      
-      (testing "GET /histories/1/head"
-        (let [req (json-request :get "/histories/1/head")
-              response (app req)]
-          (is (= (:status response) 200))
-          (data-is response {:data "step" :id 0})))
-
-      (testing "GET /histories/1/steps/1"
-        (let [req (json-request :get "/histories/1/steps/1")
-              response (app req)]
-          (is (= (:status response) 200))
-          (data-is response {:data "step" :id 1}))))
-
     (testing "PUT /histories/1"
       (let [response (app (json-request :put "/histories/1" {:updated true}))]
         (is (= (:status response) 200))
@@ -115,6 +111,67 @@
     (testing "DELETE /histories/id"
       (let [response (app (request :delete "/histories/1"))]
         (is (= (:status response) 204))))
+
+    (with-redefs [data/get-steps-of (constantly (get-all steps))]
+      
+      (testing "GET /histories/1/head"
+        (let [req (json-request :get "/histories/1/head")
+              response (app req)]
+          (is (= (:status response) 200))
+          (data-is response {:data "step" :id 0})))
+
+      (testing "GET /histories/1/steps"
+        (let [req (json-request :get "/histories/1/steps")
+              response (app req)]
+          (is (= (:status response) 200))
+          (data-is response [{:data "step" :id 0}
+                             {:data "step" :id 1}
+                             {:data "step" :id 2}
+                             {:data "step" :id 3}
+                             {:data "step" :id 4}])))
+
+      (testing "GET /histories/1/steps/1"
+        (let [req (json-request :get "/histories/1/steps/1")
+              response (app req)]
+          (is (= (:status response) 200))
+          (data-is response {:data "step" :id 1}))))
+      
+    (testing "POST /histories/1/steps"
+      (let [req (json-request :post "/histories/1/steps" {:new "step" :id 4})
+            response (app req)]
+        (is (= (:status response) 200))
+        (data-is response {:data "step" :id 4})))
+
+    (testing "GET /steps"
+      (let [req (json-request :get "/steps")
+            response (app req)]
+        (is (= (:status response) 200))
+        (data-is response [{:data "step" :id 0}
+                            {:data "step" :id 1}
+                            {:data "step" :id 2}
+                            {:data "step" :id 3}
+                            {:data "step" :id 4}])))
+
+    (testing "GET /steps/2 OK"
+      (let [req (json-request :get "/steps/2")
+            response (app req)]
+        (is (= (:status response) 200))
+        (data-is response {:data "step" :id 2})))
+
+    (testing "GET /steps/100 NOT FOUND"
+      (let [req (json-request :get "/steps/100")
+            response (app req)]
+        (is (= (:status response) 404))))
+
+    (testing "DELETE /steps/2 OK"
+      (let [req (json-request :delete "/steps/2")
+            response (app req)]
+        (is (= (:status response) 204))))
+
+    (testing "DELETE /steps/200 NOT FOUND"
+      (let [req (json-request :delete "/steps/200")
+            response (app req)]
+        (is (= (:status response) 404))))
     
     (testing "not-found route"
       (let [response (app (request :get "/invalid"))]

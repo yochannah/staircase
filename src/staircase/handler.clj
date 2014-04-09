@@ -16,9 +16,9 @@
 (def ACCEPTED {:status 204})
 
 (defn get-resource [rs id]
-   (if-let [ret (.get-one rs id)]
-     (response ret)
-     NOT_FOUND))
+  (if-let [ret (.get-one rs id)]
+    (response ret)
+    NOT_FOUND))
 
 ;; Have to vectorise, since lazy seqs won't be jsonified.
 (defn get-resources [rs] (response (into [] (.get-all rs))))
@@ -48,7 +48,7 @@
 (defn get-steps-of [histories id]
   (or
     (when (.exists? histories id)
-      (response (data/get-steps-of histories id)))
+      (response (into [] (data/get-steps-of histories id))))
     NOT_FOUND))
 
 (defn get-step-of [histories id idx]
@@ -80,9 +80,9 @@
                 (POST "/" {body :body} (create-new histories body))
                 (context "/:id" [id]
                   (GET    "/" [] (get-resource histories id))
-                  (GET    "/head" [] (get-end-of-history histories id))
                   (PUT    "/" {body :body} (update-resource histories id body))
                   (DELETE "/" [] (delete-resource histories id))
+                  (GET    "/head" [] (get-end-of-history histories id))
                   (context "/steps" []
                           (GET "/" [] (get-steps-of histories id))
                           (GET "/:idx" [idx] (get-step-of histories id idx))
