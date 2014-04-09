@@ -1,5 +1,7 @@
 # staircase
 
+[![Build Status][travis-badge]][ci]
+
 The webapp that serves the step-based data-flow interface to the
 [InterMine](http://www.intermine.org) system.
 
@@ -22,3 +24,6 @@ To run the tests:
 ## License
 
 Copyright © 2014 Alex Kalderimis and InterMine
+
+[travis-badge]: https://travis-ci.org/alexkalderimis/staircase.svg?branch=master
+[ci]: https://travis-ci.org/alexkalderimis/staircase
