@@ -1,6 +1,7 @@
 # staircase
 
-FIXME
+The webapp that serves the step-based data-flow interface to the
+[InterMine](http://www.intermine.org) system.
 
 ## Prerequisites
 
@@ -14,6 +15,10 @@ To start a web server for the application, run:
 
     lein ring server
 
+To run the tests:
+
+    lein test
+
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2014 Alex Kalderimis and InterMine
