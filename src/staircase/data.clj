@@ -1,8 +1,7 @@
 (ns staircase.data
   (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:import java.sql.SQLException)
-  (:import staircase.protocols.Resource)
-  (:use [clojure.tools.logging :only (debug info error)])
+  (:use staircase.protocols [clojure.tools.logging :only (debug info error)])
   (:require [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 

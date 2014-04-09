@@ -10,11 +10,13 @@
                  [ring-mock "0.1.5"] ;; For testing request handlers.
                  [c3p0/c3p0 "0.9.1.2"] ;; DB pooling
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
+                 [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [honeysql "0.4.3"] ;; SQL sugar
                  [org.clojure/java.jdbc "0.2.3"] ;; DB interface
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
                  [cheshire "4.0.3"]] ;; JSON serialisation
-  :plugins [[lein-ring "0.8.10"]]
+  :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
+            [lein-ring "0.8.10"]]
   :ring {:handler staircase.app/handler}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]

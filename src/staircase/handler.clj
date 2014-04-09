@@ -2,7 +2,8 @@
   (:use compojure.core)
   (:use cheshire.core)
   (:use ring.util.response)
-  (:use [clojure.tools.logging :only (debug info error)])
+  (:use [clojure.tools.logging :only (debug info error)]
+        [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
             [com.stuartsierra.component :as component]
             [ring.middleware.json :as middleware]
@@ -52,9 +53,11 @@
 
 (defn get-step-of [histories id idx]
   (or
-    (when (.exists? histories id)
-      (when-let [step (first (reduce conj '() (data/get-steps-of histories id)))]
-        (response step)))
+    (domonad maybe-m
+             [:when (.exists? histories id)
+              i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
+              step  (nth (data/get-steps-of histories id) (Integer/parseInt idx))]
+          (response step))
     NOT_FOUND))
 
 (defn add-step-to [histories steps id doc]

@@ -5,9 +5,7 @@
             [staircase.data :as data]
             [staircase.config]))
 
-(def conf (staircase.config/config (or (System/getenv "ENVIRONMENT") :development)))
-
-(info "Config:" conf)
+(defn get-conf [] (staircase.config/config (or (System/getenv "ENVIRONMENT") :development)))
 
 ;; Inject dependencies and build up the system.
 (defn build-app [options]
@@ -23,5 +21,12 @@
             :steps [:db]
             :histories [:db]})))))
 
-(def handler (get-in (build-app conf) [:router :handler]))
+(def system (delay
+              (info "Building system")
+              (let [conf (get-conf)]
+                (info "config: " conf)
+                (build-app conf))))
+
+(defn handler [req]
+  ((get-in @system [:router :handler]) req))
 
