@@ -10,7 +10,7 @@
 
   (exists? [_ id] existance)
   (get-all [_] things)
-  (get-one [_ id] (first (filter #(= (:id %1) id) things)))
+  (get-one [_ id] (first (filter #(= (str (:id %1)) (str id)) things)))
   (update [_ id doc] updated)
   (delete [_ id])
   (create [_ doc] (doc "id")))
@@ -38,6 +38,12 @@
   (testing "POST /histories"
     (let [req (-> (json-request :post "/histories")
                   (body "{\"id\": 1}"))
+          response (app req)]
+      (is (= (:status response) 200))
+      (is (= (:body response) "{\"data\":\"mock\",\"id\":1}"))))
+
+  (testing "GET /histories/1"
+    (let [req (-> (json-request :get "/histories/1"))
           response (app req)]
       (is (= (:status response) 200))
       (is (= (:body response) "{\"data\":\"mock\",\"id\":1}"))))
