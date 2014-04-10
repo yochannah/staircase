@@ -6,8 +6,6 @@ jdk:
     - openjdk7
     - oraclejdk7
     - openjdk6
-before_install:
-    - lein2 bootstrap
 install:
     - lein2 with-profile dev,travis deps
 script: lein2 with-profile dev,travis test
