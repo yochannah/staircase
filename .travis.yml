@@ -8,4 +8,6 @@ jdk:
     - openjdk6
 install:
     - lein2 with-profile dev,travis deps
-script: lein2 with-profile dev,travis test
+script:
+    - lein2 with-profile dev,travis pprint
+    - lein2 with-profile dev,travis test
