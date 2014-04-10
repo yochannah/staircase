@@ -17,9 +17,39 @@ To start a web server for the application, run:
 
     lein ring server
 
-To run the tests:
+To run the tests, you will need a test database (by default named
+`staircase-test`) and be able to access it. It is recommended you
+add configuration values to `~/.lein/profiles.clj` for these
+properties, but this can also be configured in environment
+variables - see [Configuration][].
 
     lein test
+
+## Configuration
+
+The following configuration values are recognized, here presented
+as you might configure them in a `profiles.clj` file:
+
+```clojure
+{
+    :user {
+        :env {
+            :db-user "DB-USER"     ;; The db user (optional)
+            :db-password "DB-PASS" ;; The db-password (optional)
+            :db-subname "//host/dbname" ;; The db host and name
+                                        ;; see profiles.clj for
+                                        ;; default values.
+        }
+    }
+}
+```
+
+These values can be configured through environment variables (see
+[Environ][environ] for details), eg:
+
+```bash
+DB_USER=$PSQL_USER
+```
 
 ## License
 
@@ -27,3 +57,4 @@ Copyright © 2014 Alex Kalderimis and InterMine
 
 [travis-badge]: https://travis-ci.org/alexkalderimis/staircase.svg?branch=master
 [ci]: https://travis-ci.org/alexkalderimis/staircase
+[environ]: https://github.com/weavejester/environ
