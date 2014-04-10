@@ -7,7 +7,6 @@
         :env { :db-subname "//localhost/staircase-test" }
  }
  :travis {
-        :env {:db-subname "//localhost/staircasetest"
-              :db-user "postgres" }
+        :env { :db-user "postgres" }
  }
 }

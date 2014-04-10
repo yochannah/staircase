@@ -31,8 +31,13 @@
 (use-fixtures :each clean-slate clean-up)
 
 (deftest read-empty-histories
-  (let [histories (component/start (new-history-resource :db {:connection db-spec}))
+  (let [histories (new-history-resource :db {:connection db-spec})
         fake-id (new-id)]
+    (try
+      (component/start histories)
+      (catch SQLException e
+        (warn "Bad connection details" (prn-str db-spec))
+        (throw (Exception. "Could not initialise resource" e))))
     (testing "get-all"
       (is (= [] (get-all histories))))
     (testing "exists?"
