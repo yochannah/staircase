@@ -4,20 +4,29 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
+                 [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
+                 [org.clojure/java.jdbc "0.3.3"] ;; DB interface
+                 [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
+                 [honeysql "0.4.3"] ;; SQL sugar
+                 [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
                  [compojure "1.1.6"] ;; Request handlers
                  [ring/ring-json "0.1.2"] ;; JSON marshalling
-                 [javax.servlet/servlet-api "2.5"] ;; Apparently needed for compilation.
-                 [ring-mock "0.1.5"] ;; For testing request handlers.
                  [c3p0/c3p0 "0.9.1.2"] ;; DB pooling
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
-                 [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
-                 [honeysql "0.4.3"] ;; SQL sugar
-                 [org.clojure/java.jdbc "0.2.3"] ;; DB interface
-                 [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
-                 [cheshire "4.0.3"]] ;; JSON serialisation
+                 [environ "0.4.0"] ;; Settings management.
+                 [cheshire "4.0.3"];; JSON serialisation
+                 [log4j/log4j "1.2.17"]] ;; Logging
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
+            [lein-environ "0.4.0"]
+            [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
   :ring {:handler staircase.app/handler}
-  :profiles
-  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}})
+  :test-selectors {
+                   :all (constantly true)
+                   :database :database
+                   :default (complement :acceptance)}
+  :env {
+        :db-classname "org.postgresql.Driver"
+        :db-subprotocol "postgresql"
+  }
+)
