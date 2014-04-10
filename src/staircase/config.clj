@@ -1,5 +1,6 @@
 (ns staircase.config
-  (:use [clojure.java.io :as io])
+  (:use [clojure.java.io :as io]
+        [clojure.string :only (replace-first)])
   (:require [clojure.tools.reader.edn :as edn]))
 
 (defn from-edn [fname]
@@ -14,4 +15,14 @@
   (let [conf (from-edn "config.edn")
         env-conf (conf env)]
     (merge-with merge (:default conf) env-conf)))
+
+(defn- options [opts prefix]
+  (->> opts
+       keys 
+       (map name) ;; From keyword -> str
+       (filter #(.startsWith % prefix))
+       (reduce #(assoc %1 (keyword (replace-first %2 prefix "")) (opts (keyword %2))) {})))
+
+(defn db-options [opts]
+  (options opts "db-"))
 
