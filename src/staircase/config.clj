@@ -3,7 +3,7 @@
         [clojure.string :only (replace-first)])
   (:require [clojure.tools.reader.edn :as edn]))
 
-(defn from-edn [fname]
+(defn- from-edn [fname]
   (if-let [is (io/resource fname)]
     (with-open [rdr (-> is
                         io/reader
@@ -11,10 +11,10 @@
       (edn/read rdr))
     (throw (IllegalArgumentException. (str fname " not found")))))
 
-(defn config [env]
-  (let [conf (from-edn "config.edn")
-        env-conf (conf env)]
-    (merge-with merge (:default conf) env-conf)))
+(def configuration (delay (from-edn "config.edn")))
+
+(defn config [k]
+  (k @configuration))
 
 (defn- options [opts prefix]
   (->> opts
