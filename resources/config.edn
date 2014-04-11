@@ -1,19 +1,7 @@
 {
- :default {
-           :db {
-                    :classname "org.postgresql.Driver"
-                    :subprotocol "postgresql"
-                }
-           }
- :development {
-               :db {
-                    :subname "//localhost/staircase"
-                    }
-               }
- :testing {
-           :db {
-                :subname "//localhost/staircase-test"
-                }
-           }
- }
+    :tools {
+        :hello-world {:uri "https://github.com/intermine/im-tables.git"
+                      :ref "v1.6.0"
+                      :options {:branch-name "master"}}}
+}
 
