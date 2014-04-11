@@ -7,4 +7,4 @@ jdk:
     - oraclejdk7
     - openjdk6
 install: lein2 with-profile dev,travis deps
-script: lein2 with-profile dev,travis do pprint, test
+script: lein2 with-profile dev,travis do pprint :env, test
