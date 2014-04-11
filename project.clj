@@ -15,12 +15,16 @@
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
+                 [clj-jgit "0.6.5-d"] ;; Git interface.
                  [log4j/log4j "1.2.17"]] ;; Logging
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
   :ring {:handler staircase.app/handler}
+  :aliases {
+            "load-tools" ["run" "-m" "staircase.tasks/load-tools"]
+            "clean-tools" ["run" "-m" "staircase.tasks/clean-tools"]}
   :test-selectors {
                    :all (constantly true)
                    :database :database
