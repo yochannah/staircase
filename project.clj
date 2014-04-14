@@ -6,6 +6,8 @@
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [org.clojure/java.jdbc "0.3.3"] ;; DB interface
+                 [clj-http "0.9.1"] ;; Perform http requests.
+                 [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
