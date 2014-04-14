@@ -51,13 +51,13 @@
 
 (deftest write-to-empty-histories
   (let [histories (component/start (new-history-resource :db {:connection db-spec}))
-        new-id (create histories {:title "My new history" :text "A testing history"})
+        new-id (create histories {:title "My new history" :description "A testing history"})
         got (get-one histories new-id)
         hists (get-all histories)]
     (testing "Return value of create"
       (is (instance? java.util.UUID new-id)))
     (testing "retrieved record"
-      (is (= got {:steps [] :id new-id :title "My new history" :text "A testing history"})))
+      (is (= got {:owner nil :steps [] :id new-id :title "My new history" :description "A testing history"})))
     (testing "The new state of the world - created history in hists"
       (is (some #{new-id} (map :id hists))))
     (testing "The numbers of histories"
@@ -72,5 +72,5 @@
         (is (= "changed the title" (:title retrieved))))
       (testing "Changed, and did not add a history"
         (is (= 1 (count hists)))
-        (is (= {:title "changed the title" :text "A testing history" :id new-id} (hists 0)))))))
+        (is (= {:owner nil :title "changed the title" :description "A testing history" :id new-id} (hists 0)))))))
 

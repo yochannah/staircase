@@ -4,14 +4,12 @@
         [staircase.helpers :only (string->uuid new-id)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require staircase.sql
+            [staircase.resources.schema :as schema]
             [clojure.tools.reader.edn :as edn]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
-(def session-tables {
-                     :sessions [ [:id :uuid :primary :key]
-                                [:data :text]
-                                [:valid_until "timestamp with time zone"] ]})
+(def session-tables schema/sessions)
 
 (defn- now [] (java.sql.Timestamp. (System/currentTimeMillis)))
 

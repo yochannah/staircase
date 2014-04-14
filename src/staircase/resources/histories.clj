@@ -4,6 +4,7 @@
         [clojure.tools.logging :only (info)])
   (:import java.sql.SQLException)
   (:require staircase.sql
+            [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
@@ -14,16 +15,15 @@
         f #(update-in %1 [:steps] conj (:step_id %2))]
     (reduce f init rows)))
 
+(def table-spec (merge schema/histories schema/history-step))
+
 (defrecord HistoryResource [db]
   component/Lifecycle
 
   (start [component]
     (staircase.sql/create-tables
       (:connection db)
-      {
-       :histories [ [:id :uuid "primary key"] [:title "varchar(1024)"] [:text :varchar] ]
-       :history_step [ [:history_id :uuid] [:created_at :timestamp] [:step_id :uuid] ]
-       })
+      table-spec)
     component)
 
   (stop [component] component)
