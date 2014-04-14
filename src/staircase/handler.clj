@@ -81,8 +81,8 @@
   (let [resp (client/post verifier {:form-params {:audience audience :assertion assertion} :throw-exceptions false})
         status (:status resp)]
     (if (not (= status 200))
-      {:status 500 :session nil}
-      (let [{email :email} (json/parse-string (:body status))
+      {:status 500 :session (dissoc session :identity)}
+      (let [{email :email} (json/parse-string (:body resp))
             session (assoc session :identity email)]
         (-> (response "ok") (assoc :session session))))))
 
