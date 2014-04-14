@@ -10,3 +10,4 @@ pom.xml.asc
 /.nrepl-port
 staircase.log
 staircase.log.*
+resources/secret*
