@@ -18,14 +18,14 @@
 
 (defn drop-tables [] 
   (debug "Dropping tables...")
-  (doseq [table [:entities :table_a :table_b]]
-    (ignore-errors #(sql/db-do-commands db-spec (str "DELETE FROM " (name table)) (sql/drop-table-ddl table)))
+  (doseq [table [:entities :owned_entities :table_a :table_b]]
+    (ignore-errors #(sql/db-do-commands db-spec (str "TRUNCATE " (name table)) (sql/drop-table-ddl table)))
     (debug "Dropped" table)))
 
 (defn build-tables []
-  (debug "Building tables...")
-  (sql/db-do-commands db-spec (sql/create-table-ddl :entities [:id :uuid] [:value :text]))
-  (debug "Created table: entities"))
+  (sql/db-do-commands db-spec
+                      (sql/create-table-ddl :entities [:id :uuid] [:value :text])
+                      (sql/create-table-ddl :owned_entities [:id :uuid] [:owner "varchar(1024)" "NOT NULL"] [:value :text])))
 
 (defn clean-slate [f]
   (drop-tables)
@@ -36,6 +36,7 @@
 
 (defn insert-data [f]
   (apply sql/insert! db-spec :entities [:id :value] test-rows)
+  (apply sql/insert! db-spec :owned_entities [:id :value :owner] (map #(conj % "foo@bar.org") test-rows))
   (f))
 
 (defn set-up [f]
@@ -91,17 +92,48 @@
     (testing "There are no rows with the old value"
       (is (= 0 (count-where db-spec :entities [:= :value "quux"]))))))
 
-(deftest ^:database test-update-entity-string-map
+(deftest ^:database test-update-owned-entity
   (let [quux-id (get-in test-rows [3 0])
-        updated (update-entity db-spec :entities quux-id {"value" "now even quuxier"})]
+        updated (update-owned-entity db-spec :owned_entities quux-id "foo@bar.org" {:value "now even quuxier"})]
     (testing "Return value"
       (is (= "now even quuxier" (:value updated))))
     (testing "There exists an entity of that id"
-      (is (exists db-spec :entities quux-id)))
+      (is (exists db-spec :owned_entities quux-id)))
     (testing "There is still only one of that id"
-      (is (= 1 (count-where db-spec :entities [:= :id quux-id]))))
+      (is (= 1 (count-where db-spec :owned_entities [:= :id quux-id]))))
     (testing "There are no rows with the old value"
-      (is (= 0 (count-where db-spec :entities [:= :value "quux"]))))))
+      (is (= 0 (count-where db-spec :owned_entities [:= :value "quux"]))))))
+
+(deftest ^:database test-update-owned-entity-wrong-owner
+  (let [quux-id (get-in test-rows [3 0])
+        updated (update-owned-entity db-spec :owned_entities quux-id "bar@foo.org" {:value "now even quuxier"})]
+    (testing "Return value"
+      (is (= nil updated)))
+    (testing "There still exists an entity of that id"
+      (is (exists db-spec :owned_entities quux-id)))
+    (testing "There is still only one of that id"
+      (is (= 1 (count-where db-spec :owned_entities [:= :id quux-id]))))
+    (testing "There are no rows with the new value"
+      (is (= 0 (count-where db-spec :owned_entities [:= :value "now even quuxier"]))))))
+
+(deftest ^:database test-update-entity-string-map
+  (try
+    (let [quux-id (get-in test-rows [3 0])
+          updated (update-entity db-spec :entities quux-id {"value" "now even quuxier"})]
+      (testing "Return value"
+        (is (= "now even quuxier" (:value updated))))
+      (testing "There exists an entity of that id"
+        (is (exists db-spec :entities quux-id)))
+      (testing "There is still only one of that id"
+        (is (= 1 (count-where db-spec :entities [:= :id quux-id]))))
+      (testing "There are no rows with the old value"
+        (is (= 0 (count-where db-spec :entities [:= :value "quux"])))))
+    (catch SQLException e
+      (let [sw (java.io.StringWriter.)]
+        (binding [*out* sw]
+          (sql/print-sql-exception-chain e))
+        (warn (str sw)))
+      (throw e))))
 
 (deftest ^:database test-update-safety
   (let [quux-id (get-in test-rows [3 0])
@@ -118,6 +150,4 @@
       (is (= 0 (count-where db-spec :entities [:= :value "quux"]))))
     (testing "There are no rows with the new id"
       (is (= 0 (count-where db-spec :entities [:= :id new-id]))))))
-
-
 

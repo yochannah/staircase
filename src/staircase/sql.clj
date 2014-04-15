@@ -29,6 +29,10 @@
   (when-let [uuid (string->uuid id)]
     (< 0 (count-where conn tbl [:= :id uuid]))))
 
+(defn exists-with-owner [conn tbl id owner]
+  (when-let [uuid (string->uuid id)]
+    (< 0 (count-where conn tbl [:and [:= :id uuid] [:= :owner owner]]))))
+
 (defn create-tables [conn table-specs]
   (let [tables (get-table-names conn)]
     (sql/with-db-connection [c conn]
@@ -41,9 +45,24 @@
             (catch SQLException e
               (do (log-sql-error e) (throw (Exception. (str "Could not create table: " table) e))))))))))
 
+(defn- kw-keys [m]
+  (reduce-kv #(assoc %1 (keyword %2) %3) {} m))
+
+(defn- normalise-entity-values [values]
+  (-> (kw-keys values) (dissoc :id :owner))) ;; These things may not be changed.
+
+(defn- update-entity-where [conn tbl values constraint]
+  (let  [to-update (normalise-entity-values values)
+         update-cmd (-> (update tbl) (sset to-update) (where constraint) (hsql/format))]
+    (info "Executing update:" (prn-str update-cmd))
+    (sql/execute! conn update-cmd)
+    (sql/query conn (hsql/format {:select [:*] :from [tbl] :where constraint :limit 1}) :result-set-fn first)))
+
 (defn update-entity [conn tbl id values]
-  (if-let [uuid      (string->uuid id)]
-    (let  [to-update (dissoc values "id" :id)]
-      (sql/update! conn tbl to-update ["id=?" uuid])
-      (sql/query conn (hsql/format {:select [:*] :from [tbl] :where [:= :id uuid] :limit 1}) :result-set-fn first))))
+  (if-let [uuid (string->uuid id)]
+    (update-entity-where conn tbl values [:= :id uuid])))
+
+(defn update-owned-entity [conn tbl id owner values]
+  (if-let [uuid (string->uuid id)]
+    (update-entity-where conn tbl values [:and [:= :id uuid] [:= :owner owner]])))
 

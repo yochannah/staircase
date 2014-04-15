@@ -6,14 +6,26 @@
 ;; Currently we delegate user authentication to third party identity services
 ;; (persona), identifying users by email address alone.
 
+;; Fixed length string data type, as opposed to string data.
+;; The type to use for things like email addresses, uris, names, etc.
+(def string "varchar(1024)") 
+
+;; Unbounded character data type. Ideally this should actually be something
+;; like json - but that will be another day
+(def data :text)
+
+(def owner-column [:owner string "NOT NULL"])
+
 (def histories
   {:histories
    [ [:id :uuid "primary key"]
-     [:title "varchar(1024)"]
+     [:title string]
      [:description :text]
-     [:owner "varchar(1024)"] ;; Should be long enough for emails...
+     owner-column
     ]})
 
+;; Link table, allowing many-many relationships between steps and histories (histories
+;; have many steps, steps can be part of more than one history).
 (def history-step
    {:history_step
     [ [:history_id :uuid]
@@ -26,11 +38,19 @@
 (def steps
   {:steps
    [ [:id :uuid :primary :key]
-     [:title "varchar(1024)"]
-     [:tool "varchar(1024)"]
-     [:data :text] ]}) ;; ideally should use the json data type.
+     [:title string]
+     [:tool string]
+     [:data data] ]}) ;; The input payload for this step.
 
 (def sessions
   {:sessions [ [:id :uuid :primary :key]
-              [:data :text]
+              [:data data] ;; The session data (currently stored as edn)
               [:valid_until "timestamp with time zone"] ]} )
+
+(def services
+  {:services
+   [[:id :uuid :primary :key ]
+    [:uri string ]
+    owner-column
+    [:data data ] ]})
+      

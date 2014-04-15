@@ -2,8 +2,10 @@
   (:use staircase.protocols
         staircase.helpers
         [clojure.tools.logging :only (info)])
-  (:import java.sql.SQLException)
   (:require staircase.sql
+            staircase.resources
+            [honeysql.helpers :refer (select from where)]
+            [honeysql.core :as hsql]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
@@ -31,9 +33,13 @@
   Resource
 
   (get-all [histories]
-    (into [] (sql/query (:connection db) ["select * from histories"])))
+    (into [] (sql/query (:connection db)
+                        (-> (select :*)
+                            (from :histories)
+                            (where [:= :owner :?user])
+                            (hsql/format :params staircase.resources/context)))))
 
-  (exists? [_ id] (staircase.sql/exists (:connection db) :histories id))
+  (exists? [_ id] (staircase.sql/exists-with-owner (:connection db) :histories id (:user staircase.resources/context)))
 
   (get-one [histories id]
     (when-let [uuid (string->uuid id)]
@@ -42,22 +48,28 @@
         [" select h.*, hs.step_id
            from histories as h
            left join history_step as hs on h.id = hs.history_id
-           where h.id = ?
-           order by hs.created_at desc " uuid] 
+           where h.id = ? and h.owner = ?
+           order by hs.created_at desc " uuid (:user staircase.resources/context)] 
         :result-set-fn #(if (empty? %) nil (apply build-history %)))))
 
-  (update [_ id doc] (staircase.sql/update-entity (:connection db) :histories id doc))
+  (update [_ id doc] (staircase.sql/update-owned-entity
+                       (:connection db)
+                       :histories
+                       id (:user staircase.resources/context)
+                       doc))
 
   (delete [histories id]
     (when-let [uuid (string->uuid id)]
       (sql/with-db-transaction [conn (:connection db)]
-        (sql/delete! conn :histories ["id=?" uuid])
-        (sql/delete! conn :history_step ["history_id=?" uuid])))
+        (sql/delete! conn :history_step
+                     ["history_id=?" uuid])
+        (sql/delete! conn :histories
+                     ["id=? and owner=?" uuid (:user staircase.resources/context)])))
     nil)
 
   (create [histories doc]
     (let [id (new-id)
-          values (assoc doc "id" id)]
+          values (assoc doc "id" id "owner" (:user staircase.resources/context))]
       (sql/insert! (:connection db) :histories values)
       id)))
 
