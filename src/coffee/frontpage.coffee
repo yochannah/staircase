@@ -18,11 +18,8 @@ require.config
 # See http://code.angularjs.org/1.2.1/docs/guide/bootstrap#overview_deferred-bootstrap
 window.name = 'NG_DEFER_BOOTSTRAP!'
 
-init = (scope) -> scope.auth = {}
-
 require ['angular', 'app'], (angular, app) ->
   $html = angular.element document.getElementsByTagName('html')[0]
   
   $html.ready ->
     angular.resumeBootstrap() #app.name
-    app.run ['$routeScope', init]

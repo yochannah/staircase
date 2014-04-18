@@ -17,49 +17,52 @@
 
 (def vendor-scripts [])
 
+(def button-style :orange) ;; :orange or :dark
+
 (defn login []
-  (-> (pv/sign-in-button {:ng-click "navigator.id.request()"} :orange)
+  (-> (pv/sign-in-button {:ng-click "persona.request()"} button-style)
       (update-in [2 1] (constantly "Sign in/Sign up"))))
 
 (defn logout []
-  (-> (pv/sign-in-button {:ng-click "navigator.id.logout()"} :orange)
+  (-> (pv/sign-in-button {:ng-click "persona.logout()"} button-style)
       (update-in [2 1] (constantly "Sign out"))))
 
 (defn header []
   [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
     [:div.navbar-header
-     [:div.row
+     [:a.navbar-brand
+      [:span.app-name "Steps"]]] ;; Make configurable?
+    [:div.collapse.navbar-collapse
 
-      [:div.col-sm-2
-       [:span.navbar-brand
-        [:span.app-name "Steps"]]] ;; Make configurable?
+     [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
+      [:li {:ng-show "auth.loggedIn"}
+       [:a "{{auth.identity}}"]
+       (logout)]
+      [:li {:ng-hide "auth.loggedIn"}
+       (login)];; TODO: Replace with persona button
+      [:li
+       (mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
+                [:span
+                 [:i.fa.fa-envelope-o]
+                 " Contact"])]
+      [:li
+       [:a {:href "https://github.com/alexkalderimis/staircase"}
+        [:i.fa.fa-github]
+        " View on github"]]]
 
-      [:div.col-sm-5 {:ng-controller "QuickSearchController"}
-       [:form.navbar-form {:role "search" :ng-submit "startQuickSearchHistory(searchTerm)"}
-        [:div.input-group
-         [:input.form-control {:ng-model "searchTerm" :placeholder "eve"}] ;; TODO: Definitely make placeholders injectable.
-         [:span.input-group-btn
-          [:button.btn.btn-default {:type "submit"}
-           "Search "
-           [:i.fa.fa-search]]]]]]
+     [:form.navbar-form.navbar-right
+      {:ng-controller "QuickSearchController"
+       :role "search"
+       :ng-submit "startQuickSearchHistory(searchTerm)"}
+      [:div.input-group
+       [:input.form-control {:ng-model "searchTerm" :placeholder "eve"}] ;; TODO: Definitely make placeholders injectable.
+       [:span.input-group-btn
+        [:button.btn.btn-default {:type "submit"}
+         "Search "
+         [:i.fa.fa-search]]]]]
 
-      [:div.col-sm-5 {:ng-controller "AuthController"}
-       [:ul.nav.navbar-nav
-        [:li {:ng-show "auth.loggedIn"}
-         [:a "{{auth.identity}}"]
-         (logout)]
-        [:li {:ng-hide "auth.loggedIn"}
-         (login)];; TODO: Replace with persona button
-        [:li
-         (mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
-                  [:span
-                    [:i.fa.fa-envelope-o]
-                   " Contact"])]
-        [:li
-         [:a {:href "https://github.com/alexkalderimis/staircase"}
-          [:i.fa.fa-github]
-          " View on github"]]]]]]]])
+     ]]])
 
 (defn common
   ([title body] (common title body []))
