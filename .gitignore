@@ -11,3 +11,4 @@ pom.xml.asc
 staircase.log
 staircase.log.*
 resources/secret*
+node_modules

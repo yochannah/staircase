@@ -8,6 +8,8 @@
         ring.mock.request  
         staircase.handler))
 
+(defn asset-pipeline [f] f)
+
 ;; In-memory mock resource, holding a store of "things" keyed by their :id field.
 (defrecord MockResource [things]
   Resource
@@ -29,10 +31,21 @@
 (defn data-is [resp expected]
   (is (= (json/parse-string (:body resp) true) expected)))
 
+(defn get-router [histories steps]
+  (-> (new-router)
+      (assoc :asset-pipeline asset-pipeline
+             :config {}
+             :secrets {}
+             :session-store (memory-store)
+             :histories histories
+             :steps steps)
+      (component/start)
+      :handler))
+
 (deftest test-empty-app
   (let [histories (MockResource. [])
         steps (MockResource. [])
-        app (-> (new-router) (assoc :config {} :secrets {} :session-store (memory-store) :histories histories :steps steps) (component/start) :handler)]
+        app (get-router histories steps)]
 
     (testing "GET /api/v1/histories/1"
       (let [req (json-request :get "/api/v1/histories/1")
@@ -79,12 +92,12 @@
 (deftest test-app-with-stuff
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))
         steps     (MockResource. (map #(hash-map :id %1 :data "step") (range 5)))
-        app (-> (new-router) (assoc :config {} :secrets {} :session-store (memory-store) :histories histories :steps steps) (component/start) :handler)]
+        app (get-router histories steps)]
 
     (testing "main route"
       (let [response (app (request :get "/"))]
         (is (= (:status response) 200))
-        (is (= (:body response) "Hello World"))))
+        (is (= (get-in response [:headers "Content-Type"]) "text/html; charset=utf-8"))))
 
     (testing "GET /histories"
       (let [req (json-request :get "/api/v1/histories")
