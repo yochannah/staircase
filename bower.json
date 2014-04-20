@@ -18,6 +18,7 @@
     "should": "~3.3.1"
   },
   "dependencies": {
-    "angular-ui-bootstrap-bower": "~0.10.0"
+    "angular-ui-bootstrap-bower": "~0.10.0",
+    "angular-cookies": "~1.2.16"
   }
 }

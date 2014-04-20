@@ -199,7 +199,8 @@
                       (-> (handler/api v1) wrap-json-body)
                       (-> (handler/api app-routes)
                           (friend/authenticate auth-conf)
-                          (wrap-session {:store session-store})
+                          (wrap-session {:store session-store
+                                         :cookie-name "staircase-session"})
                           asset-pipeline
                           pm/wrap-persona-resources))]
       (assoc this :handler (wrap-restful-format handler))))

@@ -13,6 +13,7 @@ require.config
     angular:         '/vendor/angular/angular'
     'angular-route': '/vendor/angular-route/angular-route'
     'angular-mocks': '/vendor/angular-mocks/angular-mocks'
+    'angular-cookies': '/vendor/angular-cookies/angular-cookies'
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     text:            '/vendor/requirejs-text/text'
 

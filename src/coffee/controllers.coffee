@@ -1,6 +1,11 @@
-define ['angular', 'services'], (ng, services) ->
+define ['angular', 'angular-cookies', 'services'], (ng) ->
   
-  Controllers = ng.module('steps.controllers', ['steps.services'])
+  Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
+
+  Controllers.controller 'FooterCtrl', Array '$scope', '$cookies', (scope, cookies) ->
+    scope.showCookieMessage = cookies.ShowCookieWarning isnt "false"
+
+    scope.$watch "showCookieMessage", -> cookies.ShowCookieWarning = String scope.showCookieMessage
 
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->

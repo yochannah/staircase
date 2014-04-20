@@ -30,10 +30,16 @@
 (defn header []
   [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
-    [:div.navbar-header
+
+    [:div.navbar-header ;; The elements to always display.
+     [:button.navbar-toggle {:data-toggle "collapse" :ng-click "showHeaderMenu = !showHeaderMenu"}
+      [:span.sr-only "Toggle navigation"]
+      (for [_ (range 3)]
+        [:span.icon-bar])]
      [:a.navbar-brand
       [:span.app-name "Steps"]]] ;; Make configurable?
-    [:div.collapse.navbar-collapse
+
+    [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
      [:p.navbar-text.navbar-right {:ng-show "auth.loggedIn"}
       "Signed in as {{auth.identity}}"]
@@ -53,7 +59,7 @@
                                  [:i.fa.fa-github]
                                  " View on github")])]]
 
-     [:form.navbar-form.navbar-left.col-sm-5
+     [:form.navbar-form.navbar-left  ;;.col-sm-5
       {:ng-controller "QuickSearchController"
        :role "search"
        :ng-submit "startQuickSearchHistory(searchTerm)"}
@@ -65,6 +71,18 @@
          [:i.fa.fa-search]]]]]
 
      ]]])
+
+(defn footer []
+  [:section.footer {:ng-controller "FooterCtrl" :ng-show "showCookieMessage"}
+   [:div.panel.panel-info
+    [:div.panel-heading "Cookies"]
+    [:div.panel-body
+     [:p
+      "This site uses cookies to provide essential functionality. The European
+      Union mandates that we tell you what infomation this site stores on your
+      computer. You can find out the details of this " (link-to "/cookies" "here")
+      "."]
+     [:button.btn {:ng-click "showCookieMessage = false"} "Do not show again"]]]])
 
 (defn common
   ([title body] (common title body []))
@@ -82,6 +100,7 @@
               [:body {:ng-app "steps"}
                (header)
                [:section#content.main body]]
+               (footer)
               ]
              scripts))))
 
