@@ -82,7 +82,6 @@
                                     :body (payload ident csrf)
                                     :content-type "application/json")
                            :response)]
-
           (is (= (:status response) 403)))))
 
     ))
