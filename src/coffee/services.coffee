@@ -25,7 +25,7 @@ require ['angular', 'services'], (ng) ->
 
       onlogin: (assertion) =>
         loggingIn = @post "/auth/login", {assertion}
-        loggingIn.then ({data}) => log.info(data); @options.changeIdentity data.identity
+        loggingIn.then ({data}) => @options.changeIdentity data.current
         loggingIn.then (->), -> navId.logout()
 
       onlogout: =>

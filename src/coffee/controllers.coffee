@@ -6,7 +6,9 @@ define ['angular', 'services'], (ng, services) ->
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
     rs.auth ?= identity: null # TODO: put this somewhere more sensible.
 
-    changeIdentity = (identity) -> scope.auth.identity = identity
+    changeIdentity = (identity) ->
+      scope.auth.identity = identity
+      scope.auth.loggedIn = identity?
 
     scope.persona = new Persona {changeIdentity, loggedInUser: scope.auth.identity}
 

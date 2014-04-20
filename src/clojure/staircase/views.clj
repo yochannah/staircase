@@ -35,12 +35,12 @@
       [:span.app-name "Steps"]]] ;; Make configurable?
     [:div.collapse.navbar-collapse
 
+     [:p.navbar-text.navbar-right {:ng-show "auth.loggedIn"}
+      "Signed in as {{auth.identity}}"]
+
      [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
-      [:li {:ng-show "auth.loggedIn"}
-       [:a "{{auth.identity}}"]
-       (logout)]
-      [:li {:ng-hide "auth.loggedIn"}
-       (login)];; TODO: Replace with persona button
+      [:li {:ng-show "auth.loggedIn"} (logout)]
+      [:li {:ng-hide "auth.loggedIn"} (login)]
       [:li.dropdown
        [:a.dropdown-toggle
         "get in touch!"]
