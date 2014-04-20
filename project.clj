@@ -15,15 +15,22 @@
                  [honeysql "0.4.3"] ;; SQL sugar
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
                  [compojure "1.1.6"] ;; Request handlers
-                 [ring/ring-json "0.1.2"] ;; JSON marshalling
+                 [ring-middleware-format "0.3.2"] ;; JSON marshalling
+                 [ring "1.2.2"] ;; sessions.
+                 [ring/ring-json "0.3.1"]
+                 [ring/ring-anti-forgery "0.3.1"] ;; CSRF protection.
                  [c3p0/c3p0 "0.9.1.2"] ;; DB pooling
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
                  [dieter "0.4.1"] ;; Assets pipe-lining
-                 [de.sandroboehme.lesscss/lesscss "1.6.1.1.0"]
+                 [de.sandroboehme.lesscss/lesscss "1.6.1.1.0"] ;; Less 1.6.1
                  [hiccup "1.0.5"] ;; Templating
+                 ;; Deal with load issues.
+                 ;; see: https://github.com/LightTable/LightTable/issues/794
+                 [org.clojure/core.cache "0.6.3"] 
+                 [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
             [lein-environ "0.4.0"]
@@ -43,6 +50,7 @@
                    :database :database
                    :default (complement :acceptance)}
   :env {
+        :web-max-session-age ~(* 60 60 24)
         :db-classname "org.postgresql.Driver"
         :db-subprotocol "postgresql"
   }

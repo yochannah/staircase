@@ -1,6 +1,10 @@
 (ns staircase.handler
   (:use compojure.core
         ring.util.response
+        [ring.middleware.session :only (wrap-session)]
+        ring.middleware.json
+        ring.middleware.format
+        ring.middleware.anti-forgery
         [clojure.tools.logging :only (debug info error)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
@@ -10,12 +14,12 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [com.stuartsierra.component :as component]
-            ring.middleware.json
-            ring.middleware.session
             staircase.resources
             [persona-kit.friend :as pf]
+            [persona-kit.core :as pk]
             [persona-kit.middleware :as pm]
             [cemerick.friend :as friend] ;; auth.
+            [cemerick.friend.workflows :as workflows]
             [staircase.protocols] ;; Compile, so import will work.
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
@@ -105,11 +109,42 @@
         (binding [staircase.resources/context {:user principal}]
           (handler (assoc req ::principal principal)))))))
 
+;; Requires session functionality.
+(def app-auth-routes
+  (routes
+    (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
+    (POST "/login"
+          {session :session :as r}
+          (let [ident (friend/identity r)]
+            (if (:current ident) (response ident) {:status 403})))
+    (friend/logout (POST "/logout"
+          {session :session :as r}
+          (-> (response "ok") (content-type "text/plain"))))))
+
+;; replacement for persona-kit version. TODO: move to different file.
+(defn persona-workflow [audience request]
+  (when (and (= (:uri request) "/auth/login")
+             (= (:request-method request) :post))
+    (-> request
+        :params
+        (get "assertion")
+        (pk/verify-assertion audience)
+        pf/credential-fn
+        (workflows/make-auth {::friend/redirect-on-auth? false
+                              ::friend/workflow :mozilla-persona}))))
+
 ;; Route builders
+
+(defn- read-token
+  [req]
+  (-> (apply merge (map req [:params :form-params :multipart-params]))
+      :__anti-forgery-token))
 
 (defn- build-app-routes [router]
   (routes 
     (GET "/" [] (views/index))
+    (context "/auth" [] (-> app-auth-routes
+                            (wrap-anti-forgery {:read-token read-token})))
     (route/resources "/")
     (route/not-found (views/four-oh-four))))
 
@@ -137,7 +172,7 @@
 (defn- build-api-session-routes [router]
   (-> (routes
         (POST "/" {sess :session} (issue-session (:config router) (:secrets router) (:identity sess))))
-      (ring.middleware.session/wrap-session {:store (:session-store router)})))
+      (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
   (let [hist-routes (build-hist-routes router)
@@ -155,18 +190,19 @@
   component/Lifecycle
 
   (start [this]
-    (let [app-routes (build-app-routes this)
+    (info "Starting steps app at" (:audience config))
+    (let [auth-conf {:credential-fn pf/credential-fn
+                     :workflows [(partial persona-workflow (:audience config))]}
+          app-routes (build-app-routes this)
           v1 (context "/api/v1" [] (api-v1 this))
-          handler (routes (-> (handler/api v1)
-                              (ring.middleware.json/wrap-json-body)
-                              (ring.middleware.json/wrap-json-response))
-                          (-> (handler/site app-routes {:session {:store session-store}})
-                              (pf/wrap-persona-friend)
-                              (friend/authenticate {:credential-fn pf/credential-fn
-                                                    :workflows [(partial pf/persona-workflow (:audience config))]})
-                              (pm/wrap-persona-resources)
-                              asset-pipeline))]
-      (assoc this :handler handler)))
+          handler (routes
+                      (-> (handler/api v1) wrap-json-body)
+                      (-> (handler/api app-routes)
+                          (friend/authenticate auth-conf)
+                          (wrap-session {:store session-store})
+                          asset-pipeline
+                          pm/wrap-persona-resources))]
+      (assoc this :handler (wrap-restful-format handler))))
 
   (stop [this] this))
 

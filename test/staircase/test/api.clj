@@ -1,46 +1,17 @@
-(ns staircase.test.handler
+(ns staircase.test.api
   (:require [cheshire.core :as json]
+            [persona-kit.core :as pk]
             [staircase.data :as data]
-            [ring.middleware.session.memory :refer (memory-store)]
             [com.stuartsierra.component :as component])
   (:use clojure.test
+        staircase.test.util
         staircase.protocols
         ring.mock.request  
-        staircase.handler))
-
-(defn asset-pipeline [f] f)
-
-;; In-memory mock resource, holding a store of "things" keyed by their :id field.
-(defrecord MockResource [things]
-  Resource
-
-  (exists? [this id] (not (nil? (get-one this id))))
-  (get-all [_] things)
-  (get-one [_ id] (first (filter #(= (str (:id %1)) (str id)) things)))
-  (update [this id doc] (merge (get-one this id) doc))
-  (delete [_ id])
-  (create [_ doc] (doc "id")))
-
-(defn json-request [meth path & [payload]]
-  (let [req (-> (request meth path)
-                (header "Accept" "application/json"))]
-    (if payload
-      (-> req (body (json/generate-string payload)) (content-type "application/json"))
-      req)))
+        staircase.handler)
+  (import staircase.test.util.MockResource))
 
 (defn data-is [resp expected]
-  (is (= (json/parse-string (:body resp) true) expected)))
-
-(defn get-router [histories steps]
-  (-> (new-router)
-      (assoc :asset-pipeline asset-pipeline
-             :config {}
-             :secrets {}
-             :session-store (memory-store)
-             :histories histories
-             :steps steps)
-      (component/start)
-      :handler))
+  (is (= (json/parse-string (slurp (:body resp)) true) expected)))
 
 (deftest test-empty-app
   (let [histories (MockResource. [])
@@ -93,11 +64,6 @@
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))
         steps     (MockResource. (map #(hash-map :id %1 :data "step") (range 5)))
         app (get-router histories steps)]
-
-    (testing "main route"
-      (let [response (app (request :get "/"))]
-        (is (= (:status response) 200))
-        (is (= (get-in response [:headers "Content-Type"]) "text/html; charset=utf-8"))))
 
     (testing "GET /histories"
       (let [req (json-request :get "/api/v1/histories")

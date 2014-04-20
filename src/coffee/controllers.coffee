@@ -4,11 +4,11 @@ define ['angular', 'services'], (ng, services) ->
 
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
-    rs.auth ?= identity: null
-    scope.persona = Persona
-    onLogin = onLogout = -> console.log arguments
+    rs.auth ?= identity: null # TODO: put this somewhere more sensible.
 
-    Persona.watch {onlogin: onLogin, onlogout: onLogout, loggedInUser: scope.auth.identity}
+    changeIdentity = (identity) -> scope.auth.identity = identity
+
+    scope.persona = new Persona {changeIdentity, loggedInUser: scope.auth.identity}
 
   Controllers.controller 'QuickSearchController', Array '$log', '$scope', (log, scope) ->
     scope.startQuickSearchHistory = (term) ->

@@ -1,9 +1,10 @@
-deps = ['angular', 'filters', 'services', 'directives', 'controllers']
+deps = ['angular', 'filters', 'services', 'directives', 'controllers', 'angular-ui']
 
-modules = ['steps.controllers', 'steps.filters', 'steps.services', 'steps.directives']
+modules = [
+  'steps.controllers',
+  'steps.filters',
+  'steps.services',
+  'steps.directives',
+  'ui.bootstrap']
 
-define deps, (angular) ->
-  
-  Steps = angular.module('steps', modules)
-
-  return Steps
+define deps, (angular) -> angular.module('steps', modules)

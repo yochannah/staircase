@@ -10,12 +10,29 @@
 
 (defn less [f] (.compile less-c f))
 
-(defn checksum
+(defn ext
+  [f]
+  (let [fname (.getName f)
+        dotIdx (.lastIndexOf fname ".")]
+    (keyword (.substring fname (+ 1 dotIdx)))))
+
+(defmulti checksum ext)
+
+(defmethod checksum :coffee
   [f]
   (let [md5     (java.security.MessageDigest/getInstance "MD5")
         content (-> (slurp f) (.getBytes "UTF-8"))
         digest  (.digest md5 content)]
     (BigInteger. 1 digest)))
+
+(defmethod checksum :less
+  [f]
+  (let [dir (.getParentFile f)
+        files (filter #(.isFile %) (file-seq dir))
+        md5 (java.security.MessageDigest/getInstance "MD5")]
+    (doseq [f' files]
+      (.update md5 (-> (slurp f') (.getBytes "UTF-8"))))
+    (BigInteger. 1 (.digest md5))))
 
 (defn- get-kind [file-name]
   (cond (.endsWith file-name ".js") :script
@@ -55,7 +72,7 @@
 
 (defn serve-asset [req file options]
   (debug "Asset file found:" file)
-  (if-not (:cache? options)
+  (if (:no-cache? options)
     (generate-response file req)
     (let [cksm (checksum file)
           cache-record (@asset-cache file)]

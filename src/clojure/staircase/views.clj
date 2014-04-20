@@ -3,7 +3,7 @@
             [hiccup.def :as d]
             [persona-kit.view :as pv])
   (:use [hiccup.page :only (html5 include-css include-js)]
-        [hiccup.element :only (unordered-list javascript-tag mail-to)]))
+        [hiccup.element :only (link-to unordered-list javascript-tag mail-to)]))
 
 (defn- with-utf8-charset [[tag attrs]]
   [tag (assoc attrs :charset "utf-8")])
@@ -41,17 +41,19 @@
        (logout)]
       [:li {:ng-hide "auth.loggedIn"}
        (login)];; TODO: Replace with persona button
-      [:li
-       (mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
-                [:span
-                 [:i.fa.fa-envelope-o]
-                 " Contact"])]
-      [:li
-       [:a {:href "https://github.com/alexkalderimis/staircase"}
-        [:i.fa.fa-github]
-        " View on github"]]]
+      [:li.dropdown
+       [:a.dropdown-toggle
+        "get in touch!"]
+       (unordered-list {:class "dropdown-menu"}
+                       [(mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
+                                  [:span
+                                  [:i.fa.fa-envelope-o]
+                                  " Contact"])
+                        (link-to "https://github.com/alexkalderimis/staircase"
+                                 [:i.fa.fa-github]
+                                 " View on github")])]]
 
-     [:form.navbar-form.navbar-right
+     [:form.navbar-form.navbar-left.col-sm-5
       {:ng-controller "QuickSearchController"
        :role "search"
        :ng-submit "startQuickSearchHistory(searchTerm)"}
