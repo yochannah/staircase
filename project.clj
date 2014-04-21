@@ -7,7 +7,7 @@
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [org.clojure/java.jdbc "0.3.3"] ;; DB interface
                  [clj-http "0.9.1"] ;; Perform http requests.
-                 [clj-jwt "0.0.4"] ;; Generate signed json web-tokens.
+                 [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
                  [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
                  [clj-time "0.6.0"] ;; deal with time.
