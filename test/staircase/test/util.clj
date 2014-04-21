@@ -31,7 +31,7 @@
   (-> (new-router)
       (assoc :asset-pipeline asset-pipeline
              :config {}
-             :secrets {}
+             :secrets {:key-phrase "some very difficult key-phrase"}
              :session-store (memory-store)
              :histories histories
              :steps steps)

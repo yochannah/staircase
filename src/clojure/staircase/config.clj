@@ -11,7 +11,8 @@
       (edn/read rdr))
     (throw (IllegalArgumentException. (str fname " not found")))))
 
-(defn secrets [] (try (from-edn "secrets.edn") (catch Exception e {}))) ;; Empty secrets if not configured.
+;; Empty secrets if not configured.
+(defn secrets [] (try (from-edn "secrets.edn") (catch Exception e {}))) 
 
 (def configuration (delay (from-edn "config.edn")))
 

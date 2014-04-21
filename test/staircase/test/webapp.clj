@@ -3,6 +3,7 @@
             [persona-kit.core :as pk]
             [ring.middleware.anti-forgery :as af]
             [staircase.data :as data]
+            [clj-jwt.core :as jwt]
             [ring.middleware.session.memory :refer (memory-store)]
             [com.stuartsierra.component :as component])
   (:use clojure.test
@@ -27,6 +28,10 @@
 (defn current-user
   [response]
   (-> response :body slurp json/parse-string (get "current")))
+
+(defn as-prn
+  [response]
+  (-> response :body jwt/str->jwt :claims :prn))
 
 (deftest test-webapp
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))
@@ -83,6 +88,49 @@
                                     :content-type "application/json")
                            :response)]
           (is (= (:status response) 403)))))
+
+    (testing "Getting a session token"
+      (let [response (-> (session app)
+                         (request "/")
+                         (request "/auth/session")
+                         :response)
+            key-phrase "some very difficult key-phrase"
+            not-key-phrase "different key phrase"]
+        (is (= (:status response) 200))
+        (is (not (= (get-principal {:secrets {:key-phrase key-phrase}}
+                                   (str "Token: " (:body response)))
+                    :staircase.handler/invalid)))
+        (is (= (get-principal {:secrets {:key-phrase key-phrase}}
+                                   (str "Token: " (:body response)))
+               (-> response :body jwt/str->jwt :claims :prn)))
+        (is (= (get-principal {:secrets {:key-phrase not-key-phrase}}
+                              (str "Token: " (:body response)))
+                    :staircase.handler/invalid))))
+
+    (testing "Session tokens refer to the same principal"
+      (let [{r-1 :response :as sess} (-> (session app)
+                                         (request "/")
+                                         (request "/auth/session"))
+            {r-2 :response} (request sess "/auth/session")]
+        (is (= (as-prn r-1) (as-prn r-2)))))
+
+    (testing "logging-in and getting a session token"
+      ;; stub out the callback to persona.
+      (with-redefs [pk/verify-assertion (partial verify-assertion "okay")]
+        (let [ident "foo@bar.org"
+              sess (-> (session app)
+                       (request "/")
+                       (request "/auth/csrf-token"))
+              csrf (get-in sess [:response :body])
+              principal (-> sess
+                            (request "/auth/login"
+                                    :request-method :post
+                                    :body (payload ident csrf)
+                                    :content-type "application/json")
+                            (request "/auth/session")
+                            :response
+                            as-prn)]
+          (is (= principal ident)))))
 
     ))
 

@@ -2,14 +2,17 @@
   (:use compojure.core
         ring.util.response
         [ring.middleware.session :only (wrap-session)]
+        [ring.middleware.cookies :only (wrap-cookies)]
         ring.middleware.json
         ring.middleware.format
         ring.middleware.anti-forgery
+        [staircase.helpers :only (new-id)]
         [clojure.tools.logging :only (debug info error)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
             [clj-jwt.core  :as jwt]
             [clj-jwt.key   :refer [private-key public-key]]
+            [clj-jwt.intdate :refer [intdate->joda-time]]
             [clj-time.core :as t]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -82,48 +85,66 @@
     NOT_FOUND))
 
 (defn- issue-session [config secrets ident]
-  (let [claim {:iss (:whoami config)
-              :exp (t/plus (t/now) (t/days 1))
-              :prn ident}
-        rsa-prv-key (private-key "rsa/private.key" (:key-phrase secrets))]
-    (-> claim jwt/jwt (jwt/sign :RS256 rsa-prv-key) jwt/to-str)))
+  (let [key-phrase (:key-phrase secrets)
+        claim (jwt/jwt {:iss (:audience config)
+                        :exp (t/plus (t/now) (t/days 1))
+                        :iat (t/now)
+                        :prn ident})]
+    (if-let [rsa-prv-key
+             (try (private-key "rsa/private.key" key-phrase)
+               (catch java.io.FileNotFoundException fnf nil))]
+      (-> claim
+          (jwt/sign :RS256 rsa-prv-key)
+          jwt/to-str)
+      (-> claim
+          (jwt/sign :HS256 key-phrase)
+          jwt/to-str))))
 
-(defn- get-principal [router auth]
-  (if (and auth (.startsWith auth "Token: "))
+(defn get-principal [router auth]
+  (when (and auth (.startsWith auth "Token: "))
     (let [token (.replace auth "Token: " "")
-          rsa-pub-key (public-key  "rsa/public.key")
           web-token (jwt/str->jwt token)
-          valid? (jwt/verify web-token)
-          claims (:claims web-token)]
-      (if (and valid? (t/after? (:exp claims) (t/now)))
+          claims (:claims web-token)
+          proof (try (public-key  "rsa/public.key")
+                 (catch java.io.FileNotFoundException fnf
+                   (get-in router [:secrets :key-phrase])))
+          valid? (jwt/verify web-token proof)]
+      (if (and valid? (t/after? (intdate->joda-time (:exp claims)) (t/now)))
         (:prn claims)
-        ::invalid))
-    nil))
+        ::invalid))))
 
 (defn- wrap-api-auth [handler router]
   (fn [req]
     (let [{{auth :Authorization} :headers} req
           principal (get-principal router auth)]
       (if (= ::invalid principal)
-        {:status 401 :body {:message "Bad authorization."}}
+        {:status 403 :body {:message "Bad authorization."}}
         (binding [staircase.resources/context {:user principal}]
           (handler (assoc req ::principal principal)))))))
 
 ;; Requires session functionality.
-(def app-auth-routes
-  (routes
-    (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
-    (POST "/login"
-          {session :session :as r}
-          (let [ident (friend/identity r)]
-            (if (:current ident) (response ident) {:status 403})))
-    (friend/logout (POST "/logout"
-          {session :session :as r}
-          (-> (response "ok") (content-type "text/plain"))))))
+(defn app-auth-routes [{:keys [config secrets]}]
+  (let [issue-session (partial issue-session config secrets)
+        session-resp #(-> % issue-session response (content-type "application/json-web-token"))]
+    (routes
+      (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
+      (GET "/session"
+           {session :session :as r}
+           (session-resp (:current (friend/identity r))))
+      (POST "/login"
+            {session :session :as r}
+            (if (:email (friend/current-authentication r))
+              (assoc (response (friend/identity r)) :session session) ;; Have to record session here.
+              {:status 403}))
+      (friend/logout (POST "/logout"
+                           {session :session :as r}
+                           (-> (response "ok")
+                               (assoc :session (dissoc session :anon-identity))
+                               (content-type "text/plain")))))))
 
 ;; replacement for persona-kit version. TODO: move to different file.
 (defn persona-workflow [audience request]
-  (when (and (= (:uri request) "/auth/login")
+  (if (and (= (:uri request) "/auth/login")
              (= (:request-method request) :post))
     (-> request
         :params
@@ -133,7 +154,18 @@
         (workflows/make-auth {::friend/redirect-on-auth? false
                               ::friend/workflow :mozilla-persona}))))
 
-;; Route builders
+(defn anonymous-workflow [request]
+  "Assign an identity if none is available."
+  (if-not (:current (friend/identity request))
+    (workflows/make-auth {:anon? true :identity (str (new-id))}
+                         {::friend/redirect-on-auth? false
+                          ::friend/workflow :anonymous})))
+
+(defn credential-fn
+  [auth]
+  (case (::friend/workflow auth)
+    :anonymous       (assoc auth :roles [])
+    :mozilla-persona (assoc (pf/credential-fn auth) :roles [:user])))
 
 (defn- read-token
   [req]
@@ -143,7 +175,7 @@
 (defn- build-app-routes [router]
   (routes 
     (GET "/" [] (views/index))
-    (context "/auth" [] (-> app-auth-routes
+    (context "/auth" [] (-> (app-auth-routes router)
                             (wrap-anti-forgery {:read-token read-token})))
     (route/resources "/")
     (route/not-found (views/four-oh-four))))
@@ -171,7 +203,9 @@
 
 (defn- build-api-session-routes [router]
   (-> (routes
-        (POST "/" {sess :session} (issue-session (:config router) (:secrets router) (:identity sess))))
+        (POST "/"
+              {sess :session}
+              (issue-session (:config router) (:secrets router) (:identity sess))))
       (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
@@ -186,21 +220,38 @@
                 (wrap-api-auth router))
             (route/not-found {:message "Not found"}))))
 
-(defrecord Router [session-store asset-pipeline config secrets histories steps handler]
+(defn wrap-bind-user
+  [handler]
+  (fn [request]
+    (let [user (:identity (friend/current-authentication request))]
+      (info "for" (:uri request) "user =" user)
+      (binding [staircase.resources/context {:user user}]
+        (handler request)))))
+
+(defrecord Router [session-store
+                   asset-pipeline
+                   config
+                   secrets
+                   histories
+                   steps
+                   handler]
+
   component/Lifecycle
 
   (start [this]
     (info "Starting steps app at" (:audience config))
-    (let [auth-conf {:credential-fn pf/credential-fn
-                     :workflows [(partial persona-workflow (:audience config))]}
+    (let [persona (partial persona-workflow (:audience config))
+          auth-conf {:credential-fn credential-fn
+                     :workflows [persona anonymous-workflow]}
           app-routes (build-app-routes this)
           v1 (context "/api/v1" [] (api-v1 this))
           handler (routes
                       (-> (handler/api v1) wrap-json-body)
-                      (-> (handler/api app-routes)
+                      (-> app-routes
+                          handler/api
                           (friend/authenticate auth-conf)
-                          (wrap-session {:store session-store
-                                         :cookie-name "staircase-session"})
+                          (wrap-session {:store session-store})
+                          (wrap-cookies)
                           asset-pipeline
                           pm/wrap-persona-resources))]
       (assoc this :handler (wrap-restful-format handler))))
