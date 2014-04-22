@@ -27,6 +27,8 @@
   (-> (pv/sign-in-button {:ng-click "persona.logout()"} button-style)
       (update-in [2 1] (constantly "Sign out"))))
 
+(declare search-form nav-list)
+
 (defn header []
   [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
@@ -44,33 +46,40 @@
      [:p.navbar-text.navbar-right {:ng-show "auth.loggedIn"}
       "Signed in as {{auth.identity}}"]
 
-     [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
-      [:li {:ng-show "auth.loggedIn"} (logout)]
-      [:li {:ng-hide "auth.loggedIn"} (login)]
-      [:li.dropdown
-       [:a.dropdown-toggle
-        "get in touch!"]
-       (unordered-list {:class "dropdown-menu"}
-                       [(mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
-                                  [:span
-                                  [:i.fa.fa-envelope-o]
-                                  " Contact"])
-                        (link-to "https://github.com/alexkalderimis/staircase"
-                                 [:i.fa.fa-github]
-                                 " View on github")])]]
+     (nav-list)
 
-     [:form.navbar-form.navbar-left  ;;.col-sm-5
-      {:ng-controller "QuickSearchController"
-       :role "search"
-       :ng-submit "startQuickSearchHistory(searchTerm)"}
-      [:div.input-group
-       [:input.form-control {:ng-model "searchTerm" :placeholder "eve"}] ;; TODO: Definitely make placeholders injectable.
-       [:span.input-group-btn
-        [:button.btn.btn-default {:type "submit"}
-         "Search "
-         [:i.fa.fa-search]]]]]
+     (search-form)
 
      ]]])
+
+(defn search-form []
+  [:form.navbar-form.navbar-left
+   {:ng-controller "QuickSearchController"
+    :role "search"
+    :ng-submit "startQuickSearchHistory(searchTerm)"}
+   [:div.input-group
+    [:input.form-control {:ng-model "searchTerm" :placeholder "eve"}] ;; TODO: Definitely make placeholders injectable.
+    [:span.input-group-btn
+     [:button.btn.btn-default {:type "submit"}
+      "Search "
+      [:i.fa.fa-search]]]]])
+
+(defn nav-list []
+  [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
+   [:li {:ng-show "auth.loggedIn"} (logout)]
+   [:li {:ng-hide "auth.loggedIn"} (login)]
+   [:li.dropdown
+    [:a.dropdown-toggle
+     "get in touch!"]
+    (unordered-list {:class "dropdown-menu"}
+                    [(mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
+                              [:span
+                               [:i.fa.fa-envelope-o]
+                               " Contact"])
+                     (link-to "https://github.com/alexkalderimis/staircase"
+                              [:i.fa.fa-github]
+                              " View on github")])]])
+
 
 (defn footer []
   [:section.footer {:ng-controller "FooterCtrl" :ng-show "showCookieMessage"}
@@ -78,9 +87,9 @@
     [:div.panel-heading "Cookies"]
     [:div.panel-body
      [:p
-      "This site uses cookies to provide essential functionality. The European
-      Union mandates that we tell you what infomation this site stores on your
-      computer. You can find out the details of this " (link-to "/cookies" "here")
+      "This site uses cookies to provide essential functionality, such as remembering your
+      identity. You can find out details of what information we store here "
+      (link-to "/cookies" "here")
       "."]
      [:button.btn {:ng-click "showCookieMessage = false"} "Do not show again"]]]])
 
@@ -116,7 +125,14 @@
               [:div.panel-heading
                 "Welcome to " [:strong "Steps"]]
               [:div.panel-body "The data-flow interface for intermine. Take a first step:"]]]
-            [:div.row.starting-points {:ng-controller "StartingPointsController"}]]
+            [:div.row.starting-points {:ng-controller "StartingPointsController"}
+             [:ul
+              [:li {:ng-repeat "startingPoint in startingPoints"}
+               [:div.panel.panel-default
+                [:div.panel-heading "{{startingPoint.heading}}"]
+                [:div.panel-body
+                 [:native-tool {:controller-uri "{{startingPoint.controllerURI}}"
+                                :template-uri "{{startingPoint.templateURI}}"}]]]]]]]
           (map with-utf8-charset
                (conj (apply include-js vendor-scripts)
                      (entry-point "/js/frontpage")))))

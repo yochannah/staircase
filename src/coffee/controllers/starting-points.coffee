@@ -1,7 +1,8 @@
 define [], -> Array '$scope', '$http', (scope, http) ->
 
-  scope.tools = []
+  scope.startingPoints = []
+
   http.get("/tools", {params: {capabilities: "initial"}})
-      .then (tools) -> scope.tools = tools
+      .then (tools) -> scope.startingPoints = tools
 
   scope.$apply()
