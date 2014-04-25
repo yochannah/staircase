@@ -1,7 +1,7 @@
 {
     :tools {
-        :hello-world {:uri "https://github.com/intermine/im-tables.git"
-                      :ref "v1.6.0"
-                      :options {:branch-name "master"}}}
+        :im-tables {:uri "https://github.com/intermine/im-tables.git"
+                    :ref "v1.6.0"
+                    :options {:branch-name "master"}}}
 }
 

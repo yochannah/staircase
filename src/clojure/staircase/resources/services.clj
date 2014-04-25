@@ -60,8 +60,16 @@
 
   (create [_ doc]
     (let [id (new-id)
-          service (-> (dissoc doc :id) (assoc "id" id "owner" (:user staircase.resources/context)))]
+          service (-> (dissoc doc :id "id") (assoc "id" id "owner" (:user staircase.resources/context)))]
       (sql/insert! (:connection db) :services service)
-      id)))
+      id))
+  
+  Searchable
+
+  (get-where [_ constraint]
+    (sql/query (:connection db)
+               (hsql/format {:select [:*] :from [:services] :where constraint})
+               :result-set-fn (partial into [])))
+  )
 
 (defn new-services-resource [& {:keys [db]}] (map->ServicesResource {:db db}))

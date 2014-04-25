@@ -6,10 +6,12 @@
         ring.middleware.json
         ring.middleware.format
         ring.middleware.anti-forgery
+        [staircase.protocols] ;; Compile, so import will work.
         [staircase.helpers :only (new-id)]
         [clojure.tools.logging :only (debug info error)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
+            [devlin.table-utils :refer (left-outer-join)]
             [clj-jwt.core  :as jwt]
             [clj-jwt.key   :refer [private-key public-key]]
             [clj-jwt.intdate :refer [intdate->joda-time]]
@@ -23,11 +25,13 @@
             [persona-kit.middleware :as pm]
             [cemerick.friend :as friend] ;; auth.
             [cemerick.friend.workflows :as workflows]
-            [staircase.protocols] ;; Compile, so import will work.
+            [staircase.tools :refer (get-tools)]
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
             [compojure.route :as route]) ;; Standard route builders.
-  (:import staircase.protocols.Resource))
+  )
+
+;; TODO: this file is much too large, and in serious need of refactoring.
 
 (def NOT_FOUND {:status 404})
 (def ACCEPTED {:status 204})
@@ -175,9 +179,14 @@
 (defn- build-app-routes [router]
   (routes 
     (GET "/" [] (views/index))
+    (GET "/tools" [capability] (response (get-tools (:config router) capability)))
+    (GET "/partials/:fragment.html"
+         [fragment]
+         (views/render-partial fragment))
     (context "/auth" [] (-> (app-auth-routes router)
                             (wrap-anti-forgery {:read-token read-token})))
-    (route/resources "/")
+    (route/resources "/" {:root "tools"})
+    (route/resources "/" {:root "public"})
     (route/not-found (views/four-oh-four))))
 
 (defn- build-hist-routes [{:keys [histories steps]}]
@@ -201,6 +210,25 @@
                    (GET    "/" [] (get-resource steps id))
                    (DELETE "/" [] (delete-resource steps id)))))
 
+(defn build-service-routes [{:keys [config services]}]
+  (let [real-id #(if (= "default" %) (:default-service config) %)]
+    (routes ;; Routes for getting service information.
+            (GET "/" []
+                (let [user-services (get-all services)
+                      configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
+                  (response (left-outer-join configured-services user-services :root :root))))
+            (context "/:ident" [ident]
+                    (GET "/" []
+                          (let [ident (real-id ident)
+                                uri (get-in config [:services ident])
+                                user-services (get-where services [:= :uri uri])]
+                            (-> (left-outer-join [{:root uri :ident ident}] user-services :root :root)
+                                first
+                                response)))
+                    (PUT "/" {doc :body}
+                          (let [uri (get-in config [:services (real-id ident)])]
+                            (create-new services (assoc doc :uri uri))))))))
+
 (defn- build-api-session-routes [router]
   (-> (routes
         (POST "/"
@@ -211,11 +239,13 @@
 (defn- api-v1 [router]
   (let [hist-routes (build-hist-routes router)
         step-routes (build-step-routes router)
+        service-routes (build-service-routes router)
         api-session-routes (build-api-session-routes router)]
     (routes ;; put them all together
             (context "/sessions" [] api-session-routes)
             (-> (routes 
                   (context "/histories" [] hist-routes)
+                  (context "/services" [] service-routes)
                   (context "/steps" [] step-routes))
                 (wrap-api-auth router))
             (route/not-found {:message "Not found"}))))
@@ -232,6 +262,7 @@
                    asset-pipeline
                    config
                    secrets
+                   services
                    histories
                    steps
                    handler]

@@ -7,6 +7,16 @@ define ['angular', 'angular-cookies', 'services'], (ng) ->
 
     scope.$watch "showCookieMessage", -> cookies.ShowCookieWarning = String scope.showCookieMessage
 
+  Controllers.controller 'WelcomeCtrl', Array '$scope', '$cookies', (scope, cookies) ->
+    scope.showWelcome = cookies.ShowWelcome isnt "false"
+
+    scope.$watch "showWelcome", (val) -> cookies.ShowWelcome = String val
+
+
+  Controllers.controller 'IndexCtrl', ->
+
+  Controllers.controller 'AboutCtrl', ->
+
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
     rs.auth ?= identity: null # TODO: put this somewhere more sensible.

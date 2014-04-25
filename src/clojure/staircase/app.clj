@@ -11,12 +11,21 @@
             [staircase.sessions :as sessions]
             [staircase.data :as data]))
 
+(declare system)
+
 ;; Inject dependencies and build up the system.
 (defn build-app [options]
+  (. (Runtime/getRuntime)
+     (addShutdownHook (Thread. (fn [] (component/stop @system)))))
   (component/start
     (let [db (db-options options)]
       (-> (component/system-map
-            :asset-pipeline (assets/pipeline :js-dir "/js" :css-dir "/css" :engine :v8 :coffee "src/coffee" :less "src/less")
+            :asset-pipeline (assets/pipeline :js-dir "/js"
+                                             :css-dir "/css"
+                                             :engine :v8
+                                             :as-resource "tools"
+                                             :coffee "src/coffee"
+                                             :less "src/less")
             :config (app-options options)
             :secrets (secrets)
             :session-store (sessions/new-pg-session-store)
@@ -26,7 +35,7 @@
             :steps (new-steps-resource)
             :router (routing/new-router))
           (component/system-using
-            {:router [:config :secrets :session-store :histories :steps :asset-pipeline]
+            {:router [:config :secrets :session-store :services :histories :steps :asset-pipeline]
              :session-store [:db :config]
              :services [:db]
              :steps [:db]

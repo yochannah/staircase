@@ -16,8 +16,9 @@
     (catch FileNotFoundException fnf (clone-repo uri (assoc options :path path)))))
 
 (defn- process-args [names]
+  "Get a list of the configured remote tools."
   (if-let [settings (config :tools)]
-    (let [tool-names  (keys settings)
+    (let [tool-names  (->> (keys settings) (filter #(get-in settings [% :uri])))
           names       (if (empty? names) tool-names (filter (set names) tool-names))]
       [settings names])
     [{} []]))

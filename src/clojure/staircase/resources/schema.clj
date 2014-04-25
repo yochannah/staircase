@@ -50,7 +50,7 @@
 (def services
   {:services
    [[:id :uuid :primary :key ]
-    [:uri string ]
-    owner-column
-    [:data data ] ]})
+    [:root string ]
+    [:token data ]
+    owner-column]})
       

@@ -1,12 +1,102 @@
-require ['angular', 'services'], (ng) ->
+require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
   Directives.directive 'appVersion', ['version', (v) -> (scope, elm) -> elm.text(version)]
 
-  Directives.directive 'nativeTool', ->
+  getOffsets = (doc, sel) ->
+    els = [].slice.call doc.querySelectorAll sel
+    for e in els
+      left: e.offsetLeft
+      top: e.offsetTop
+      width: e.offsetWidth
+      height: e.offsetHeight
+
+  getTopBars = (offsets) ->
+    for o in offsets
+      p:
+        x: o.left
+        y: o.top
+      q:
+        x: o.left + o.width
+        y: o.top
+
+  doesntIntersectWith = (p1, q1) -> ({p, q}) -> not lines.intersects p1, q1, p, q
+
+  Directives.directive 'filterTerm', ->
+    restrict: 'AE'
+    replace: true,
+    scope:
+      term: '='
+    template: """
+      <div class="input-group input-group-sm">
+          <span class="input-group-addon">Filter:</span>
+          <input class="form-control" ng-model="term">
+          <span class="input-group-btn">
+              <button class="btn btn-default" ng-click="term = null">&#x2e3;</button>
+          </span>
+      </div>
+    """
+
+  Directives.directive 'startingPoint', ($window) ->
+    restrict: 'E'
+    link: (scope, element, attrs) ->
+
+      if scope.tool.expandable
+        console.log "adding resize listener for #{ scope.tool.heading }"
+        doResize = ->
+          margin = 38 # HARDCODED! TODO! CALCULATE!
+          offsets = getOffsets(document, 'starting-point')
+          maxx = L.max offsets.map (o) -> o.left + o.width
+          maxy = L.max offsets.map (o) -> o.top + o.height
+          console.log maxy
+          topBars = getTopBars offsets
+          console.log topBars
+          ystep = element[0].offsetHeight
+          p1 =
+            x: element[0].offsetLeft
+            y: element[0].offsetTop + 1 # Don't get intersects with own top bar.
+          q1 =
+            x: p1.x + element[0].offsetWidth
+            y: p1.y + element[0].offsetHeight
+
+          factor = 1
+
+          while factor < 3 and (q1.y + ystep) <= maxy
+            q1.y += ystep + margin
+            if L.every topBars, doesntIntersectWith p1, q1
+              console.log "Increasing factor"
+              factor += 1
+
+          console.log "factor = #{ factor }"
+          if factor > 1 and panelBody = element[0].querySelector('.panel-body')
+            totalHeight = ystep * factor - margin
+            panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"
+            element.addClass 'expanded'
+
+        $window.addEventListener 'resize', ->
+          element[0].querySelector('.panel-body')?.style.height = null
+          element.removeClass 'expanded'
+          setTimeout doResize, 10
+
+        setTimeout doResize, 10
+
+  Directives.directive 'nativeTool', ($window, $compile, $injector) ->
     restrict: 'E'
     scope:
-      templateURI: '=templateURI'
-      controllerURI: '=controllerURI'
+      tool: '=tool'
+    link: (scope, element, attrs) ->
+
+      ctrl = "#{$window.location}/#{scope.tool.controllerURI}"
+      tmpl = "#{$window.location}/#{scope.tool.templateURI}"
+
+      require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+
+        $injector.invoke controller, this, {'$scope': scope}
+
+        element.html(template)
+        $compile(element.contents())(scope)
+
+        scope.$apply()
+
 

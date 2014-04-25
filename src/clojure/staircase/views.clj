@@ -2,7 +2,8 @@
   (:require [hiccup.form :refer :all]
             [hiccup.def :as d]
             [persona-kit.view :as pv])
-  (:use [hiccup.page :only (html5 include-css include-js)]
+  (:use [hiccup.core :only (html)]
+        [hiccup.page :only (html5 include-css include-js)]
         [hiccup.element :only (link-to unordered-list javascript-tag mail-to)]))
 
 (defn- with-utf8-charset [[tag attrs]]
@@ -17,17 +18,21 @@
 
 (def vendor-scripts [])
 
-(def button-style :orange) ;; :orange or :dark
+(def button-style :blue) ;; :orange or :dark
 
 (defn login []
   (-> (pv/sign-in-button {:ng-click "persona.request()"} button-style)
+      (update-in [1 :class] str " navbar-btn")
       (update-in [2 1] (constantly "Sign in/Sign up"))))
 
 (defn logout []
   (-> (pv/sign-in-button {:ng-click "persona.logout()"} button-style)
+      (update-in [1 :class] str " navbar-btn")
       (update-in [2 1] (constantly "Sign out"))))
 
 (declare search-form nav-list)
+
+(def home-links [["home" "home" "/"] ["about intermine" "info" "/about"] ["options" "cog"]])
 
 (defn header []
   [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
@@ -38,8 +43,11 @@
       [:span.sr-only "Toggle navigation"]
       (for [_ (range 3)]
         [:span.icon-bar])]
-     [:a.navbar-brand
-      [:span.app-name "Steps"]]] ;; Make configurable?
+     [:a.navbar-brand.dropdown-toggle
+      [:span.app-name "Steps"]] ;; Make configurable?
+     (unordered-list {:class "dropdown-menu"}
+                     (for [[title icon path] home-links]
+                       (link-to (or path (str "/" title)) [:i.fa.fa-fw {:class (str "fa-" icon)}] " " title)))]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
@@ -66,11 +74,16 @@
 
 (defn nav-list []
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
-   [:li {:ng-show "auth.loggedIn"} (logout)]
-   [:li {:ng-hide "auth.loggedIn"} (login)]
    [:li.dropdown
     [:a.dropdown-toggle
-     "get in touch!"]
+     "Start " [:b.caret]]
+     [:ul.dropdown-menu
+      [:li {:ng-repeat "tool in startingPoints"}
+           [:a {:href "/starting-point/{{tool.ident}}"}
+               "{{tool.heading}}"]]]]
+   [:li.dropdown
+    [:a.dropdown-toggle
+     "get in touch! " [:b.caret]]
     (unordered-list {:class "dropdown-menu"}
                     [(mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
                               [:span
@@ -78,7 +91,10 @@
                                " Contact"])
                      (link-to "https://github.com/alexkalderimis/staircase"
                               [:i.fa.fa-github]
-                              " View on github")])]])
+                              " View on github")])]
+   [:li {:ng-show "auth.loggedIn"} (logout)]
+   [:li {:ng-hide "auth.loggedIn"} (login)]
+   ])
 
 
 (defn footer []
@@ -117,22 +133,48 @@
   (common "Page Not Found"
           [:div#four-oh-four "The page you requested could not be found"]))
 
+(def starting-points
+  [:div.container-fluid
+    [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
+    [:div.panel.panel-default
+      [:div.panel-heading
+      "Welcome to " [:strong "Steps"]]
+      [:div.panel-body
+      [:p
+        "This is the data-flow interface for intermine data-warehouses.
+        If this is your first time here, maybe you might like to read more about
+        the intermine system " (link-to "/about" "here") "."]
+      [:button.btn.btn-default {:ng-click "showWelcome = false"}
+        "Do not show again"]]]]
+    [:div.row.starting-points {:ng-controller "StartingPointsController"}
+    [:starting-point {:ng-class "getWidthClass(tool)"
+            :ng-repeat "tool in startingPoints"
+            :ng-hide "tool.state == 'DOCKED'"}
+      [:div.panel.panel-default.first-step {:ng-class "getHeightClass(tool)"}
+      [:div.panel-heading
+        [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
+        "{{tool.heading}}"]
+      [:div.panel-body
+        [:native-tool {:tool "tool"}]]]]
+    [:div.docked-tools
+      [:ul.nav.nav-pills
+      [:li.active {:ng-show "anyToolDocked()"}
+        [:a {:ng-click "undockAll()"} [:i.fa.fa-th-large]]]
+      [:li.active {:ng-repeat "tool in startingPoints"
+                    :ng-show "tool.state == 'DOCKED'"}
+        [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]
+    
+    ])
+
+(defn render-partial
+  [fragment]
+  (case fragment
+    "frontpage" (html starting-points)
+    {:status 404})) 
+
 (defn index []
   (common "Steps"
-          [:div.container
-            [:div.row
-              [:div.panel.panel-default
-              [:div.panel-heading
-                "Welcome to " [:strong "Steps"]]
-              [:div.panel-body "The data-flow interface for intermine. Take a first step:"]]]
-            [:div.row.starting-points {:ng-controller "StartingPointsController"}
-             [:ul
-              [:li {:ng-repeat "startingPoint in startingPoints"}
-               [:div.panel.panel-default
-                [:div.panel-heading "{{startingPoint.heading}}"]
-                [:div.panel-body
-                 [:native-tool {:controller-uri "{{startingPoint.controllerURI}}"
-                                :template-uri "{{startingPoint.templateURI}}"}]]]]]]]
+          [:div {:ng-view ""}]
           (map with-utf8-charset
                (conj (apply include-js vendor-scripts)
                      (entry-point "/js/frontpage")))))

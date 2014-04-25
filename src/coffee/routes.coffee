@@ -1,9 +1,10 @@
-define ['angular-route', 'app'], (ng, app) ->
+require ['angular-route', 'app'], (ng, app) ->
 
-  app.config Array '$routeProvider', (router) ->
-    router.when '/view1',
-      templateUrl: '/partials/partial1.html'
-      controller: 'Inline'
-    router.when '/view2',
-      templateUrl: '/partials/partial2.html'
-      controller: 'Required'
+  app.config Array '$locationProvider', '$routeProvider', (locations, router) ->
+    locations.html5Mode true
+    router.when '/',
+      templateUrl: '/partials/frontpage.html'
+      controller: 'IndexCtrl'
+    router.when '/about',
+      templateUrl: '/partials/about.html'
+      controller: 'AboutCtrl'

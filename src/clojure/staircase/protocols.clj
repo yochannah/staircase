@@ -8,3 +8,6 @@
   (delete [this id] "Destroy a thing")
   (create [this doc] "Create a new thing"))
 
+(defprotocol Searchable
+  (get-where [this constraint] "Find all the things matching the constraint"))
+

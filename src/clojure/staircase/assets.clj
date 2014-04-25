@@ -36,7 +36,8 @@
 
 (defn- get-kind [file-name]
   (cond (.endsWith file-name ".js") :script
-                        (.endsWith file-name ".css") :style))
+        (.endsWith file-name ".coffee") :script
+        (.endsWith file-name ".css") :style))
 
 (defn asset-file-for [req options]
   (let [file-name (-> (:uri req)
@@ -49,14 +50,21 @@
                    :script (options :coffee)
                    :style (options :less)
                    "")
-        file     (io/as-file (str path file-name))]
-    (debug "Checking existence of" file)
-    (when (.exists file) file)))
+        file     (->> file-name (str (options :as-resource)) io/resource io/as-file)
+        path-file(io/as-file (str path file-name))]
+    (cond
+      (and file (.exists file)) file
+      (.exists path-file) path-file)))
+
+(defn has-suffix
+  [req suffix]
+  (.endsWith (:uri req) suffix))
 
 (defn is-asset-req [req]
   (and (= :get (:request-method req))
-       (or (.endsWith (:uri req) ".js")
-           (.endsWith (:uri req) ".css"))))
+       (or (has-suffix req ".js")
+           (has-suffix req ".coffee")
+           (has-suffix req ".css"))))
 
 (def asset-cache (atom {}))
 
@@ -82,8 +90,6 @@
           (debug "Generating new response for" file)
           (let [response (generate-response file req)
                 cache-record {:hash cksm :resp response}]
-
-
             (swap! asset-cache assoc file cache-record)
             response))))))
 

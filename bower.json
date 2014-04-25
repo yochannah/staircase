@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "angular-ui-bootstrap-bower": "~0.10.0",
-    "angular-cookies": "~1.2.16"
+    "angular-cookies": "~1.2.16",
+    "imjs": "~3.2.2",
+    "lodash": "~2.4.1"
   }
 }
