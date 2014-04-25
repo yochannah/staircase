@@ -1,0 +1,10 @@
+{
+  "capabilities": ["initial"],
+  "type": "native",
+  "heading": "Upload List",
+  "width": 2,
+  "extendable": true,
+  "templateURI": "./template.html",
+  "controllerURI": "./controller.js"
+}
+

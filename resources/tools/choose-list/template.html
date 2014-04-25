@@ -1,0 +1,18 @@
+<filter-term term="listFilter"></filter-term>
+
+<ul class="nav nav-pills">
+    <li ng-repeat="cat in categories">
+        <a ng-click="filterTo(cat)">
+            {{cat.name}}
+            <span class="badge">{{cat.size}}</span>
+        </a>
+    </li>
+</ul>
+<ul class="list-group">
+    <li class="list-group-item" ng-repeat="list in lists | filter:listFilter">
+        <span class="badge">{{list.size}} {{list.type}}s</span>
+        <a ng-click="viewList(list)">{{list.name}}</a>
+        <p class="list-group-item-text">{{list.description}}</p>
+    </li>
+</ul>
+

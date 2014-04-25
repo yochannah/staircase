@@ -1,0 +1,9 @@
+{
+  "capabilities": ["initial"],
+  "type": "native",
+  "heading": "Structured Search",
+  "width": 2,
+  "expandable": true,
+  "templateURI": "./template.html",
+  "controllerURI": "./controller.coffee"
+}

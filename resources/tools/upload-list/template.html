@@ -1,0 +1,30 @@
+<form role="form" class="form compact" ng-submit="uploadIds()">
+    <button class="pull-right btn btn-default" type="submit">Send identifiers</button>
+    <div class="form-group">
+        <label class="control-label">
+            Choose a type:
+        </label>
+        <select
+                ng-model="rootClass"
+                ng-options="cld for cld in classes">
+        </select>
+    </div>
+    <tabset type="navType">
+        <tab heading="Enter IDs">
+            <div class="form-group">
+                <textarea ng-model="pastedIds" rows="4" style="width: 100%"></textarea>
+                <p class="help-block">
+                Type or paste in a list of identifiers.
+                </p>
+            </div>
+        </tab>
+        <tab heading="Choose file">
+            <div class="form-group">
+                <input type="file" ng-model="idFile">
+                <p class="help-block">
+                Upload identifiers from a tab, comma or new-line delimited text file.
+                </p>
+            </div>
+        </tab>
+    </tabset>
+</form>

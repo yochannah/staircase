@@ -1,0 +1,31 @@
+<form class="form-inline">
+    <div class="form-group">
+        Look for
+        <input class="input-sm form-control" type="text" ng-model="outputType" typeahead="cld for cld in classes | filter:$viewValue">,
+        given information about
+        <input class="input-sm form-control" type="text" ng-model="inputType" typeahead="cld for cld in classes | filter:$viewValue">.
+    </div>
+</form>
+
+<div class="list-group">
+    <div class="list-group-item" ng-repeat="template in filteredTemplates">
+        <h5 ng-click="showConstraints = !showConstraints"
+            class="list-group-item-heading">{{template | templateTitle }}</h4>
+        <p class="list-group-item-text">{{template.description}}</p>
+        <div ng-show="showConstraints">
+            <form class="form" ng-submit="runQuery(template)">
+                <div class="form-group" ng-repeat="constraint in template.constraints | filter:{editable:true}">
+                    <label>{{constraint.path}} {{constraint.op}}</label>
+                    <input class="form-control" ng-model="constraint.value">
+                </div>
+                <label>Returns</label>
+                <div class="well well-sm">
+                    <span class="label label-info" ng-repeat="path in template.views">
+                        {{path}}
+                    </span>
+                </div>
+                <button class="btn btn-primary" type="submit">View Table</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,20 @@
+<div ng-show="histories.length">
+    <filter-term term="filterTerm"></filter-term>
+
+    <div class="list-group">
+        <div class="list-group-item" ng-repeat="history in histories">
+            <h5 ng-click="showConstraints = !showConstraints"
+                class="list-group-item-heading">{{history.title}}</h4>
+            <p class="list-group-item-text">{{history.description}}</p>
+        </div>
+    </div>
+</div>
+
+<div ng-show="!histories.length">
+    <p class="block-text">
+    You haven't created any sets of steps here before. You can use any of
+    the starting-point tools to add a a set of steps to your history. If you need
+    any help, or would just like some information on getting started, you can
+    find out more by visiting the <a href="/about#usage">usage guide</a>.
+    </p>
+</div>

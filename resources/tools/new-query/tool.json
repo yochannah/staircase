@@ -1,0 +1,9 @@
+{
+  "capabilities": ["initial"],
+  "type": "native",
+  "heading": "New Query",
+  "width": 1,
+  "templateURI": "./template.html",
+  "controllerURI": "./controller.js"
+}
+

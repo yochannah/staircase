@@ -1,0 +1,10 @@
+{
+  "capabilities": ["initial"],
+  "type": "native",
+  "heading": "View Existing List",
+  "width": 1,
+  "tall": true,
+  "templateURI": "./template.html",
+  "controllerURI": "./controller.js"
+}
+
