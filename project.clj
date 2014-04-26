@@ -24,7 +24,8 @@
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
-                 [dieter "0.4.1"] ;; Assets pipe-lining
+                 ;; [dieter "0.4.1"] ;; Assets pipe-lining
+                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
                  [de.sandroboehme.lesscss/lesscss "1.6.1.1.0"] ;; Less 1.6.1
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.

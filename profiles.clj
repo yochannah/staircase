@@ -1,7 +1,7 @@
 {
  :dev {
       :dependencies [[peridot "0.2.2"]
-                     [ring-server "0.3.1"]
+                     [org.marianoguerra/clj-rhino "0.2.1"]
                      [ring-mock "0.1.5"]]
       :env {
             :web-services {"flymine" "http://www.flymine.org/query/service"}
@@ -20,6 +20,7 @@
  }
  :test {
         :env { :db-subname "//localhost/staircase-test" }
+        :resource-paths ["test/resources"]
  }
  :travis {
         :env { :db-user "postgres" }
