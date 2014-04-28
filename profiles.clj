@@ -10,7 +10,7 @@
                         :templates
                         :choose-list
                         :new-query
-                        :hello-world
+                        :region-search
                         :upload-list
                         :histories
                         ]
