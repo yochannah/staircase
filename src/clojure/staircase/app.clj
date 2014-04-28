@@ -25,7 +25,8 @@
                                              :engine :v8
                                              :as-resource "tools"
                                              :coffee "src/coffee"
-                                             :less "src/less")
+                                             :ls     "src/ls"
+                                             :less   "src/less")
             :config (app-options options)
             :secrets (secrets)
             :session-store (sessions/new-pg-session-store)
