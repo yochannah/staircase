@@ -5,10 +5,12 @@
         given information about
         <input class="input-sm form-control" type="text" ng-model="inputType" typeahead="cld for cld in classes | filter:$viewValue">.
     </div>
+    <filter-term term="templateFilter"></filter-term>
 </form>
 
+
 <div class="list-group">
-    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates">
+    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates | filter:templateFilter">
         <h5 ng-click="showConstraints = !showConstraints"
             class="list-group-item-heading">{{template | templateTitle }}</h4>
         <p class="list-group-item-text">{{template.description}}</p>
