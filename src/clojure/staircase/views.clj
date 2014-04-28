@@ -16,7 +16,7 @@
        (map (fn [[tag attrs]] [tag (assoc attrs :data-main ep)]))
        (first)))
 
-(def vendor-scripts [])
+(def vendor-scripts ["jquery/dist/jquery.min.js"])
 
 (def button-style :blue) ;; :orange or :dark
 
@@ -122,7 +122,7 @@
       (include-css "/css/style.css")
       ]
      (concat [
-              [:body {:ng-app "steps"}
+              [:body
                (header)
                [:section#content.main body]]
                (footer)
@@ -153,6 +153,7 @@
       [:div.panel.panel-default.first-step {:ng-class "getHeightClass(tool)"}
       [:div.panel-heading
         [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
+        [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "resetTool(tool)"}]
         "{{tool.heading}}"]
       [:div.panel-body
         [:native-tool {:tool "tool"}]]]]
@@ -176,5 +177,5 @@
   (common "Steps"
           [:div {:ng-view ""}]
           (map with-utf8-charset
-               (conj (apply include-js vendor-scripts)
+               (conj (apply include-js (map (partial str "/vendor/") vendor-scripts))
                      (entry-point "/js/frontpage")))))
