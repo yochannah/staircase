@@ -66,8 +66,9 @@
 (defn style-candidates
   [file-name options]
   (let [file-name (-> file-name
-                      (.replaceAll "\\.css" ".less")
-                      (.replaceAll (:css-dir options) ""))
+                      (string/replace-first #"\.css$" ".less")
+                      (.replaceAll (get options :css-dir "/css")
+                                   ""))
         file-path (:less options)
         res-path  (:as-resource options)]
     [(->> file-name (str res-path) io/resource io/as-file)
@@ -118,7 +119,7 @@
             :headers {"Content-Type" "text/css"}}
     {:status 500 :body "Unknown asset type" :content-type "text/plain"})) ;; Should never happen.
 
-(defn serve-asset [req file options]
+(defn serve-asset [file options]
   (if (:no-cache? options)
     (generate-response file)
     (let [cksm (checksum file)
@@ -136,20 +137,23 @@
   (settings/with-options options
     (when (is-asset-req req)
       (when-let [asset-file (asset-file-for req options)]
-        (serve-asset req asset-file options)))))
+        (serve-asset asset-file options)))))
 
-(defn pipeline [& {:keys [prefer-compiled] :as options}]
+(defn pipeline [& {:keys [strategy] :as options}]
   "Take options and return a function that will wrap a ring handler in an assets pipeline.
    Routes served by the hanlder take precedence. Requests that produce 404 or nil will then
    be processed as asset-requests."
   (let [asset-handler (partial serve options)]
-    (if prefer-compiled
+    (case strategy
+
+      :prefer-compiled
       (fn [handler] ;; Handler takes precedence. Allows precompiled assets to take precedence.
         (fn [req]
           (let [response (handler req)]
             (if (or (nil? response) (= 404 (:status response)))
               (or (asset-handler req) response {:status 404})
               response))))
+
       (fn [handler] ;; Tries to find assets first. Prefers live updates.
         (fn [req]
           (or
