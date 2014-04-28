@@ -10,7 +10,6 @@ define ['lodash'], (L) -> Array '$rootScope', '$scope', '$http', (root, scope, h
       other.state = 'DOCKED'
     tool.state = 'FULL'
 
-
   scope.getHeightClass = ({state, tall}) ->
     if state is 'FULL'
       'full-height'
@@ -28,6 +27,8 @@ define ['lodash'], (L) -> Array '$rootScope', '$scope', '$http', (root, scope, h
   scope.undockAll = ->
     for tool in scope.startingPoints
       tool.state = null
+
+  scope.resetTool = (tool) -> scope.$broadcast 'reset', tool
 
   scope.anyToolDocked = -> L.some scope.startingPoints, state: 'DOCKED'
 

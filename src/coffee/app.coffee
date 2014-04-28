@@ -1,5 +1,5 @@
-deps = ['angular', 'angular-route', 'angular-ui',
-        'filters', 'services', 'directives', 'controllers']
+deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-ui-select2',
+        './filters', './services', './directives', './controllers']
 
 modules = [
   'ngRoute',
@@ -7,13 +7,14 @@ modules = [
   'steps.services',
   'steps.filters',
   'steps.directives',
-  'ui.bootstrap']
+  'ui.bootstrap',
+  'ui.select2']
 
 $providers = [
   '$routeProvider', '$controllerProvider', '$compileProvider', '$filterProvider', '$provide'
 ]
 
-define deps, (angular) ->
+define deps, (angular, router) ->
   Steps = angular.module('steps', modules)
 
   # Capture references to providers.
@@ -23,6 +24,8 @@ define deps, (angular) ->
     Steps.directives = directives
     Steps.filters = filters
     Steps.provide = provide
+
+  router Steps
 
   return Steps
 

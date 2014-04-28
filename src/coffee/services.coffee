@@ -1,8 +1,34 @@
-require ['angular', 'angular-resource'], (ng) ->
+require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
   Services = ng.module('steps.services', ['ngResource'])
 
   Services.value('version', '0.1.0')
+
+  Services.factory 'ClassUtils', Array '$q', '$timeout', (Q, timeout) ->
+    setClasses = (scope, grouper, propName = 'outputType') -> (model) -> timeout ->
+      ret = Q.defer()
+      defaults = scope.defaults or {}
+      scope.model = model
+      name = (className) -> model.makePath(className).getDisplayName().then (displayName) ->
+        {className, displayName}
+      group = if not grouper then ((x) -> x) else (names) ->
+        names.group = grouper names
+        return names
+
+      andThen = (names) -> timeout ->
+        scope.classes = L.sortBy names.map(group), ['group', 'displayName']
+        defaults[propName] = scope[propName] = switch model.name
+          when 'genomic' then L.find scope.classes, {className: 'Gene'}
+          when 'testmodel' then L.find scope.classes, {className: 'Employee'}
+        ret.resolve scope.classes
+
+      orElse = (e) -> ret.reject e
+
+      Q.all(name cls for cls of model.classes).then andThen, orElse
+
+      return ret.promise
+
+    return {setClasses}
 
   Services.factory 'Mines', Array '$http', '$log', '$rootScope', (http, logger, scope) ->
     headers = {}

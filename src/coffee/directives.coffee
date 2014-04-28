@@ -33,7 +33,9 @@ require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
           <span class="input-group-addon">Filter:</span>
           <input class="form-control" ng-model="term">
           <span class="input-group-btn">
-              <button class="btn btn-default" ng-click="term = null">&#x2e3;</button>
+              <button class="btn btn-default" ng-click="term = null">
+                <i class="fa fa-times"></i>
+              </button>
           </span>
       </div>
     """
@@ -43,15 +45,12 @@ require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
     link: (scope, element, attrs) ->
 
       if scope.tool.expandable
-        console.log "adding resize listener for #{ scope.tool.heading }"
         doResize = ->
           margin = 38 # HARDCODED! TODO! CALCULATE!
           offsets = getOffsets(document, 'starting-point')
           maxx = L.max offsets.map (o) -> o.left + o.width
           maxy = L.max offsets.map (o) -> o.top + o.height
-          console.log maxy
           topBars = getTopBars offsets
-          console.log topBars
           ystep = element[0].offsetHeight
           p1 =
             x: element[0].offsetLeft
@@ -65,10 +64,8 @@ require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
           while factor < 3 and (q1.y + ystep) <= maxy
             q1.y += ystep + margin
             if L.every topBars, doesntIntersectWith p1, q1
-              console.log "Increasing factor"
               factor += 1
 
-          console.log "factor = #{ factor }"
           if factor > 1 and panelBody = element[0].querySelector('.panel-body')
             totalHeight = ystep * factor - margin
             panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"

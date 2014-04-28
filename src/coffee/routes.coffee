@@ -1,4 +1,4 @@
-require ['angular-route', 'app'], (ng, app) ->
+define [], -> (app) ->
 
   app.config Array '$locationProvider', '$routeProvider', (locations, router) ->
     locations.html5Mode true
