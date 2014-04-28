@@ -4,7 +4,9 @@
             [clojure.java.io :as io]))
 
 (def tool-defaults
-  {:width 1})
+  {:templateURI "./template.html"
+   :controllerURI "./controller.js"
+   :width 1})
 
 (defn get-tool-conf
   [tool-name]
@@ -12,11 +14,12 @@
                     io/resource
                     io/reader)]
     (let [prefix #(replace-first % "." (name tool-name))]
-      (merge tool-defaults (-> (slurp r)
+      (-> (slurp r)
           (json/parse-string true)
+          (#(merge tool-defaults %))
           (assoc :ident (name tool-name))
           (update-in [:templateURI] prefix)
-          (update-in [:controllerURI] prefix))))))
+          (update-in [:controllerURI] prefix)))))
 
 (defn has-capability
   [capability tool-conf]
