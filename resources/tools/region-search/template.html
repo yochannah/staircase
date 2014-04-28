@@ -1,0 +1,53 @@
+<form role="form" class="form" ng-submit="startQuery()">
+    <div class="form-group">
+        <label class="control-label">
+            Find
+        </label>
+        <select multiple
+                data-placeholder="Feature Types"
+                style="width: 100%"
+                ui-select2="{tokenSeparators: ','}"
+                ng-model="featureTypes">
+                <option value="__DUMMY__"></option>
+                <option ng-repeat="cld in classes" value="{{cld.className}}">
+                    {{cld.displayName}}
+                </option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="control-label">
+            in organism:
+        </label>
+        <select
+                ng-model="organism"
+                ng-options="org.shortName for org in organisms">
+        </select>
+    </div>
+    <tabset type="navType">
+        <tab heading="Enter regions">
+            <div class="form-group">
+                <textarea class="literal"
+                    ng-model="pastedRegions"
+                    rows="{{tool.state === 'FULL' ? 10 : 1}}"
+                    style="width: 100%">
+                </textarea>
+                <p class="help-block">
+                Type or paste in a list of regions.
+                </p>
+            </div>
+        </tab>
+        <tab heading="Choose file">
+            <div class="form-group">
+                <input type="file" ng-model="regionFile">
+                <p class="help-block">
+                Upload regions from a new-line delimited text file.
+                </p>
+            </div>
+        </tab>
+    </tabset>
+    <button type="submit" class="pull-right btn btn-default">
+        Search
+    </button>
+
+</form>
+

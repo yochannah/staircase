@@ -1,13 +1,14 @@
 <form class="form-inline">
     <div class="form-group">
-        Look for
-        <input class="input-sm form-control" type="text" ng-model="outputType" typeahead="cld for cld in classes | filter:$viewValue">,
-        given information about
-        <input class="input-sm form-control" type="text" ng-model="inputType" typeahead="cld for cld in classes | filter:$viewValue">.
+        Look for one or more
+        <input class="input-sm form-control" type="text" ng-model="outputType" typeahead="cld as cld.displayName for cld in classes | filter:$viewValue">,
+        given information about a
+        <input class="input-sm form-control" type="text" ng-model="inputType" typeahead="cld as cld.displayName for cld in classes | filter:$viewValue">
     </div>
-    <filter-term term="templateFilter"></filter-term>
+    <div class="form-group">
+        <filter-term term="templateFilter"></filter-term>
+    </div>
 </form>
-
 
 <div class="list-group">
     <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates | filter:templateFilter">
@@ -22,7 +23,7 @@
                 </div>
                 <label>Returns</label>
                 <div class="well well-sm">
-                    <span class="label label-info" ng-repeat="path in template.views">
+                    <span class="label label-primary output-column" ng-repeat="path in template.views">
                         {{path}}
                     </span>
                 </div>

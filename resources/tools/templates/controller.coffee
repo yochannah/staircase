@@ -3,7 +3,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
   filters.register 'templateTitle', -> ({title}) ->
     title.replace(/-->/g, '\u21E8').replace(/<--/g, '\u21E6')
 
-  injectables = ['$scope', '$log', '$timeout', '$q', 'Mines']
+  injectables = ['$scope', '$log', '$timeout', '$q', 'Mines', 'ClassUtils']
 
   validPath = (model, path) ->
     try
@@ -13,8 +13,8 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
       false
 
   isBetween = (model, inputType, outputType) ->
-    inputType = validPath model, inputType
-    outputType = validPath model, outputType
+    inputType = validPath model, inputType?.className
+    outputType = validPath model, outputType?.className
     (template) ->
       ok = true
       if inputType
@@ -29,24 +29,26 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
           path.isa(outputType)
       ok
 
+  templateData = ({constraints, views, title, name, description, constraintLogic}) ->
+    {constraints, views, title, name, description, constraintLogic}
+
   filterTemplates = ({templates, model, inputType, outputType}) ->
     if templates and model
       f = isBetween model, inputType, outputType
-      (t for t in templates when f t)
+      (templateData t for t in templates when f t) # Need to json-ify data for presentation.
 
-  return Array injectables..., (scope, log, timeout, Q, Mines) ->
+  return Array injectables..., (scope, log, timeout, Q, Mines, ClassUtils) ->
+    scope.defaults = {}
 
-    setClasses = (scope) -> (model) -> timeout ->
-      scope.model = model
-      scope.classes = Object.keys model.classes
-      scope.outputType = switch model.name
-        when 'genomic' then 'Gene'
-        when 'testmodel' then 'Employee'
-
-    setTemplates = ({query}, scope) -> (ts) ->
+    setTemplates = ({query}) -> (ts) ->
       Q.all(query t for _, t of ts).then (qs) -> timeout ->
         scope.templates = qs
         scope.filteredTemplates = filterTemplates scope
+
+    scope.$on 'reset', (evt, tool) ->
+      if tool is scope.tool
+        scope.outputType = scope.defaults.outputType
+        scope.inputType = scope.defaults.inputType
 
     scope.classes = []
     scope.inputType = scope.outputType = scope.serviceName = ''
@@ -59,11 +61,12 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
 
     connecting = fetchingDefaultMine.then Service.connect
 
-    connecting.then (connection) -> connection.fetchModel().then setClasses scope
+    connecting.then (connection) -> connection.fetchModel().then ClassUtils.setClasses scope
 
-    connecting.then (connection) -> connection.fetchTemplates().then setTemplates connection, scope
+    connecting.then (connection) -> connection.fetchTemplates().then setTemplates connection
 
-    scope.$watch (({inputType, outputType}) -> inputType + outputType), ->
-      scope.filteredTemplates = filterTemplates scope
+    updateTemplates = -> scope.filteredTemplates = filterTemplates scope
+    typeWatcher = ({inputType, outputType}) -> inputType?.className + outputType?.className
 
+    scope.$watch typeWatcher, updateTemplates
 

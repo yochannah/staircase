@@ -1,5 +1,5 @@
 <span class="pull-right badge">
-    {{rowCount}}
+    {{(rowCount | number) || "counting..." }}
 </span>
 
 <form role="form" class="form" ng-submit="startQuery()">
@@ -9,7 +9,7 @@
         </label>
         <select
                 ng-model="rootClass"
-                ng-options="cld as cld.name group by groupOf(cld) for cld in classes">
+                ng-options="cld.displayName group by cld.group for cld in classes">
         </select>
     </div>
     <div class="form-group">
@@ -24,11 +24,12 @@
         class="optional-constraint form-group">
         <select
                 ng-model="fieldName"
-                ng-options="fld as name for (name, fld) in rootClass.attributes"></select>
+                ng-options="fld as name for (name, fld) in model.classes[rootClass.className].attributes">
+        </select>
         <label>matches</label>
         <input class="form-control input-sm" type="text" ng-model="fieldValue">
     </fieldset>
     <button class="pull-right btn btn-default" type="submit">
-        View {{ rowCount == 1 ? rootClass.name : 'Table' }}
+        View {{ rowCount == 1 ? rootClass.displayName : 'Table' }}
     </button>
 </form>

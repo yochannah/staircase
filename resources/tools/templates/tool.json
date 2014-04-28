@@ -4,6 +4,8 @@
   "heading": "Structured Search",
   "width": 2,
   "expandable": true,
+  "tall": true,
+  "resettable": true,
   "templateURI": "./template.html",
   "controllerURI": "./controller.coffee"
 }

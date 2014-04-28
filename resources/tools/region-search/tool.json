@@ -1,8 +1,9 @@
 {
   "capabilities": ["initial"],
   "type": "native",
-  "heading": "New Query",
+  "heading": "Region Search",
   "width": 1,
   "resettable": true
 }
+
 
