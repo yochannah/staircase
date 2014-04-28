@@ -8,7 +8,7 @@
 </form>
 
 <div class="list-group">
-    <div class="list-group-item" ng-repeat="template in filteredTemplates">
+    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates">
         <h5 ng-click="showConstraints = !showConstraints"
             class="list-group-item-heading">{{template | templateTitle }}</h4>
         <p class="list-group-item-text">{{template.description}}</p>
