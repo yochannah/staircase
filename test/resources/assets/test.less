@@ -1,0 +1,11 @@
+.box(@color) {
+    background: @color;
+    border: darken(@color, 25%);
+}
+
+.foo {
+    .box(#fefefe);
+}
+.bar {
+    .box(steelblue);
+}
