@@ -1,10 +1,16 @@
 <div ng-show="histories.length">
-    <filter-term term="filterTerm"></filter-term>
+    <form class="form">
+        <div class="form-group">
+            <filter-term term="filterTerm"></filter-term>
+        </div>
+    </form>
 
     <div class="list-group">
-        <div class="list-group-item" ng-repeat="history in histories">
-            <h5 ng-click="showConstraints = !showConstraints"
-                class="list-group-item-heading">{{history.title}}</h4>
+        <div class="list-group-item" ng-repeat="history in histories | filter:filterTerm">
+            <h5 class="list-group-item-heading">
+                <span class="pull-right badge">{{history.steps}}</span>
+                {{history.title}}
+            </h5>
             <p class="list-group-item-text">{{history.description}}</p>
         </div>
     </div>
