@@ -154,12 +154,12 @@
      [:div.panel.panel-default.first-step {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
       [:div.panel-heading
        [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
-       [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "resetTool(tool)"}]
+       [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "reset()"}]
        "{{tool.heading}}"]
       [:div.panel-body
        [:native-tool {:tool "tool"}]]
       [:div.panel-footer {:ng-if "tool.action"}
-       [:button.btn.btn-default.pull-right "{{tool.action}}"]
+       [:button.btn.btn-default.pull-right {:ng-click "act()"} "{{tool.action}}"]
        [:div.clearfix]]
       ]]
 
