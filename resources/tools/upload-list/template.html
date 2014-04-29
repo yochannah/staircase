@@ -4,17 +4,24 @@
             Choose a type:
         </label>
         <select
+                class="form-control"
                 ng-model="rootClass"
-                ng-options="cld for cld in classes">
+                ng-options="cld.displayName for cld in classes">
         </select>
     </div>
     <tabset type="navType">
         <tab heading="Enter IDs">
             <div class="form-group">
                 <textarea class="literal"
-                          ng-model="pastedIds" rows="4" style="width: 100%"></textarea>
+                    ng-model="pastedIds"
+                    spellcheck="false"
+                    rows="{{tool.state === 'FULL' ? 10 : 5}}"
+                    style="width: 100%"></textarea>
                 <p class="help-block">
                 Type or paste in a list of identifiers.
+                <a ng-click="pastedIds = tool.sampleData">
+                    Click here for an example.
+                </a>
                 </p>
             </div>
         </tab>

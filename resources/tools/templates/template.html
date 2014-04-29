@@ -12,8 +12,10 @@
 
 <div class="list-group">
     <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates | filter:templateFilter">
-        <h5 ng-click="showConstraints = !showConstraints"
-            class="list-group-item-heading">{{template | templateTitle }}</h4>
+        <a ng-click="showConstraints = !showConstraints"
+            class="list-group-item-heading">
+            {{template | templateTitle}}
+        </a>
         <p class="list-group-item-text">{{template.description}}</p>
         <div ng-show="showConstraints">
             <form class="form" ng-submit="runQuery(template)">

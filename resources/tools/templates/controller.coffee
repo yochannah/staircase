@@ -45,15 +45,14 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
         scope.templates = qs
         scope.filteredTemplates = filterTemplates scope
 
-    scope.$on 'reset', (evt, tool) ->
-      if tool is scope.tool
-        scope.outputType = scope.defaults.outputType
-        scope.inputType = scope.defaults.inputType
+    scope.$on 'reset', (evt) ->
+      scope.outputType = scope.defaults.outputType
+      scope.inputType = scope.defaults.inputType
+
+    scope.runQuery = (q) -> log.info "Results of #{ q.title } please"
 
     scope.classes = []
     scope.inputType = scope.outputType = scope.serviceName = ''
-
-    scope.runQuery = (q) -> log.info "Results of #{ q.title } please"
 
     fetchingDefaultMine = Mines.get 'default'
 

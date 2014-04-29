@@ -7,7 +7,7 @@
         <label class="control-label">
             Choose a type:
         </label>
-        <select
+        <select class="form-control"
                 ng-model="rootClass"
                 ng-options="cld.displayName group by cld.group for cld in classes">
         </select>
@@ -24,7 +24,7 @@
         class="optional-constraint form-group">
         <select
                 ng-model="fieldName"
-                ng-options="fld as name for (name, fld) in model.classes[rootClass.className].attributes">
+                ng-options="fld[1] for fld in fields">
         </select>
         <label>matches</label>
         <input class="form-control input-sm" type="text" ng-model="fieldValue">

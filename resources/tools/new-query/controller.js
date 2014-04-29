@@ -1,16 +1,22 @@
-define(['angular', 'imjs'], function (ng, im) {
+define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$cacheFactory', 'Mines', 'ClassUtils',
-          function (scope, logger, timeout, cacheFactory, mines, ClassUtils) {
+  return ['$scope', '$log', '$timeout', '$cacheFactory', '$q', 'Mines', 'ClassUtils',
+          function (scope, logger, timeout, cacheFactory, Q, mines, ClassUtils) {
     var countCache = (cacheFactory.get('query.counts') ||
                       cacheFactory('query.counts', {capacity: 100}));
     scope.classes = [];
+    scope.fields = [];
     scope.serviceName = "";
-    scope.startQuery = function () {
-      logger.info("One " + scope.rootClass.className + " query please")
-    };
+
+    scope.$on('act', function (evt) {
+      scope.$emit('start-history', {
+        title: "Created " + scope.rootClass.displayName + " query",
+        tool: "/tools/show-table",
+        data: watchQuery(scope)
+      });
+    });
 
     var fetchingDefaultMine = mines.get('default');
 
@@ -30,11 +36,23 @@ define(['angular', 'imjs'], function (ng, im) {
       }
     });
 
+    scope.$watch('rootClass.className', function (className) {
+      var fields, promises;
+      if (!scope.summaryFields) return;
+      fields = scope.summaryFields[className];
+      promises = fields.map(getDisplayName(scope.model));
+      Q.all(promises).then(function (names) {
+        scope.fields = L.zip(fields, names);
+        scope.fieldName = scope.fields[0];
+      });
+    });
+
     fetchingDefaultMine.then(setMineDetails);
     
     fetchingDefaultMine.then(connect).then(function (conn) {
       scope.connection = conn;
       conn.fetchModel().then(ClassUtils.setClasses(scope, groupOf.bind(null, scope), 'rootClass'));
+      conn.fetchSummaryFields().then(setSummaryFields);
     });
 
     function setRowCount (n) {
@@ -43,6 +61,10 @@ define(['angular', 'imjs'], function (ng, im) {
 
     function setMineDetails (mine) {
       timeout(function () { scope.serviceName = mine.ident; });
+    }
+
+    function setSummaryFields (summaryFields) {
+      timeout(function () { scope.summaryFields = summaryFields });
     }
 
   }];
@@ -65,7 +87,7 @@ define(['angular', 'imjs'], function (ng, im) {
     if (scope.rootClass) {
       query.select.push(scope.rootClass.className + ".*");
       if (scope.useConstraint && scope.fieldName && scope.fieldValue) {
-        constraint.path = scope.rootClass.className + "." + scope.fieldName.name;
+        constraint.path = scope.fieldName[0];
         constraint.value = scope.fieldValue;
         query.where = [constraint];
       }
@@ -75,5 +97,11 @@ define(['angular', 'imjs'], function (ng, im) {
 
   function watchQuery (scope) {
     return ng.toJson(getQuery(scope));
+  }
+
+  function getDisplayName (model) {
+    return function (path) {
+      return model.makePath(path).getDisplayName();
+    };
   }
 });

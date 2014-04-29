@@ -4,7 +4,8 @@
   "heading": "Region Search",
   "width": 1,
   "action": "Search",
-  "resettable": true
+  "resettable": true,
+  "sampleData": "2L:14615455..14619002\n2R:5866646..5868384\n3R:2578486..2580016"
 }
 
 

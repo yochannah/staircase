@@ -28,11 +28,15 @@
             <div class="form-group">
                 <textarea class="literal"
                     ng-model="pastedRegions"
-                    rows="{{tool.state === 'FULL' ? 10 : 1}}"
+                    spellcheck="false"
+                    rows="{{tool.state === 'FULL' ? 10 : 2}}"
                     style="width: 100%">
                 </textarea>
                 <p class="help-block">
                 Type or paste in a list of regions.
+                <a ng-click="pastedRegions = tool.sampleData">
+                    Click here for an example.
+                </a>
                 </p>
             </div>
         </tab>

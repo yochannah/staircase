@@ -9,9 +9,9 @@ define(['angular', 'imjs'], function (ng, im) {
     scope.organisms = [];
     scope.serviceName = "";
 
-    scope.startQuery = function () {
-      logger.info("Where are the " + scope.featureTypes + " in " + scope.regions + "?");
-    };
+    scope.$on('act', function () {
+      logger.info(scope.featureTypes, "in", scope.regions);
+    });
 
     var fetchingDefaultMine = mines.get('default');
 
