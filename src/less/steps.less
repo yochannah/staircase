@@ -1,7 +1,7 @@
 
-@panel-height: 345px;
-@panel-header: 41px;
-@panel-footer: 56px;
+@panel-height: 320px;
+@panel-header: 39px;
+@panel-footer: 53px;
 @step-height: @panel-height - @panel-header;
 
 .panel.first-step .panel-body {
@@ -11,6 +11,10 @@
 
 .panel.first-step.with-action .panel-body {
     height: @step-height - @panel-footer;
+}
+
+.panel.first-step .nav-pills > li > a {
+    padding: 0.5em 0.8em;
 }
 
 .panel.first-step {
