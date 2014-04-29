@@ -1,4 +1,4 @@
-define ['lodash'], (L) -> Array '$rootScope', '$scope', '$http', (root, scope, http) ->
+define ['lodash'], (L) -> Array '$rootScope', '$scope', '$http', 'Histories', (root, scope, http, Histories) ->
 
   root.startingPoints = []
 
@@ -28,9 +28,12 @@ define ['lodash'], (L) -> Array '$rootScope', '$scope', '$http', (root, scope, h
     for tool in scope.startingPoints
       tool.state = null
 
-  scope.resetTool = (tool) -> scope.$broadcast 'reset', tool
-
   scope.anyToolDocked = -> L.some scope.startingPoints, state: 'DOCKED'
+
+  scope.$on 'start-history', (evt, step) -> Histories.then (histories) ->
+    history = histories.save {title: "Un-named history"}, ->
+      step = histories.append {id: history.id}, step, ->
+        console.log("Created history " + history.id + " and step " + step.id)
 
   scope.$apply()
 
