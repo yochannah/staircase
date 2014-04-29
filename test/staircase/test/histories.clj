@@ -75,5 +75,5 @@
           (is (= "changed the title" (:title retrieved))))
         (testing "Changed, and did not add a history"
           (is (= 1 (count hists)))
-          (is (= {:owner "quux@bar.org" :title "changed the title" :description "A testing history" :id new-id} (hists 0))))))))
+          (is (= {:steps 0 :owner "quux@bar.org" :title "changed the title" :description "A testing history" :id new-id} (hists 0))))))))
 
