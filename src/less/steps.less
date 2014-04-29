@@ -1,12 +1,16 @@
 
+@panel-height: 345px;
+@panel-header: 41px;
+@panel-footer: 56px;
+@step-height: @panel-height - @panel-header;
+
 .panel.first-step .panel-body {
-    font-size: 12px;
-    height: 230px;
+    height: @step-height;
     overflow: auto;
 }
 
-.panel.first-step .panel-body p.block-text {
-    font-size: 14px;
+.panel.first-step.with-action .panel-body {
+    height: @step-height - @panel-footer;
 }
 
 .panel.first-step {
@@ -14,7 +18,11 @@
 }
 
 .panel.first-step.double-height .panel-body {
-    height: 542px;
+    height: (@panel-height * 2) + @grid-gutter-width - @panel-header;
+}
+
+.panel.first-step.double-height.with-action .panel-body {
+    height: @panel-height * 2 + @grid-gutter-width - @panel-header - @panel-footer;
 }
 
 .panel.first-step.full-height .panel-body {
@@ -44,10 +52,6 @@ form.compact .form-group {
 
 .first-step .list-group-item.active {
     background: rgba(240, 240, 240, 0.25);
-}
-
-.first-step .list-group-item > .list-group-item-text {
-    font-family: 'Roboto Condensed', @font-family-sans-serif;
 }
 
 .first-step .well .label {

@@ -35,7 +35,7 @@
 (def home-links [["home" "home" "/"] ["about intermine" "info" "/about"] ["options" "cog"]])
 
 (defn header []
-  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
+  [:div.navbar.navbar-inverse.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
 
     [:div.navbar-header ;; The elements to always display.
@@ -135,37 +135,43 @@
 
 (def starting-points
   [:div.container-fluid
-    [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
+   [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
     [:div.panel.panel-default
-      [:div.panel-heading
+     [:div.panel-heading
       "Welcome to " [:strong "Steps"]]
-      [:div.panel-body
+     [:div.panel-body
       [:p
-        "This is the data-flow interface for intermine data-warehouses.
-        If this is your first time here, maybe you might like to read more about
-        the intermine system " (link-to "/about" "here") "."]
+       "This is the data-flow interface for intermine data-warehouses.
+       If this is your first time here, maybe you might like to read more about
+       the intermine system " (link-to "/about" "here") "."]
       [:button.btn.btn-default {:ng-click "showWelcome = false"}
-        "Do not show again"]]]]
-    [:div.row.starting-points {:ng-controller "StartingPointsController"}
+       "Do not show again"]]]]
+
+   [:div.row.starting-points {:ng-controller "StartingPointsController"}
     [:starting-point {:ng-class "getWidthClass(tool)"
-            :ng-repeat "tool in startingPoints"
-            :ng-hide "tool.state == 'DOCKED'"}
-      [:div.panel.panel-default.first-step {:ng-class "getHeightClass(tool)"}
+                      :ng-repeat "tool in startingPoints"
+                      :ng-hide "tool.state == 'DOCKED'"}
+     [:div.panel.panel-default.first-step {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
       [:div.panel-heading
-        [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
-        [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "resetTool(tool)"}]
-        "{{tool.heading}}"]
+       [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
+       [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "resetTool(tool)"}]
+       "{{tool.heading}}"]
       [:div.panel-body
-        [:native-tool {:tool "tool"}]]]]
+       [:native-tool {:tool "tool"}]]
+      [:div.panel-footer {:ng-if "tool.action"}
+       [:button.btn.btn-default.pull-right "{{tool.action}}"]
+       [:div.clearfix]]
+      ]]
+
     [:div.docked-tools
-      [:ul.nav.nav-pills
+     [:ul.nav.nav-pills
       [:li.active {:ng-show "anyToolDocked()"}
-        [:a {:ng-click "undockAll()"} [:i.fa.fa-th-large]]]
+       [:a {:ng-click "undockAll()"} [:i.fa.fa-th-large]]]
       [:li.active {:ng-repeat "tool in startingPoints"
-                    :ng-show "tool.state == 'DOCKED'"}
-        [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]
-    
-    ])
+                   :ng-show "tool.state == 'DOCKED'"}
+       [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]
+
+   ])
 
 (defn render-partial
   [fragment]
