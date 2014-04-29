@@ -1,5 +1,7 @@
 require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
+  asData = ({data}) -> data
+
   Services = ng.module('steps.services', ['ngResource'])
 
   Services.value('version', '0.1.0')
@@ -30,30 +32,44 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
     return {setClasses}
 
-  Services.factory 'Mines', Array '$http', '$log', '$rootScope', (http, logger, scope) ->
-    headers = {}
+  Services.factory 'authorizer', Array '$http', (http) -> -> http.get('/auth/session').then asData
 
-    scope.$watch 'auth.identity', -> # on login/logout
-      http.get('/auth/session').then ({data}) -> headers.Authorization = "Token: #{ data }"
+  Services.factory 'apiTokenPromise', Array 'authorizer', (authorize) -> authorize()
 
-    all = ->
-      http.get('/api/v1/services', {headers}).then ({data}) -> data
+  class WebServiceAuth
+
+    makeAuth = (token) -> Authorization: "Token: #{ token }"
+
+    constructor: (tokenPromise, scope, authorize) ->
+      @_p = tokenPromise.then makeAuth
+      @headers = {}
+      @_p.then (h) => @headers[k] = v for k, v of h
+      scope.$watch 'auth.identity', =>
+        @_p = authorize().then makeAuth
+        @authorize().then (h) => @headers[k] = v for k, v of h
+
+    authorize: -> @_p
+
+  Services.service 'WebServiceAuth', ['apiTokenPromise', '$rootScope', 'authorizer', WebServiceAuth]
+
+  Services.factory 'Mines', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
+    URL = "/api/v1/services"
+
+    all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
 
     get = (ident) ->
-      http.get('/api/v1/services/' + ident, {headers}).then ({data}) -> data
+      auth.authorize().then (headers) -> http.get("#{URL}/#{ident}", {headers}).then asData
 
     return {all, get}
 
-  Services.factory 'Histories', Array '$rootScope', '$http', '$resource', (scope, http, resource) ->
-    headers = {}
-
-    scope.$watch 'auth.identity', -> # on login/logout
-      http.get('/auth/session').then ({data}) -> headers.Authorization = "Token: #{ data }"
-
-    return resource "/api/v1/histories/:id", {id: '@id'},
-      get: {method: 'GET', headers: headers}
-      query: {method: 'GET', headers: headers, isArray: true}
-      save: {method: 'POST', headers: headers}
+  Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
+    auth.authorize().then ->
+      headers = auth.headers
+      resource "/api/v1/histories/:id", {id: '@id'},
+        get: {method: 'GET', headers: headers}
+        query: {method: 'GET', headers: headers, isArray: true}
+        save: {method: 'POST', headers: headers}
+        append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
   Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
     watch = request = logout = -> log.warn "Persona authentication not available."
