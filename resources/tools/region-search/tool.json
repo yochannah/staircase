@@ -3,6 +3,7 @@
   "type": "native",
   "heading": "Region Search",
   "width": 1,
+  "action": "Search",
   "resettable": true
 }
 

@@ -3,6 +3,7 @@
   "type": "native",
   "heading": "New Query",
   "width": 1,
+  "action": "View Table",
   "resettable": true
 }
 

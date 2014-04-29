@@ -3,6 +3,7 @@
   "type": "native",
   "heading": "Upload List",
   "width": 2,
+  "action": "Send identifiers",
   "extendable": true,
   "templateURI": "./template.html",
   "controllerURI": "./controller.js"
