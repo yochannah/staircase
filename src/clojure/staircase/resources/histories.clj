@@ -4,7 +4,7 @@
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
             staircase.resources
-            [honeysql.helpers :refer (select from where)]
+            [honeysql.helpers :refer (select from where left-join group)]
             [honeysql.core :as hsql]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
@@ -34,9 +34,11 @@
 
   (get-all [histories]
     (into [] (sql/query (:connection db)
-                        (-> (select :*)
-                            (from :histories)
-                            (where [:= :owner :?user])
+                        (-> (select :h.* [:%count.hs.* :steps])
+                            (from [:histories :h])
+                            (left-join [:history_step :hs] [:= :h.id :hs.history_id])
+                            (group :h.id)
+                            (where [:= :h.owner :?user])
                             (hsql/format :params staircase.resources/context)))))
 
   (exists? [_ id] (staircase.sql/exists-with-owner (:connection db) :histories id (:user staircase.resources/context)))

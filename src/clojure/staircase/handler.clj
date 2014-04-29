@@ -105,21 +105,22 @@
           jwt/to-str))))
 
 (defn get-principal [router auth]
-  (when (and auth (.startsWith auth "Token: "))
-    (let [token (.replace auth "Token: " "")
-          web-token (jwt/str->jwt token)
-          claims (:claims web-token)
-          proof (try (public-key  "rsa/public.key")
-                 (catch java.io.FileNotFoundException fnf
-                   (get-in router [:secrets :key-phrase])))
-          valid? (jwt/verify web-token proof)]
-      (if (and valid? (t/after? (intdate->joda-time (:exp claims)) (t/now)))
-        (:prn claims)
-        ::invalid))))
+  (or
+    (when (and auth (.startsWith auth "Token: "))
+      (let [token (.replace auth "Token: " "")
+            web-token (jwt/str->jwt token)
+            claims (:claims web-token)
+            proof (try (public-key  "rsa/public.key")
+                       (catch java.io.FileNotFoundException fnf
+                         (get-in router [:secrets :key-phrase])))
+            valid? (jwt/verify web-token proof)]
+        (when (and valid? (t/after? (intdate->joda-time (:exp claims)) (t/now)))
+          (:prn claims))))
+    ::invalid))
 
 (defn- wrap-api-auth [handler router]
   (fn [req]
-    (let [{{auth :Authorization} :headers} req
+    (let [auth (get-in req [:headers "authorization"])
           principal (get-principal router auth)]
       (if (= ::invalid principal)
         {:status 403 :body {:message "Bad authorization."}}
