@@ -141,7 +141,7 @@
 
 (defn pipeline [& {:keys [strategy] :as options}]
   "Take options and return a function that will wrap a ring handler in an assets pipeline.
-   Routes served by the hanlder take precedence. Requests that produce 404 or nil will then
+   Routes served by the handler take precedence. Requests that produce 404 or nil will then
    be processed as asset-requests."
   (let [asset-handler (partial serve options)]
     (case strategy
