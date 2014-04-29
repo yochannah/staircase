@@ -13,6 +13,7 @@
                         :region-search
                         :upload-list
                         :histories
+                        :hello-world
                         ]
             :web-audience "http://localhost:3000"
             :verifier "https://verifier.login.persona.org/verify"
