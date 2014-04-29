@@ -42,6 +42,10 @@ require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
 
   Directives.directive 'startingPoint', ($window) ->
     restrict: 'E'
+    controller: ($scope) ->
+      $scope.reset = -> $scope.$broadcast 'reset'
+      $scope.act = -> $scope.$broadcast 'act'
+
     link: (scope, element, attrs) ->
 
       if scope.tool.expandable
