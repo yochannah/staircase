@@ -36,5 +36,8 @@ define ['angular', 'angular-cookies', 'services'], (ng) ->
     require ['controllers/starting-points'], (ctrl) -> $injector.invoke(ctrl, this, {$scope})
   ])
 
+  Controllers.controller 'HistoryCtrl', Array '$scope', '$injector', ($scope, injector) ->
+    require ['controllers/history'], (ctrl) -> injector.invoke(ctrl, this, {$scope})
+
   return Controllers
 
