@@ -5,6 +5,8 @@ require.loadCss = loadCss = (url) -> # Helper for css dependencies.
   link.href = url
   document.getElementsByTagName('head')[0].appendChild link
 
+
+
 require.config
   baseUrl: '/js',
   shim:
@@ -20,6 +22,8 @@ require.config
     'angular-mocks':
       deps: [ 'angular' ]
       exports: 'angular.mock'
+    'jschannel':
+      exports: 'Channel'
     priority: [ 'angular' ]
   packages: [
     {
@@ -31,6 +35,7 @@ require.config
   paths:
     angular:         '/vendor/angular/angular'
     domReady:        '/vendor/requirejs-domready/domReady'
+    'jschannel':      '/vendor/jschannel'
     'angular-route': '/vendor/angular-route/angular-route'
     'angular-resource': '/vendor/angular-resource/angular-resource'
     'angular-mocks': '/vendor/angular-mocks/angular-mocks'
