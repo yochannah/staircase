@@ -35,7 +35,11 @@
 
 (defn get-steps-of [{db :db} id & {:keys [limit] :or {limit nil}}]
   (when-let [uuid (string->uuid id)]
-    (let [query-base "select s.* from steps as s, history_step as hs where hs.history_id = ? order by hs.created_at DESC"
+    (let [query-base "select s.*
+                     from steps as s
+                     left join history_step as hs on s.id = hs.step_id
+                     where hs.history_id = ?
+                     order by hs.created_at DESC"
           limit-clause (if limit (str " LIMIT " limit) "")
           query (str query-base limit-clause)]
         (sql/query (:connection db) [query uuid]))))
