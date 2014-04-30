@@ -7,7 +7,7 @@
 
     <div class="list-group">
         <div class="list-group-item" ng-repeat="history in histories | filter:filterTerm">
-            <h5 class="list-group-item-heading">
+            <a href="/history/{{history.id}}/{{history.steps}}" class="list-group-item-heading">
                 <span class="pull-right badge">{{history.steps}}</span>
                 {{history.title}}
             </h5>

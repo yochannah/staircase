@@ -77,7 +77,7 @@
     (domonad maybe-m
              [:when (.exists? histories id)
               i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
-              step  (nth (data/get-steps-of histories id) (Integer/parseInt idx))]
+              step  (nth (data/get-steps-of histories id) i)]
           (response step))
     NOT_FOUND))
 
@@ -180,6 +180,7 @@
 (defn- build-app-routes [router]
   (routes 
     (GET "/" [] (views/index))
+    (GET "/history/:id/:idx" [] (views/index))
     (GET "/tools" [capability] (response (get-tools (:config router) capability)))
     (GET "/partials/:fragment.html"
          [fragment]
@@ -196,7 +197,9 @@
           (POST "/" {body :body} (create-new histories body))
           (context "/:id" [id]
                    (GET    "/" [] (get-resource histories id))
-                   (PUT    "/" {body :body} (update-resource histories id body))
+                   (PUT    "/" {body :body} (update-resource histories
+                                                             id
+                                                             (dissoc body "id" "steps" "owner")))
                    (DELETE "/" [] (delete-resource histories id))
                    (GET    "/head" [] (get-end-of-history histories id))
                    (context "/steps" []

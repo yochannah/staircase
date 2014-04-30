@@ -173,10 +173,45 @@
 
    ])
 
+(def edit-button
+       [:i.fa.fa-edit.pull-right {:ng-show "!editing" :ng-click "editing = true"}])
+
+(defn save-button [cb]
+       [:i.fa.fa-save.pull-right {:ng-show "editing" :ng-click cb}])
+
+(defn label-input-pair [model]
+  [[:span {:ng-show "!editing"} (str "{{" model "}}")]
+   [:input.form-control {:ng-show "editing" :ng-model model}]])
+
+(def history
+  [:div.container-fluid.history-view
+   [:div.row
+    [:div.col-xs-12.col-sm-2.sidebar
+     [:div.panel.panel-default
+      (apply vector
+             :div.panel-heading
+             edit-button
+             (save-button "saveHistory()")
+             (label-input-pair "history.title"))
+      (apply vector
+             :div.panel-body
+             edit-button
+             (save-button "saveHistory()")
+             [:em {:ng-hide "history.description"} "No description"]
+             (label-input-pair "history.description"))
+      [:div.list-group
+        [:a.list-group-item {:ng-repeat "s in steps"
+                             :ng-class "{active: step.id == s.id}"
+                             :href "/history/{{history.id}}/{{$index + 1}}"}
+         "{{s.title}}"]]]]
+    [:div.col-xs-12.col-sm-10
+     "{{history.title}}"]]])
+
 (defn render-partial
   [fragment]
   (case fragment
     "frontpage" (html starting-points)
+    "history" (html history)
     {:status 404})) 
 
 (defn index []
