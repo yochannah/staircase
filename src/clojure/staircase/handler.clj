@@ -25,7 +25,7 @@
             [persona-kit.middleware :as pm]
             [cemerick.friend :as friend] ;; auth.
             [cemerick.friend.workflows :as workflows]
-            [staircase.tools :refer (get-tools)]
+            [staircase.tools :refer (get-tools get-tool)]
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
             [compojure.route :as route]) ;; Standard route builders.
@@ -74,7 +74,7 @@
 
 (defn get-step-of [histories id idx]
   (or
-    (domonad maybe-m
+    (domonad maybe-m ;; TODO: use offsetting rather than nth.
              [:when (.exists? histories id)
               i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
               step  (nth (data/get-steps-of histories id) i)]
@@ -177,11 +177,14 @@
   (-> (apply merge (map req [:params :form-params :multipart-params]))
       :__anti-forgery-token))
 
-(defn- build-app-routes [router]
+(defn- build-app-routes [{conf :config :as router}]
   (routes 
     (GET "/" [] (views/index))
     (GET "/history/:id/:idx" [] (views/index))
-    (GET "/tools" [capability] (response (get-tools (:config router) capability)))
+    (GET "/tools" [capability] (response (get-tools conf capability)))
+    (GET "/tools/:id" [id] (if-let [tool (get-tool conf id)]
+                             (response tool)
+                             {:status 404}))
     (GET "/partials/:fragment.html"
          [fragment]
          (views/render-partial fragment))

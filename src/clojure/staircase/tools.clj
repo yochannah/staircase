@@ -27,6 +27,10 @@
     ((set (:capabilities tool-conf)) capability)
     true))
 
+(defn get-tool
+  [config ident]
+  (first (filter #(= ident (:ident %)) (map get-tool-conf (:tools config)))))
+
 (defn get-tools
   [config capability]
   (let [tools (config :tools)]
