@@ -67,8 +67,11 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
       headers = auth.headers
       resource "/api/v1/histories/:id", {id: '@id'},
         get: {method: 'GET', headers: headers}
+        getStep: {method: 'GET', headers: headers, url: '/api/v1/histories/:id/steps/:idx'}
+        getSteps: {method: 'GET', headers: headers, isArray: true, url: '/api/v1/histories/:id/steps'}
         query: {method: 'GET', headers: headers, isArray: true}
-        save: {method: 'POST', headers: headers}
+        save: {method: 'PUT', headers: headers}
+        create: {method: 'POST', headers: headers}
         append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
   Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
