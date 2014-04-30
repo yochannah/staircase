@@ -63,3 +63,12 @@
   (let [b-steps (get-steps-of {:db db} id-b)]
     (testing "we only get steps of the history we asked for"
       (is (empty? b-steps)))))
+
+(deftest test-get-steps-of-security
+  (testing "only the owner can access the histories, even if the id is leaked"
+    (binding [staircase.resources/context context]
+      (let [a-steps (get-steps-of {:db db} id-a)]
+        (is (= 2 (count a-steps)))))
+    (binding [staircase.resources/context {:user "blackhat@pirates.r.us"}]
+      (let [a-steps (get-steps-of {:db db} id-a)]
+        (is (empty? a-steps))))))
