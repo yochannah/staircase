@@ -1,4 +1,4 @@
-require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
+require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, Channel) ->
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
@@ -22,6 +22,44 @@ require ['angular', 'lodash', 'lines', 'services'], (ng, L, lines) ->
         y: o.top
 
   doesntIntersectWith = (p1, q1) -> ({p, q}) -> not lines.intersects p1, q1, p, q
+
+  Directives.directive 'currentStep', Array '$window', ($window) ->
+    restrict: 'C'
+    scope:
+      tool: '=tool'
+      step: '=step'
+    template: """
+      <div class="panel-heading">
+        {{tool.heading}}
+      </div>
+      <div class="panel-body">
+        <iframe seamless src="{{tool.src}}" width="100%">
+      </div>
+    """
+    link: (scope, element, attrs) ->
+      element.addClass('panel panel-default')
+      iframe = element.find('iframe')
+
+      do resize = -> iframe.css height: ng.element($window).height() * 0.8
+
+      $window.addEventListener 'resize', resize
+
+      channel = Channel.build
+        window: iframe[0].contentWindow
+        origin: '*'
+        scope: 'currentStep'
+        onReady: -> console.log "Channel ready"
+
+      channel.bind 'nextStep', (trans, data) -> console.log data
+
+      scope.$watch 'step', (step) ->
+        return unless step?
+        step.$promise.then -> channel.call
+          method: 'init'
+          params: step.data
+          error: -> console.error "initialization failed"
+          success: -> console.log "Initialized"
+
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
