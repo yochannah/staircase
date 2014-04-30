@@ -1,0 +1,6 @@
+{
+  "capabilities": ["next"],
+  "type": "IFrame",
+  "heading": "Results Table",
+  "src": "http://show-table.labs.intermine.org/index.html"
+}
