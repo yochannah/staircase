@@ -176,11 +176,16 @@
 (def edit-button
        [:i.fa.fa-edit.pull-right {:ng-show "!editing" :ng-click "editing = true"}])
 
+(defn cancel-button [cb]
+  [:i.fa.fa-undo.pull-right {:ng-show "editing" :ng-click cb}])
+
 (defn save-button [cb]
        [:i.fa.fa-save.pull-right {:ng-show "editing" :ng-click cb}])
 
 (defn label-input-pair [model]
-  [[:span {:ng-show "!editing"} (str "{{" model "}}")]
+  [[:span {:ng-show "!editing"}
+    [:em {:ng-hide model} (clojure.string/replace model #"\w+\." "No ")]
+    (str "{{" model "}}")]
    [:input.form-control {:ng-show "editing" :ng-model model}]])
 
 (def history
@@ -191,13 +196,11 @@
       (apply vector
              :div.panel-heading
              edit-button
+             (cancel-button "updateHistory()")
              (save-button "saveHistory()")
              (label-input-pair "history.title"))
       (apply vector
              :div.panel-body
-             edit-button
-             (save-button "saveHistory()")
-             [:em {:ng-hide "history.description"} "No description"]
              (label-input-pair "history.description"))
       [:div.list-group
         [:a.list-group-item {:ng-repeat "s in steps"
@@ -205,7 +208,7 @@
                              :href "/history/{{history.id}}/{{$index + 1}}"}
          "{{s.title}}"]]]]
     [:div.col-xs-12.col-sm-10
-     "{{history.title}}"]]])
+     [:div.current-step {:tool "tool" :step "step"} ]]]])
 
 (defn render-partial
   [fragment]
