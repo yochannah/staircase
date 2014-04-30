@@ -10,6 +10,11 @@
 
 (def table-specs (merge schema/history-step schema/steps))
 
+(defn- get-first [m ks]
+  (get m (first (filter (set (keys m)) ks))))
+
+(defn- get-prop [m k] (get-first m [k (name k)]))
+
 (defrecord StepsResource [db]
   component/Lifecycle 
 
@@ -45,8 +50,8 @@
 
   (create [_ doc]
     (let [id (new-id)
-          step (-> doc (dissoc "history_id") (assoc "id" id))
-          link {"history_id" (java.util.UUID/fromString (str (doc "history_id"))) ;; Make sure the id is a uuid
+          step (-> doc (dissoc "history_id" :history_id :id) (assoc "id" id))
+          link {"history_id" (java.util.UUID/fromString (str (get-prop doc :history_id))) ;; Make sure the id is a uuid
                 "step_id" id
                 "created_at" (java.sql.Timestamp. (.getTime (now)))}]
       (sql/with-db-transaction [trs (:connection db)]
