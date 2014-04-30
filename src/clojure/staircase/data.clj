@@ -2,7 +2,8 @@
   (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:use staircase.helpers
         [clojure.tools.logging :only (debug info error)])
-  (:require [com.stuartsierra.component :as component]
+  (:require staircase.resources
+            [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
 (defn- open-pool
@@ -38,8 +39,9 @@
     (let [query-base "select s.*
                      from steps as s
                      left join history_step as hs on s.id = hs.step_id
-                     where hs.history_id = ?
+                     left join histories as h on h.id = hs.history_id
+                     where hs.history_id = ? and h.owner = ?
                      order by hs.created_at DESC"
           limit-clause (if limit (str " LIMIT " limit) "")
           query (str query-base limit-clause)]
-        (sql/query (:connection db) [query uuid]))))
+        (sql/query (:connection db) [query uuid (:user staircase.resources/context)]))))
