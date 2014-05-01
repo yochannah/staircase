@@ -47,7 +47,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       channel = Channel.build
         window: iframe[0].contentWindow
         origin: '*'
-        scope: 'currentStep'
+        scope: 'CurrentStep'
         onReady: -> console.log "Channel ready"
 
       channel.bind 'nextStep', (trans, data) -> console.log data
