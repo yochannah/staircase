@@ -3,6 +3,7 @@
   (:use staircase.helpers
         [clojure.tools.logging :only (debug info error)])
   (:require staircase.resources
+            [staircase.resources.steps :as steps]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
@@ -44,4 +45,6 @@
                      order by hs.created_at DESC"
           limit-clause (if limit (str " LIMIT " limit) "")
           query (str query-base limit-clause)]
-        (sql/query (:connection db) [query uuid (:user staircase.resources/context)]))))
+        (sql/query (:connection db)
+                   [query uuid (:user staircase.resources/context)]
+                   :result-set-fn steps/parse-steps))))

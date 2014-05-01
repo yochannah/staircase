@@ -4,6 +4,7 @@
         [clojure.tools.logging :only (info)])
   (:import java.sql.SQLException)
   (:require staircase.sql
+            [cheshire.core :as json]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
@@ -14,6 +15,16 @@
   (get m (first (filter (set (keys m)) ks))))
 
 (defn- get-prop [m k] (get-first m [k (name k)]))
+
+(defn ensure-string [maybe-string]
+  (if (instance? String maybe-string)
+    maybe-string
+    (json/generate-string maybe-string)))
+
+(defn parse-data [step]
+  (update-in step [:data] json/parse-string))
+
+(def parse-steps (comp vec (partial map parse-data)))
 
 (defrecord StepsResource [db]
   component/Lifecycle 
@@ -28,7 +39,9 @@
 
   Resource
   
-  (get-all [_] (into [] (sql/query (:connection db) ["select * from steps"])))
+  (get-all [_] (sql/query (:connection db)
+                          ["select * from steps"]
+                          :result-set-fn parse-steps))
 
   (exists? [_ id] (staircase.sql/exists (:connection db) :steps id))
 
@@ -37,7 +50,7 @@
       (sql/query
         (:connection db)
         ["select * from steps where id = ?" uuid]
-        :result-set-fn first)))
+        :result-set-fn (comp parse-data first))))
 
   (update [_ id doc] (staircase.sql/update-entity (:connection db) :steps id doc))
 
@@ -50,7 +63,10 @@
 
   (create [_ doc]
     (let [id (new-id)
-          step (-> doc (dissoc "history_id" :history_id :id) (assoc "id" id))
+          step (-> doc
+                   (dissoc "history_id" :history_id :id) 
+                   (assoc "id" id)
+                   (update-in ["data"] ensure-string))
           link {"history_id" (java.util.UUID/fromString (str (get-prop doc :history_id))) ;; Make sure the id is a uuid
                 "step_id" id
                 "created_at" (java.sql.Timestamp. (.getTime (now)))}]
