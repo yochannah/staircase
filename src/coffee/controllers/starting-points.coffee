@@ -30,9 +30,9 @@ define ['lodash'], (L) ->
 
     scope.anyToolDocked = -> L.some scope.startingPoints, state: 'DOCKED'
 
-    scope.$on 'start-history', (evt, step) -> Histories.then (histories) ->
-      history = histories.create {title: "Un-named history"}, ->
-        step = histories.append {id: history.id}, step, ->
+    scope.$on 'start-history', (evt, step) ->
+      history = Histories.create {title: "Un-named history"}, ->
+        step = Histories.append {id: history.id}, step, ->
           console.log("Created history " + history.id + " and step " + step.id)
           location.url "/history/#{ history.id }/1"
 
