@@ -14,7 +14,11 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
       scope.$emit('start-history', {
         title: "Created " + scope.rootClass.displayName + " query",
         tool: "/tools/show-table",
-        data: watchQuery(scope)
+        data: {
+          url: scope.connection.root,
+          token: scope.connection.token,
+          query: getQuery(scope)
+        }
       });
     });
 
