@@ -22,7 +22,8 @@
     (json/generate-string maybe-string)))
 
 (defn parse-data [step]
-  (update-in step [:data] json/parse-string))
+  (when step
+    (update-in step [:data] json/parse-string)))
 
 (def parse-steps (comp vec (partial map parse-data)))
 
