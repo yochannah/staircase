@@ -1,4 +1,4 @@
-define ['angular', 'angular-cookies', 'services'], (ng) ->
+define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
   
   Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
 
@@ -12,10 +12,15 @@ define ['angular', 'angular-cookies', 'services'], (ng) ->
 
     scope.$watch "showWelcome", (val) -> cookies.ShowWelcome = String val
 
-
   Controllers.controller 'IndexCtrl', ->
 
-  Controllers.controller 'AboutCtrl', ->
+  Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'startHistory', (http, scope, startHistory) ->
+    http.get('/tools', {params: {capabilities: 'initial'}})
+        .then ({data}) ->
+          scope.tool = L.chain(data).where(width: 1).find('description').value()
+          scope.tool.expandable = false
+
+    startHistory scope
 
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
