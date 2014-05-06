@@ -33,6 +33,7 @@
                  [org.clojure/core.cache "0.6.3"] 
                  [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
+  :min-lein-version "2.0.0"
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
