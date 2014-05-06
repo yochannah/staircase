@@ -1,6 +1,7 @@
 {
   "capabilities": ["next"],
   "type": "IFrame",
+  "seamless": false,
   "heading": "Results Table",
   "src": "http://showtable.labs.intermine.org/tool.html"
 }

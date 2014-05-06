@@ -48,8 +48,16 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
     scope.$on 'reset', (evt) ->
       scope.outputType = scope.defaults.outputType
       scope.inputType = scope.defaults.inputType
+      scope.templateFilter = null
 
-    scope.runQuery = (q) -> log.info "Results of #{ q.title } please"
+    scope.runQuery = (q) ->
+      scope.$emit 'start-history',
+        title: "Ran #{ q.title } template query",
+        tool: '/tools/show-table',
+        data:
+          url: scope.connection.root,
+          token: scope.connection.token,
+          query: q
 
     scope.classes = []
     scope.inputType = scope.outputType = scope.serviceName = ''
@@ -59,6 +67,8 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
     fetchingDefaultMine.then ({ident}) -> timeout -> scope.serviceName = ident
 
     connecting = fetchingDefaultMine.then Service.connect
+
+    connecting.then (connection) -> scope.connection = connection
 
     connecting.then (connection) -> connection.fetchModel().then ClassUtils.setClasses scope
 

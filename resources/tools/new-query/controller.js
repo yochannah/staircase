@@ -6,6 +6,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
           function (scope, logger, timeout, cacheFactory, Q, mines, ClassUtils) {
     var countCache = (cacheFactory.get('query.counts') ||
                       cacheFactory('query.counts', {capacity: 100}));
+    scope.defaults = {};
     scope.classes = [];
     scope.fields = [];
     scope.serviceName = "";
@@ -20,6 +21,11 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
           query: getQuery(scope)
         }
       });
+    });
+
+    scope.$on('reset', function (evt) {
+      scope.rootClass = scope.defaults.rootClass;
+      scope.useConstraint = false;
     });
 
     var fetchingDefaultMine = mines.get('default');
@@ -37,6 +43,18 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
         scope.connection.count(getQuery(scope)).then(function (n) {
           setRowCount(countCache.put(key, n));
         });
+      }
+    });
+
+    scope.$watch('rowCount', function (rowCount) {
+      scope.tool.disabled = false;
+      if (rowCount === 0) {
+        scope.tool.disabled = true;
+        scope.tool.action = "No results";
+      } else if (rowCount === 1) {
+        scope.tool.action = "View " + scope.rootClass.displayName;
+      } else {
+        scope.tool.action = "View Table";
       }
     });
 

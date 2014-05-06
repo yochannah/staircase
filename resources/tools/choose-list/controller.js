@@ -1,4 +1,5 @@
 define(['angular', 'imjs'], function (ng, im) {
+  "use strict";
 
   var connect = im.Service.connect;
 
@@ -12,12 +13,30 @@ define(['angular', 'imjs'], function (ng, im) {
 
     fetchingDefaultMine.then(setMineDetails);
     
-    fetchingDefaultMine.then(connect).then(function (conn) {
+    fetchingDefaultMine.then(connect).then(readLists);
+    
+    scope.viewList = viewList;
+
+    function viewList (list) {
+      scope.$emit('start-history', {
+        title: "Chose list " + list.title,
+        tool: "/tools/show-list",
+        data: {
+          service: {
+            root: scope.connection.root,
+            token: scope.connection.token,
+          },
+          listName: list.name
+        }
+      });
+    }
+
+    function readLists (conn) {
       scope.connection = conn;
       var fetching = conn.fetchLists();
       fetching.then(setLists);
       fetching.then(setTags);
-    });
+    }
 
     function setLists (lists) {
       timeout(function () {
