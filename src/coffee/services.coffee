@@ -6,6 +6,17 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
   Services.value('version', '0.1.0')
 
+  class StepConfig
+
+    constructor: ->
+      stepConfig = {}
+
+      @configureStep = (ident, conf) -> stepConfig[ident] = conf
+
+      @$get = -> stepConfig
+
+  Services.provider 'stepConfig', StepConfig
+
   Services.factory 'ClassUtils', Array '$q', '$timeout', (Q, timeout) ->
     setClasses = (scope, grouper, propName = 'outputType') -> (model) -> timeout ->
       ret = Q.defer()
@@ -72,6 +83,13 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
       save: {method: 'PUT', headers: headers}
       create: {method: 'POST', headers: headers}
       append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
+
+  Services.factory 'startHistory', Array 'Histories', '$location', (Histories, location) -> (scope) ->
+    scope.$on 'start-history', (evt, step) ->
+      history = Histories.create {title: "Un-named history"}, ->
+        step = Histories.append {id: history.id}, step, ->
+          console.log("Created history " + history.id + " and step " + step.id)
+          location.url "/history/#{ history.id }/1"
 
   Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
     watch = request = logout = -> log.warn "Persona authentication not available."
