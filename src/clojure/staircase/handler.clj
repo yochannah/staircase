@@ -267,6 +267,15 @@
       (binding [staircase.resources/context {:user user}]
         (handler request)))))
 
+(def friendly-hosts [ #"http://localhost:"
+                     #"http://[^/]*labs.intermine.org"
+                     #"http://intermine.github.io"
+                     #"http://alexkalderimis.github.io"])
+
+(defn allowed-origins
+  [audience]
+  (if audience (conj friendly-hosts (re-pattern audience)) friendly-hosts))
+
 (defrecord Router [session-store
                    asset-pipeline
                    config
@@ -296,11 +305,7 @@
                           pm/wrap-persona-resources))]
       (assoc this :handler (-> handler
                                wrap-restful-format
-                               (wrap-cors :access-control-allow-origin [(re-pattern (:audience config))
-                                                                        #"http://localhost:"
-                                                                        #"http://[^/]*labs.intermine.org"
-                                                                        #"http://intermine.github.io"
-                                                                        #"http://alexkalderimis.github.io"])))))
+                               (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))))))
 
   (stop [this] this))
 
