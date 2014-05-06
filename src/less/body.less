@@ -2,11 +2,15 @@
 @import "variables";
 
 body {
+    padding: 15px;
+    font-weight: 300;
+    .full-size();
+}
+
+body.staircase {
     background: #333;
     margin: 0;
     padding: @body-padding-top @body-padding-side @body-padding-side @body-padding-side;
-    font-weight: 300;
-    .full-size();
     .bg-img(@body-bg);
 }
 
