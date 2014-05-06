@@ -122,7 +122,7 @@
       (include-css "/css/style.css")
       ]
      (concat [
-              [:body
+              [:body {:class "staircase"}
                (header)
                [:section#content.main body]]
                (footer)
@@ -159,7 +159,7 @@
       [:div.panel-body
        [:native-tool {:tool "tool"}]]
       [:div.panel-footer {:ng-if "tool.action"}
-       [:button.btn.btn-default.pull-right {:ng-click "act()"} "{{tool.action}}"]
+       [:button.btn.btn-default.pull-right {:ng-disabled "tool.disabled" :ng-click "act()"} "{{tool.action}}"]
        [:div.clearfix]]
       ]]
 
@@ -210,11 +210,61 @@
     [:div.col-xs-12.col-sm-10
      [:div.current-step {:tool "tool" :step "step"} ]]]])
 
+(def about
+  [:div.container-fluid
+   [:div.row
+    [:div.about.col-xs-10.col-xs-offset-1
+     [:div.about-header
+      [:div.container
+       [:h1 "InterMine Steps"]
+       [:p "The data-flow interface to InterMine data-warehouses,
+           providing an extensible, programmable tool-box for
+           scientists."]]]
+     [:section
+      [:h2 "Using the home-page"]
+      [:p.lead
+       "The " (link-to "/" "home page") " allows quick access to the tools available "
+       "for starting a new history"]
+      [:p
+       "Tools are components that let you interact with your data. They can do a wide
+       range of things, from uploading a data-set, to running a complex query, to
+       managing your stored resources. On the home page you can see the tools that can
+       be used to start a sequence of steps in a data-flow. One of these is shown below:"]
+      [:div.row
+       [:starting-point.col-sm-6 ;; TODO: Move the template below into a directive. Currently not very DRY at all.
+        [:div.panel.panel-default.first-step {:ng-class "tool.action ? 'with-action' : ''"}
+         [:div.panel-heading
+          [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "reset()"}]
+          "{{tool.heading}}"]
+         [:div.panel-body
+          [:native-tool {:tool "tool"}]]
+         [:div.panel-footer {:ng-if "tool.action"}
+          [:button.btn.btn-default.pull-right {:ng-disabled "tool.disabled" :ng-click "act()"} "{{tool.action}}"]
+          [:div.clearfix]]]]
+       [:div.col-sm-6
+        [:p {:ng-repeat "para in tool.description"} "{{para}}"]
+        [:p
+         "The following standard controls are available for interacting with one of these
+         tools:"]
+        [:table.table
+          [:tr
+           [:td
+            [:button.btn.btn-default {:ng-disabled "tool.disabled" :ng-click "act()"} "{{tool.action}}"]]
+           [:td
+            "This button performs the main action for the component (if it has one)"]]
+         [:tr
+          [:td
+            [:i.fa.fa-undo {:ng-click "reset()"}]]
+          [:td
+           "This button restores the component to its orginal state, removing any filters you may have applied."]]]]
+        ]]]]])
+
 (defn render-partial
   [fragment]
   (case fragment
     "frontpage" (html starting-points)
     "history" (html history)
+    "about" (html about)
     {:status 404})) 
 
 (defn index []
