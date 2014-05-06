@@ -1,5 +1,5 @@
 define ['lodash'], (L) ->
-  Array '$rootScope', '$scope', '$http', '$location', 'Histories', (root, scope, http, location, Histories) ->
+  Array '$rootScope', '$scope', '$http', '$location', 'startHistory', (root, scope, http, location, startHistory) ->
     root.startingPoints = []
 
     http.get("/tools", {params: {capabilities: "initial"}})
@@ -30,11 +30,7 @@ define ['lodash'], (L) ->
 
     scope.anyToolDocked = -> L.some scope.startingPoints, state: 'DOCKED'
 
-    scope.$on 'start-history', (evt, step) ->
-      history = Histories.create {title: "Un-named history"}, ->
-        step = Histories.append {id: history.id}, step, ->
-          console.log("Created history " + history.id + " and step " + step.id)
-          location.url "/history/#{ history.id }/1"
+    startHistory scope
 
     scope.$apply()
 
