@@ -12,23 +12,30 @@ modules = [
 
 $providers = [
   '$routeProvider', '$controllerProvider', '$compileProvider',
-  '$filterProvider', '$provide', '$sceDelegateProvider'
+  '$filterProvider', '$provide', '$sceDelegateProvider', 'stepConfigProvider'
 ]
 
 define deps, (angular, router) ->
   Steps = angular.module('steps', modules)
 
   # Capture references to providers.
-  Steps.config Array $providers..., (routes, controllers, directives, filters, provide, sceDelegateProvider) ->
+  Steps.config Array $providers..., (routes, controllers, directives, filters, provide, sceDelegateProvider, stepConfigProvider) ->
     Steps.routes = routes
     Steps.controllers = controllers
     Steps.directives = directives
     Steps.filters = filters
     Steps.provide = provide
+    # Whitelist the sources of any tools we plan on using.
     sceDelegateProvider.resourceUrlWhitelist([
       'self', # TODO: make configurable.
-      'http://*.labs.intermine.org/**'
+      'http://*.labs.intermine.org/**',
+      'http://alexkalderimis.github.io/**',
+      'http://intermine.github.io/**'
     ])
+    stepConfigProvider.configureStep 'show-table',
+      IndicateOffHostLinks: false,
+      Style:
+        icons: 'fontawesome'
 
   router Steps
 
