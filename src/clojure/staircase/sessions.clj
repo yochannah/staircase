@@ -38,7 +38,7 @@
   [store id]
   (let [db (get-in store [:db :connection])
         cache (:cache store)]
-    (info "Reading session from db:" id)
+    (debug "Reading session from db:" id)
     (domonad maybe-m ;; Look in persistent store.
              [uuid (string->uuid id)
               data (sql/query ;; nil-safe - returns nil if none found.
@@ -89,23 +89,28 @@
 
   (write-session
     [store id data]
-    (let [uuid (string->uuid (or id (new-id)))]
-      (when (not uuid) (throw (IllegalArgumentException. (str id " is not a good key"))))
+    (if-let [uuid (string->uuid (or id (new-id)))]
       (let [valid-until (get-expiry (:max-session-age config))
-            session {:data (prn-str data)}
+            session {:data (prn-str data) :valid_until valid-until}
+            where-clause ["id=?" uuid]
             con (:connection db)]
-        (info "Storing" data "until" valid-until)
+        (debug "Storing" data "until" valid-until)
         (if (get-from-db store uuid)
           (sql/update! con
                        :sessions
                        session
-                       ["id=?" uuid])
-          (sql/insert! con
-                       :sessions
-                       (assoc session :id uuid :valid_until valid-until)))
+                       where-clause)
+          (sql/with-db-transaction [t-con con]
+            (sql/delete! t-con
+                         :sessions
+                         where-clause)
+            (sql/insert! t-con
+                        :sessions
+                        (assoc session :id uuid))))
         (swap! next-expiry #(if (and %1 (.before %1 %2)) %1 %2) valid-until)
         (swap! cache dissoc id) ;; Evict from cache.
-        uuid))))
+        uuid)
+      (throw (IllegalArgumentException. (str id " is not a good key"))))))
 
 (defn new-pg-session-store
   ([] (new-pg-session-store nil nil))
