@@ -1,0 +1,28 @@
+@about-header-size: 60px;
+
+.about {
+    background-color: @panel-bg;
+    padding: 2 * @panel-body-padding;
+    position: relative;
+    top: -18px;
+
+    .about-header {
+        padding-top: @about-header-size;
+        padding-bottom: @about-header-size;
+        padding-left: @about-header-size / 2;
+        padding-right: @about-header-size / 2;
+        font-size: 24px;
+        text-align: left;
+        position: relative;
+        background-color: @brand-primary;
+        color: lighten(@brand-primary, 50%);
+
+        h1 {
+            font-size: @about-header-size;
+            line-height: 1;
+            margin-top: 0;
+            color: rgb(255, 255, 255);
+        }
+    }
+
+}
