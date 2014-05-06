@@ -106,6 +106,8 @@
 
 (defonce asset-cache (atom {}))
 
+(def cors {"Access-Control-Allow-Origin" "*"})
+
 (defn generate-response [asset-file]
   (case (ext asset-file)
     :coffee {:body (compile-coffeescript asset-file)
@@ -116,7 +118,7 @@
              :headers {"Content-Type" "text/javascript"}}
     :less {:body (less asset-file)
             :status 200
-            :headers {"Content-Type" "text/css"}}
+            :headers (assoc cors "Content-Type" "text/css")}
     {:status 500 :body "Unknown asset type" :content-type "text/plain"})) ;; Should never happen.
 
 (defn serve-asset [file options]

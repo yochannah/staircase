@@ -19,6 +19,7 @@
             [cheshire.core :as json]
             [clj-http.client :as client]
             [com.stuartsierra.component :as component]
+            [ring.middleware.cors :refer (wrap-cors)]
             staircase.resources
             [persona-kit.friend :as pf]
             [persona-kit.core :as pk]
@@ -293,7 +294,13 @@
                           (wrap-cookies)
                           asset-pipeline
                           pm/wrap-persona-resources))]
-      (assoc this :handler (wrap-restful-format handler))))
+      (assoc this :handler (-> handler
+                               wrap-restful-format
+                               (wrap-cors :access-control-allow-origin [(re-pattern (:audience config))
+                                                                        #"http://localhost:"
+                                                                        #"http://[^/]*labs.intermine.org"
+                                                                        #"http://intermine.github.io"
+                                                                        #"http://alexkalderimis.github.io"])))))
 
   (stop [this] this))
 

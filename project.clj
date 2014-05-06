@@ -19,6 +19,7 @@
                  [ring "1.2.2"] ;; sessions.
                  [ring/ring-json "0.3.1"]
                  [ring/ring-anti-forgery "0.3.1"] ;; CSRF protection.
+                 [ring-cors "0.1.1"]
                  [c3p0/c3p0 "0.9.1.2"] ;; DB pooling
                  [com.stuartsierra/component "0.2.1"] ;; Dependency management
                  [environ "0.4.0"] ;; Settings management.
