@@ -23,7 +23,19 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   doesntIntersectWith = (p1, q1) -> ({p, q}) -> not lines.intersects p1, q1, p, q
 
-  Directives.directive 'currentStep', Array '$window', ($window) ->
+  # Handle the seamless attribute on iframes.
+  Directives.directive 'isSeamless', ->
+    restrict: 'A'
+    scope:
+      isSeamless: '='
+    link: (scope, element, attrs) ->
+      scope.$watch 'isSeamless', (seamless) ->
+        if seamless
+          element.attr 'seamless', 'seamless'
+        else
+          element.removeAttr('seamless')
+
+  Directives.directive 'currentStep', Array '$window', 'stepConfig', ($window, conf) ->
     restrict: 'C'
     scope:
       tool: '=tool'
@@ -33,7 +45,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         {{tool.heading}}
       </div>
       <div class="panel-body">
-        <iframe seamless src="{{tool.src}}" width="100%">
+        <iframe is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
       </div>
     """
     link: (scope, element, attrs) ->
@@ -52,13 +64,29 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
       channel.bind 'nextStep', (trans, data) -> console.log data
 
+      scope.$watch 'tool.ident', (ident) ->
+        return unless ident and conf[ident]
+        channel.call
+          method: 'configure'
+          params: conf[ident]
+          success: -> console.log "Configured #{ ident }"
+
       scope.$watch 'step', (step) ->
         return unless step?
-        step.$promise.then -> channel.call
-          method: 'init'
-          params: step.data
-          error: -> console.error "initialization failed"
-          success: -> console.log "Initialized"
+        step.$promise.then ->
+
+          channel.call
+            method: 'init'
+            params: step.data
+            error: -> console.error "initialization failed"
+            success: -> console.log "Initialized"
+
+          for link in $window.document.getElementsByTagName('link') then do (link) ->
+            channel.call
+              method: 'style'
+              params:
+                stylesheet: link.href
+              success: -> console.log "Applied stylesheet: #{ link.href }"
 
 
   Directives.directive 'filterTerm', ->
@@ -86,39 +114,40 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
     link: (scope, element, attrs) ->
 
-      if scope.tool.expandable
-        doResize = ->
-          margin = 38 # HARDCODED! TODO! CALCULATE!
-          offsets = getOffsets(document, 'starting-point')
-          maxx = L.max offsets.map (o) -> o.left + o.width
-          maxy = L.max offsets.map (o) -> o.top + o.height
-          topBars = getTopBars offsets
-          ystep = element[0].offsetHeight
-          p1 =
-            x: element[0].offsetLeft
-            y: element[0].offsetTop + 1 # Don't get intersects with own top bar.
-          q1 =
-            x: p1.x + element[0].offsetWidth
-            y: p1.y + element[0].offsetHeight
+      scope.$watch 'tool.expandable', (expandable) ->
+        if expandable
+          doResize = ->
+            margin = 38 # HARDCODED! TODO! CALCULATE!
+            offsets = getOffsets(document, 'starting-point')
+            maxx = L.max offsets.map (o) -> o.left + o.width
+            maxy = L.max offsets.map (o) -> o.top + o.height
+            topBars = getTopBars offsets
+            ystep = element[0].offsetHeight
+            p1 =
+              x: element[0].offsetLeft
+              y: element[0].offsetTop + 1 # Don't get intersects with own top bar.
+            q1 =
+              x: p1.x + element[0].offsetWidth
+              y: p1.y + element[0].offsetHeight
 
-          factor = 1
+            factor = 1
 
-          while factor < 3 and (q1.y + ystep) <= maxy
-            q1.y += ystep + margin
-            if L.every topBars, doesntIntersectWith p1, q1
-              factor += 1
+            while factor < 3 and (q1.y + ystep) <= maxy
+              q1.y += ystep + margin
+              if L.every topBars, doesntIntersectWith p1, q1
+                factor += 1
 
-          if factor > 1 and panelBody = element[0].querySelector('.panel-body')
-            totalHeight = ystep * factor - margin
-            panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"
-            element.addClass 'expanded'
+            if factor > 1 and panelBody = element[0].querySelector('.panel-body')
+              totalHeight = ystep * factor - margin
+              panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"
+              element.addClass 'expanded'
 
-        $window.addEventListener 'resize', ->
-          element[0].querySelector('.panel-body')?.style.height = null
-          element.removeClass 'expanded'
+          $window.addEventListener 'resize', ->
+            element[0].querySelector('.panel-body')?.style.height = null
+            element.removeClass 'expanded'
+            setTimeout doResize, 10
+
           setTimeout doResize, 10
-
-        setTimeout doResize, 10
 
   Directives.directive 'nativeTool', ($window, $compile, $injector) ->
     restrict: 'E'
@@ -126,16 +155,19 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       tool: '=tool'
     link: (scope, element, attrs) ->
 
-      ctrl = "#{$window.location}/#{scope.tool.controllerURI}"
-      tmpl = "#{$window.location}/#{scope.tool.templateURI}"
+      scope.$watch 'tool.controllerURI', ->
+        if scope.tool
 
-      require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+          ctrl = $window.location.origin + scope.tool.controllerURI
+          tmpl = $window.location.origin + scope.tool.templateURI
 
-        $injector.invoke controller, this, {'$scope': scope}
+          require [ctrl, "text!#{ tmpl }"], (controller, template) ->
 
-        element.html(template)
-        $compile(element.contents())(scope)
+            $injector.invoke controller, this, {'$scope': scope}
 
-        scope.$apply()
+            element.html(template)
+            $compile(element.contents())(scope)
+
+            scope.$apply()
 
 
