@@ -1,5 +1,6 @@
 (ns staircase.tools
-  (:use [clojure.string :only (replace-first)])
+  (:use [clojure.string :only (replace-first)]
+        [clojure.tools.logging :only (info debug)])
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]))
 
@@ -13,7 +14,7 @@
   (with-open [r (-> (str "tools/" (name tool-name) "/tool.json")
                     io/resource
                     io/reader)]
-    (let [prefix #(replace-first % "." (name tool-name))]
+    (let [prefix #(replace-first % "." (str "/" (name tool-name)))]
       (-> (slurp r)
           (json/parse-string true)
           (#(merge tool-defaults %))
@@ -33,6 +34,7 @@
 
 (defn get-tools
   [config capability]
+  (debug "Getting tools with the" capability "capability")
   (let [tools (config :tools)]
     (->> tools
          (map get-tool-conf)
