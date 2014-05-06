@@ -14,7 +14,8 @@
                         :upload-list
                         :histories
                         :hello-world
-                        :show-table
+                        :show-table ;; TODO: make these autoconfigure...
+                        :show-list
                         ]
             :web-audience "http://localhost:3000"
             :verifier "https://verifier.login.persona.org/verify"
