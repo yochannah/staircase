@@ -61,6 +61,12 @@
       ACCEPTED)
     NOT_FOUND))
 
+(defn register-for ;; currently gets anon session. Needs api hf to be applied.
+  [service]
+  (let [session-url (str (:root service) "/session")
+        resp (client/get session-url {:as :json :throw-exceptions false})]
+    (get-in resp [:body :token])))
+
 (defn get-end-of-history [histories id]
   (or
     (when-let [end (first (data/get-steps-of histories id :limit 1))]
@@ -227,16 +233,23 @@
                       configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
                   (response (left-outer-join configured-services user-services :root :root))))
             (context "/:ident" [ident]
-                    (GET "/" []
+                     (GET "/" []
                           (let [ident (real-id ident)
                                 uri (get-in config [:services ident])
-                                user-services (get-where services [:= :uri uri])]
-                            (-> (left-outer-join [{:root uri :ident ident}] user-services :root :root)
-                                first
-                                response)))
+                                user-services (get-where services [:= :root uri])
+                                service (-> (left-outer-join [{:root uri :ident ident}]
+                                                             user-services
+                                                             :root
+                                                             :root)
+                                            first)]
+                            (response (if (:token service)
+                                        service
+                                        (let [token (register-for service)
+                                              id (create services {:root (:root service) :token token})]
+                                          (merge service (get-one services id)))))))
                     (PUT "/" {doc :body}
                           (let [uri (get-in config [:services (real-id ident)])]
-                            (create-new services (assoc doc :uri uri))))))))
+                            (create-new services (assoc doc :root uri))))))))
 
 (defn- build-api-session-routes [router]
   (-> (routes
