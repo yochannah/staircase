@@ -191,6 +191,7 @@
 (def history
   [:div.container-fluid.history-view
    [:div.row
+
     [:div.sidebar.slide-left.col-xs-12.col-md-2
      {:ng-class "{minimised: expanded}"}
      [:div.panel.panel-default
@@ -207,11 +208,22 @@
         [:a.list-group-item {:ng-repeat "s in steps"
                              :ng-class "{active: step.id == s.id}"
                              :href "/history/{{history.id}}/{{$index + 1}}"}
+
          "{{s.title}}"]]]]
-    [:div.col-xs-12.slide-left.pull-right
-     {:ng-class "{'col-md-10': !expanded}"}
+
+    [:div.next-steps.col-xs-12.col-md-1.slide-right.pull-right
+     {:ng-class "{minimised: expanded}"}
+     [:div.panel.panel-default
+      [:div.panel-heading "Next steps"]
+      [:div.list-group
+       [:a.list-group-item {:ng-repeat "ns in nextSteps"}]]]]
+
+    [:div.col-xs-12.slide-left
+     {:ng-class "{'col-md-9': !expanded, 'col-md-offset-2': !expanded}"}
      [:div.current-step
-      {:tool "tool" :step "step" :full-size "expanded" :on-toggle "expanded = !expanded"} ]]]])
+      {:tool "tool" :step "step" :full-size "expanded" :on-toggle "expanded = !expanded"} ]]
+
+    ]])
 
 (def about
   [:div.container-fluid
