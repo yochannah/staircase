@@ -38,10 +38,15 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
   Directives.directive 'currentStep', Array '$window', 'stepConfig', ($window, conf) ->
     restrict: 'C'
     scope:
-      tool: '=tool'
-      step: '=step'
+      tool:     '='
+      step:     '='
+      fullSize: '='
+      onToggle: '&'
     template: """
       <div class="panel-heading">
+        <i class="fa pull-right"
+           ng-click="onToggle()"
+           ng-class="{'fa-compress': fullSize, 'fa-expand': !fullSize}"></i>
         {{tool.heading}}
       </div>
       <div class="panel-body">
@@ -52,7 +57,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       element.addClass('panel panel-default')
       iframe = element.find('iframe')
 
-      do resize = -> iframe.css height: ng.element($window).height() * 0.8
+      do resize = -> iframe.css height: ng.element($window).height() * 0.85
 
       $window.addEventListener 'resize', resize
 

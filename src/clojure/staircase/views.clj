@@ -191,7 +191,8 @@
 (def history
   [:div.container-fluid.history-view
    [:div.row
-    [:div.col-xs-12.col-sm-2.sidebar
+    [:div.sidebar.slide-left.col-xs-12.col-md-2
+     {:ng-class "{minimised: expanded}"}
      [:div.panel.panel-default
       (apply vector
              :div.panel-heading
@@ -207,8 +208,10 @@
                              :ng-class "{active: step.id == s.id}"
                              :href "/history/{{history.id}}/{{$index + 1}}"}
          "{{s.title}}"]]]]
-    [:div.col-xs-12.col-sm-10
-     [:div.current-step {:tool "tool" :step "step"} ]]]])
+    [:div.col-xs-12.slide-left.pull-right
+     {:ng-class "{'col-md-10': !expanded}"}
+     [:div.current-step
+      {:tool "tool" :step "step" :full-size "expanded" :on-toggle "expanded = !expanded"} ]]]])
 
 (def about
   [:div.container-fluid
