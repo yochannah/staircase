@@ -13,7 +13,11 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
     scope.$on('act', function (evt) {
       scope.$emit('start-history', {
-        title: "Created " + scope.rootClass.displayName + " query",
+        thing: scope.rootClass.displayName + " query",
+        verb: {
+          ed: "ran",
+          ing: "running"
+        },
         tool: "/tools/show-table",
         data: {
           url: scope.connection.root,

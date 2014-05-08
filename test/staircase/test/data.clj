@@ -58,8 +58,8 @@
   (let [a-steps (get-steps-of {:db db} id-a)]
     (testing "history A has two steps"
       (is (= 2 (count a-steps))))
-    (testing "steps come out newest -> oldest"
-      (is (= (list "bar" "foo") (map :title a-steps)))))
+    (testing "steps come out oldest -> newest"
+      (is (= (list "foo" "bar") (map :title a-steps)))))
   (let [b-steps (get-steps-of {:db db} id-b)]
     (testing "we only get steps of the history we asked for"
       (is (empty? b-steps)))))

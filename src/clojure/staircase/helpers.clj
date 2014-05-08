@@ -11,3 +11,5 @@
       (catch IllegalArgumentException e nil))))
 
 (defn now [] (java.util.Date.))
+
+(defn sql-now [] (java.sql.Timestamp. (.getTime (now))))

@@ -42,7 +42,7 @@
                      left join history_step as hs on s.id = hs.step_id
                      left join histories as h on h.id = hs.history_id
                      where hs.history_id = ? and h.owner = ?
-                     order by hs.created_at DESC"
+                     order by hs.created_at ASC"
           limit-clause (if limit (str " LIMIT " limit) "")
           query (str query-base limit-clause)]
         (sql/query (:connection db)

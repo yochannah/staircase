@@ -1,0 +1,6 @@
+{
+  "capabilities": ["next"],
+  "handles": "items",
+  "type": "native"
+}
+

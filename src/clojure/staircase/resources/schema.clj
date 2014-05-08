@@ -20,6 +20,7 @@
   {:histories
    [ [:id :uuid "primary key"]
      [:title string]
+     [:created_at "timestamp with time zone"]
      [:description :text]
      owner-column
     ]})
@@ -29,7 +30,7 @@
 (def history-step
    {:history_step
     [ [:history_id :uuid]
-      [:created_at :timestamp]
+      [:created_at "timestamp with time zone"]
       [:step_id :uuid] ] })
 
 ;; Question: should steps also reference their owner? On one hand, since steps

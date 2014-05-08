@@ -52,7 +52,10 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
 
     scope.runQuery = (q) ->
       scope.$emit 'start-history',
-        title: "Ran #{ q.title } template query",
+        verb:
+          ed: "ran"
+          ing: "running"
+        thing: "#{ q.title } template query"
         tool: '/tools/show-table',
         data:
           url: scope.connection.root,

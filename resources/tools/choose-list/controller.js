@@ -19,7 +19,11 @@ define(['angular', 'imjs'], function (ng, im) {
 
     function viewList (list) {
       scope.$emit('start-history', {
-        title: "Chose list " + list.title,
+        verb: {
+          ed: "chose",
+          ing: "choosing"
+        },
+        thing: "list " + list.title,
         tool: "/tools/show-list",
         data: {
           service: {

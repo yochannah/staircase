@@ -5,7 +5,8 @@
             [clojure.java.io :as io]))
 
 (def tool-defaults
-  {:templateURI "./template.html"
+  {:headingURI "./heading.html"
+   :templateURI "./template.html"
    :controllerURI "./controller.js"
    :width 1})
 
@@ -19,6 +20,7 @@
           (json/parse-string true)
           (#(merge tool-defaults %))
           (assoc :ident (name tool-name))
+          (update-in [:headingURI] prefix)
           (update-in [:templateURI] prefix)
           (update-in [:controllerURI] prefix)))))
 

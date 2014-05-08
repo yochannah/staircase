@@ -71,7 +71,11 @@
 
   (create [histories doc]
     (let [id (new-id)
-          values (assoc doc "id" id "owner" (:user staircase.resources/context))]
+          created-at (sql-now)
+          values (assoc doc
+                        "id" id
+                        "created_at" created-at
+                        "owner" (:user staircase.resources/context))]
       (sql/insert! (:connection db) :histories values)
       id)))
 

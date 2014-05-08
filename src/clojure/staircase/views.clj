@@ -211,17 +211,30 @@
 
          "{{s.title}}"]]]]
 
-    [:div.next-steps.col-xs-12.col-md-1.slide-right.pull-right
+    [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right
      {:ng-class "{minimised: expanded}"}
      [:div.panel.panel-default
       [:div.panel-heading "Next steps"]
-      [:div.list-group
-       [:a.list-group-item {:ng-repeat "ns in nextSteps"}]]]]
+      [:div.list-group {:ng-show "nextSteps.length"}
+       [:next-step
+        {:ng-repeat "ns in nextSteps"
+         :previous-step "step"
+         :tool "ns.tool"
+         :data "ns.data"}
+        ]]
+      [:div.panel-body {:ng-hide "nextSteps.length"}
+       [:em "No steps available"]]]]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-9': !expanded, 'col-md-offset-2': !expanded}"}
+     {:ng-class "{'col-md-8': !expanded, 'col-md-offset-2': !expanded}"}
      [:div.current-step
-      {:tool "tool" :step "step" :full-size "expanded" :on-toggle "expanded = !expanded"} ]]
+      {:tool "tool"
+       :step "step"
+       :full-size "expanded"
+       :has-items "setItems(key, type, ids)"
+       :has-list "hasList(data)"
+       :next-step "nextStep(data)"
+       :on-toggle "expanded = !expanded"} ]]
 
     ]])
 

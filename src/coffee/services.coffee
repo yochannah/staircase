@@ -82,12 +82,15 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
       query: {method: 'GET', headers: headers, isArray: true}
       save: {method: 'PUT', headers: headers}
       create: {method: 'POST', headers: headers}
+      delete: {method: 'DELETE', headers: headers}
       append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
   Services.factory 'startHistory', Array 'Histories', '$location', (Histories, location) -> (scope) ->
-    scope.$on 'start-history', (evt, step) ->
-      history = Histories.create {title: "Un-named history"}, ->
-        step = Histories.append {id: history.id}, step, ->
+    scope.$on 'start-history', (evt, {thing, verb, tool, data}) ->
+      historyTitle = "Started by #{ verb.ing } #{ thing }"
+      history = Histories.create {title: historyTitle}, ->
+        stepTitle = "#{ verb.ed } #{ thing }"
+        step = Histories.append {id: history.id}, {title: stepTitle, tool, data}, ->
           console.log("Created history " + history.id + " and step " + step.id)
           location.url "/history/#{ history.id }/1"
 

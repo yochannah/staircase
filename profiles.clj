@@ -4,7 +4,8 @@
                      [org.marianoguerra/clj-rhino "0.2.1"]
                      [ring-mock "0.1.5"]]
       :env {
-            :web-services {"flymine" "http://www.flymine.org/query/service"}
+            :web-services {"flymine" "http://www.flymine.org/query/service"
+                           "mousemine" "http://www.mousemine.org/mousemine/service"}
             :web-default-service "flymine"
             :web-tools [
                         :templates
@@ -16,6 +17,8 @@
                         :hello-world
                         :show-table ;; TODO: make these autoconfigure...
                         :show-list
+                        :convert-list
+                        :export
                         ]
             :web-audience "http://localhost:3000"
             :verifier "https://verifier.login.persona.org/verify"

@@ -70,7 +70,7 @@
                    (update-in ["data"] ensure-string))
           link {"history_id" (java.util.UUID/fromString (str (get-prop doc :history_id))) ;; Make sure the id is a uuid
                 "step_id" id
-                "created_at" (java.sql.Timestamp. (.getTime (now)))}]
+                "created_at" (sql-now)}]
       (sql/with-db-transaction [trs (:connection db)]
         (sql/insert! trs :steps step)
         (sql/insert! trs :history_step link))

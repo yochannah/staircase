@@ -42,6 +42,9 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       step:     '='
       fullSize: '='
       onToggle: '&'
+      hasItems: '&'
+      hasList:  '&'
+      nextStep: '&'
     template: """
       <div class="panel-heading">
         <i class="fa pull-right"
@@ -67,7 +70,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         scope: 'CurrentStep'
         onReady: -> console.log "Channel ready"
 
-      channel.bind 'nextStep', (trans, data) -> console.log data
+      channel.bind 'next-step', (trans, data) -> scope.nextStep {data}
+
+      channel.bind 'has-items', (trans, {key, noun, categories, ids}) ->
+        scope.hasItems {type: noun, key, ids}
+
+      channel.bind 'has-list', (trans, data) -> scope.hasList {data}
 
       scope.$watch 'tool.ident', (ident) ->
         return unless ident and conf[ident]
@@ -165,6 +173,30 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
           ctrl = $window.location.origin + scope.tool.controllerURI
           tmpl = $window.location.origin + scope.tool.templateURI
+
+          require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+
+            $injector.invoke controller, this, {'$scope': scope}
+
+            element.html(template)
+            $compile(element.contents())(scope)
+
+            scope.$apply()
+
+  Directives.directive 'nextStep', ($window, $compile, $injector) ->
+    restrict: 'E'
+    replace: true
+    scope:
+      previousStep: '='
+      data: '='
+      tool: '='
+    link: (scope, element, attrs) ->
+
+      scope.$watch 'tool.headingURI', ->
+        if scope.tool
+
+          ctrl = $window.location.origin + scope.tool.controllerURI
+          tmpl = $window.location.origin + scope.tool.headingURI
 
           require [ctrl, "text!#{ tmpl }"], (controller, template) ->
 
