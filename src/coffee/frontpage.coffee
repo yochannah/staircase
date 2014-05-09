@@ -13,6 +13,7 @@ require.config
     'angular':
       exports: 'angular'
     'angular-route': ['angular']
+    'angular-animate': ['angular']
     'angular-ui': ['angular']
     'angular-cookies': ['angular']
     'angular-resource': ['angular']
@@ -37,6 +38,7 @@ require.config
     domReady:        '/vendor/requirejs-domready/domReady'
     'jschannel':      '/vendor/jschannel'
     'angular-route': '/vendor/angular-route/angular-route'
+    'angular-animate': '/vendor/angular-animate/angular-animate'
     'angular-resource': '/vendor/angular-resource/angular-resource'
     'angular-mocks': '/vendor/angular-mocks/angular-mocks'
     'angular-cookies': '/vendor/angular-cookies/angular-cookies'
