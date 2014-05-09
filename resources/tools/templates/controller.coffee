@@ -3,7 +3,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
   filters.register 'templateTitle', -> ({title}) ->
     title.replace(/-->/g, '\u21E8').replace(/<--/g, '\u21E6')
 
-  injectables = ['$scope', '$log', '$timeout', '$q', 'Mines', 'ClassUtils']
+  injectables = ['$scope', '$log', '$timeout', '$q', '$filter', 'Mines', 'ClassUtils']
 
   validPath = (model, path) ->
     try
@@ -37,7 +37,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
       f = isBetween model, inputType, outputType
       (templateData t for t in templates when f t) # Need to json-ify data for presentation.
 
-  return Array injectables..., (scope, log, timeout, Q, Mines, ClassUtils) ->
+  return Array injectables..., (scope, log, timeout, Q, filters, Mines, ClassUtils) ->
     scope.defaults = {}
 
     setTemplates = ({query}) -> (ts) ->
@@ -55,7 +55,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
         verb:
           ed: "ran"
           ing: "running"
-        thing: "#{ q.title } template query"
+        thing: "#{ filters('templateTitle')(q) } template query"
         tool: 'show-table',
         data:
           url: scope.connection.root,
