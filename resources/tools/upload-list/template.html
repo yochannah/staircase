@@ -1,4 +1,4 @@
-<form role="form" class="form compact" ng-submit="uploadIds()">
+<form role="form" class="identifier-upload form compact">
     <div class="form-group">
         <label class="control-label">
             Choose a type:
@@ -13,25 +13,57 @@
         <tab heading="Enter IDs">
             <div class="form-group">
                 <textarea class="literal"
-                    ng-model="pastedIds"
+                    ng-model="ids.pasted"
                     spellcheck="false"
                     rows="{{tool.state === 'FULL' ? 10 : 5}}"
                     style="width: 100%"></textarea>
                 <p class="help-block">
                 Type or paste in a list of identifiers.
-                <a ng-click="pastedIds = tool.sampleData">
+                <a ng-click="ids.pasted = tool.sampleData">
                     Click here for an example.
                 </a>
                 </p>
             </div>
         </tab>
         <tab heading="Choose file">
-            <div class="form-group">
-                <input type="file" ng-model="idFile">
+            <div class="alert alert-danger" ng-if="!filesAreSupported">
+                <strong>Sorry!</strong> The HTML5 file API is not supported in this browser.
+            </div>
+            <div class="form-group" ng-if="filesAreSupported">
+                <html5-file-upload ng-model="ids.file"/>
+            </div>
+            <div>
+                <div class="alert alert-info" ng-show="ids.file">
+                    <strong>{{ids.file.name}}</strong> ({{ids.file.type || 'unknown'}}) - {{ids.file.size}} bytes
+                </div>
                 <p class="help-block">
                 Upload identifiers from a tab, comma or new-line delimited text file.
                 </p>
             </div>
         </tab>
+        <tab heading="Parsed IDs">
+            <div class="well tokens">
+                <span class="token label label-default pull-left fade-out"
+                    ng-repeat="ident in parsedIds | orderBy:sorting">
+                    <i class="pull-left fa fa-times-circle"
+                       ng-click="removeToken(ident)"></i>
+                    {{ident.token}}
+                </span>
+                <div class="clearfix"></div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default"
+                    ng-click="sorting = ''"
+                    ng-class="{active: sorting == ''}">
+                    As entered
+                </button>
+                <button class="btn btn-default"
+                    ng-click="sorting = 'token'"
+                    ng-class="{active: sorting == 'token'}">
+                    Sort alphabetically
+                </button>
+            </div>
+        </tab>
     </tabset>
+
 </form>

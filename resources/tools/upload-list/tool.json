@@ -1,6 +1,7 @@
 {
   "capabilities": ["initial"],
   "type": "native",
+  "style": "./style.css",
   "heading": "Upload List",
   "width": 2,
   "action": "Send identifiers",
