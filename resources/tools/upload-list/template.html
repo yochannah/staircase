@@ -1,5 +1,6 @@
-<form role="form" class="identifier-upload form compact">
-    <div class="form-group">
+<form role="form" class="identifier-upload form-inline compact">
+    <div class="form-group half-width"
+        ng-class="{'full-width': !discriminator}">
         <label class="control-label">
             Choose a type:
         </label>
@@ -9,9 +10,19 @@
                 ng-options="cld.displayName for cld in classes">
         </select>
     </div>
+    <div class="form-group half-width" ng-hide="!discriminator">
+        <label class="control-label">
+            {{discriminator}}:
+        </label>
+        <select
+                class="form-control"
+                ng-model="extraValue"
+                ng-options="val for val in extraValues">
+        </select>
+    </div>
     <tabset type="navType">
         <tab heading="Enter IDs">
-            <div class="form-group">
+            <div class="form-group full-width">
                 <textarea class="literal"
                     ng-model="ids.pasted"
                     spellcheck="false"

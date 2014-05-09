@@ -7,6 +7,9 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
           function (scope, logger, timeout, cacheFactory, window, filters, tokenise, mines, histories, ClassUtils) {
 
     scope.classes = [];
+    scope.extraValues = [];
+    scope.discriminator = null;
+    scope.extraValue = null;
     scope.parsedIds = [];
     scope.navType = "pills";
     scope.sorting = '';
@@ -32,6 +35,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
           request: {
             type: type,
             identifiers: identifiers,
+            extra: scope.extraValue,
             caseSensitive: false
           }
         }
@@ -60,6 +64,32 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.$watch('ids.pasted', function (ids) {
       scope.parsedIds = L.uniq(tokenise(ids)).map(function (token) {
         return {token: token};
+      });
+    });
+
+    scope.$watch('rootClass.className', function (className) {
+      if (!className) return;
+      scope.extraValues = [];
+      scope.discriminator = null;
+      scope.extraValue = null;
+      scope.connection.fetchSummaryFields().then(function withSummaryFields(fields) {
+        var fieldsForType = fields[className];
+        var joinedFields = fieldsForType.filter(function (f) { return f.split('.').length > 2; });
+        console.log(fieldsForType, joinedFields);
+        if (joinedFields.length === 1) {
+          scope.connection.fetchModel().then(function (model) {
+            return model.makePath(joinedFields[0]).getDisplayName();
+          }).then(function (name) {
+            timeout(function () {
+              scope.discriminator = name;
+            });
+          });
+          scope.connection.values({select: joinedFields}).then(function (values) {
+            timeout(function () {
+              scope.extraValues = values;
+            });
+          });
+        }
       });
     });
 
