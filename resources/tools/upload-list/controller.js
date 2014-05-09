@@ -35,7 +35,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
           request: {
             type: type,
             identifiers: identifiers,
-            extra: scope.extraValue,
+            extra: (scope.extraValue || ''),
             caseSensitive: false
           }
         }
