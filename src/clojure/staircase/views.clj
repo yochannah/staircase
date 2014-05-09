@@ -133,8 +133,7 @@
   (common "Page Not Found"
           [:div#four-oh-four "The page you requested could not be found"]))
 
-(def starting-points
-  [:div.container-fluid
+(def welcome
    [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
     [:div.panel.panel-default
      [:div.panel-heading
@@ -145,23 +144,47 @@
        If this is your first time here, maybe you might like to read more about
        the intermine system " (link-to "/about" "here") "."]
       [:button.btn.btn-default {:ng-click "showWelcome = false"}
-       "Do not show again"]]]]
+       "Do not show again"]]]])
+
+(defn initiator
+  [attrs panel-attrs heading-buttons]
+  [:starting-point.xs-col-12 attrs
+   [:div.panel.panel-default.first-step
+    panel-attrs
+    (apply vector :div.panel-heading
+     (concat heading-buttons
+             [ [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "reset()"}]
+               "{{tool.heading}}" ]))
+    [:div.panel-body
+     [:native-tool {:tool "tool" :actions "buttons" :state "state"}]]
+    [:div.panel-footer {:ng-if "tool.action"}
+     [:button.btn.btn-default.pull-right
+      {:ng-disabled "state.disabled" :ng-click "act()"}
+      "{{buttons.act || tool.action}}"]
+     [:div.clearfix]]]])
+
+(def starting-point
+  [:div.container-fluid
+
+   welcome
+
+   [:div.row.starting-points
+    (initiator {}
+               {:class "full-height" :ng-class "{'with-action': tool.action}"}
+               [])]])
+
+(def starting-points
+  [:div.container-fluid
+
+   welcome
 
    [:div.row.starting-points {:ng-controller "StartingPointsController"}
-    [:starting-point {:ng-class "getWidthClass(tool)"
-                      :ng-repeat "tool in startingPoints"
-                      :ng-hide "tool.state == 'DOCKED'"}
-     [:div.panel.panel-default.first-step {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
-      [:div.panel-heading
-       [:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]
-       [:i.fa.fa-undo.pull-right {:ng-show "tool.resettable" :ng-click "reset()"}]
-       "{{tool.heading}}"]
-      [:div.panel-body
-       [:native-tool {:tool "tool"}]]
-      [:div.panel-footer {:ng-if "tool.action"}
-       [:button.btn.btn-default.pull-right {:ng-disabled "tool.disabled" :ng-click "act()"} "{{tool.action}}"]
-       [:div.clearfix]]
-      ]]
+
+    (initiator {:ng-class "getWidthClass(tool)"
+                :ng-repeat "tool in startingPoints"
+                :ng-hide "tool.state == 'DOCKED'"}
+               {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
+               [[:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]])
 
     [:div.docked-tools
      [:ul.nav.nav-pills
@@ -169,9 +192,7 @@
        [:a {:ng-click "undockAll()"} [:i.fa.fa-th-large]]]
       [:li.active {:ng-repeat "tool in startingPoints"
                    :ng-show "tool.state == 'DOCKED'"}
-       [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]
-
-   ])
+       [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]])
 
 (def edit-button
        [:i.fa.fa-edit.pull-right {:ng-show "!editing" :ng-click "editing = true"}])
@@ -203,6 +224,7 @@
              (label-input-pair "history.title"))
       (apply vector
              :div.panel-body
+             [:p [:small [:em "{{history.created_at | roughDate }}"]]]
              (label-input-pair "history.description"))
       [:div.list-group
         [:a.list-group-item {:ng-repeat "s in steps"
@@ -292,6 +314,7 @@
   [fragment]
   (case fragment
     "frontpage" (html starting-points)
+    "starting-point" (html starting-point)
     "history" (html history)
     "about" (html about)
     {:status 404})) 

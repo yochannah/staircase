@@ -11,6 +11,10 @@ define [], -> (app) ->
       templateUrl: '/partials/history.html'
       controller: 'HistoryCtrl'
       resolve: dependencies
+    router.when '/starting-point/:tool',
+      templateUrl: '/partials/starting-point.html'
+      controller: 'StartingPointCtrl'
+      resolve: dependencies
     router.when '/about',
       templateUrl: '/partials/about.html'
       controller: 'AboutCtrl'
