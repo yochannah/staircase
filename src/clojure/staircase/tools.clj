@@ -14,7 +14,7 @@
 (defn- fix-uris
   [conf fixer]
   (reduce #(update-in %1 [%2] fixer)
-          conf
+          (if (:style conf) (update-in conf [:style] fixer) conf)
           [:headingTemplateURI :headingControllerURI :templateURI :controllerURI]))
 
 (defn strip-by-cap
