@@ -211,8 +211,8 @@
 
          "{{s.title}}"]]]]
 
-    [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right
-     {:ng-class "{minimised: expanded}"}
+    [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
+     {:ng-class "{onscreen: (!expanded && nextSteps.length)}"}
      [:div.panel.panel-default
       [:div.panel-heading "Next steps"]
       [:div.list-group {:ng-show "nextSteps.length"}
@@ -227,7 +227,7 @@
        [:em "No steps available"]]]]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-8': !expanded, 'col-md-offset-2': !expanded}"}
+     {:ng-class "{'col-md-8': (!expanded && nextSteps.length), 'col-md-10': (!expanded && !nextSteps.length), 'col-md-offset-2': !expanded}"}
      [:div.current-step
       {:tool "tool"
        :step "step"
