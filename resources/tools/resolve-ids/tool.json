@@ -1,0 +1,7 @@
+{
+  "capabilities": ["now"],
+  "type": "IFrame",
+  "seamless": false,
+  "heading": "Resolve identifiers",
+  "src": "http://alexkalderimis.github.io/resolve-ids-tool/tool.html"
+}
