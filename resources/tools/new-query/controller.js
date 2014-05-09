@@ -51,14 +51,14 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
     });
 
     scope.$watch('rowCount', function (rowCount) {
-      scope.tool.disabled = false;
+      scope.state.disabled = false;
       if (rowCount === 0) {
-        scope.tool.disabled = true;
-        scope.tool.action = "No results";
+        scope.state.disabled = true;
+        scope.actions.act = "No results";
       } else if (rowCount === 1) {
-        scope.tool.action = "View " + scope.rootClass.displayName;
+        scope.actions.act = "View " + scope.rootClass.displayName;
       } else {
-        scope.tool.action = "View Table";
+        scope.actions.act = "View Table";
       }
     });
 
