@@ -14,6 +14,15 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
   Controllers.controller 'IndexCtrl', ->
 
+  Controllers.controller 'StartingPointCtrl', Array '$scope', '$routeParams', 'startHistory', (scope, params, startHistory) ->
+
+    startHistory scope
+    console.log params.tool
+
+    scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
+      scope.tool = L.find startingPoints, (sp) -> sp.ident is params.tool
+      console.log scope.tool
+
   Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'startHistory', (http, scope, startHistory) ->
     http.get('/tools', {params: {capabilities: 'initial'}})
         .then ({data}) ->
