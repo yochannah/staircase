@@ -17,6 +17,51 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
   Services.provider 'stepConfig', StepConfig
 
+  # Little pull parsing state machine for tokenising identifiers.
+  Services.factory 'tokenise', -> (string) ->
+    charIndex = 0
+    escaping = false
+    inQuotes = false
+    current = []
+    tokens = []
+
+    endCurrent = ->
+      if current.length
+        tokens.push current.join ''
+        current = []
+
+    isDelimiter = (c) -> /\s/.test(char) or ',' is char
+
+    if string
+      while char = string.charAt(charIndex++)
+        if inQuotes and !escaping and char is "\\"
+          escaping = true
+        else if inQuotes and escaping and char is '"'
+          current.push(char)
+          escaping = false
+        else if inQuotes and escaping and char is 'n'
+          current.push("\n")
+          escaping = false
+        else if inQuotes and escaping
+          current.push("\\")
+          current.push(char)
+          escaping = false
+        else if inQuotes and !escaping and char is '"'
+          inQuotes = false
+          endCurrent()
+        else if inQuotes
+          current.push(char)
+        else if !inQuotes and !escaping and char is '"'
+          inQuotes = true
+        else if !inQuotes and !escaping and isDelimiter(char)
+          endCurrent()
+        else
+          current.push(char)
+        
+      endCurrent()
+
+    return tokens
+
   Services.factory 'ClassUtils', Array '$q', '$timeout', (Q, timeout) ->
     setClasses = (scope, grouper, propName = 'outputType') -> (model) -> timeout ->
       ret = Q.defer()
