@@ -2,6 +2,16 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
+  Directives.directive 'html5FileUpload', ->
+    restrict: 'E'
+    require: ['ngModel']
+    replace: true
+    template: """<input type="file">"""
+    link: (scope, elem, attrs, [ngModel]) ->
+      elem.on 'change', -> scope.$apply ->
+        file = elem[0].files[0]
+        ngModel.$setViewValue file
+
   Directives.directive 'appVersion', ['version', (v) -> (scope, elm) -> elm.text(version)]
 
   getOffsets = (doc, sel) ->
@@ -135,9 +145,11 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       </div>
     """
 
-  Directives.directive 'startingPoint', ($window) ->
+  Directives.directive 'startingPoint', ($timeout, $window) ->
     restrict: 'E'
     controller: ($scope) ->
+      $scope.buttons = {}
+      $scope.state = {}
       $scope.reset = -> $scope.$broadcast 'reset'
       $scope.act = -> $scope.$broadcast 'act'
 
@@ -152,6 +164,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
             maxy = L.max offsets.map (o) -> o.top + o.height
             topBars = getTopBars offsets
             ystep = element[0].offsetHeight
+            unless ystep
+              $timeout doResize, 10
+              return
+
             p1 =
               x: element[0].offsetLeft
               y: element[0].offsetTop + 1 # Don't get intersects with own top bar.
@@ -168,24 +184,36 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
             if factor > 1 and panelBody = element[0].querySelector('.panel-body')
               totalHeight = ystep * factor - margin
+              console.log totalHeight, ystep, factor
               panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"
               element.addClass 'expanded'
 
           $window.addEventListener 'resize', ->
             element[0].querySelector('.panel-body')?.style.height = null
             element.removeClass 'expanded'
-            setTimeout doResize, 10
+            $timeout doResize, 10
 
-          setTimeout doResize, 10
+          $timeout doResize, 10
+
+  toolCssLoaded = {}
 
   Directives.directive 'nativeTool', ($window, $compile, $injector) ->
     restrict: 'E'
     scope:
       tool: '=tool'
+      actions: '=actions'
+      state: '=state'
     link: (scope, element, attrs) ->
 
       scope.$watch 'tool.controllerURI', ->
         if scope.tool
+
+          if scope.tool.style and not toolCssLoaded[scope.tool.style]
+            link = $window.document.createElement('link')
+            link.rel = 'stylesheet'
+            link.href = scope.tool.style
+            document.getElementsByTagName('head')[0].appendChild(link)
+            toolCssLoaded[scope.tool.style] = true
 
           ctrl = $window.location.origin + scope.tool.controllerURI
           tmpl = $window.location.origin + scope.tool.templateURI
