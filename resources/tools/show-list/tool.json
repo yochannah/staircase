@@ -1,5 +1,6 @@
 {
-  "capabilities": ["now"],
+  "capabilities": ["now", "next"],
+  "handles": "list",
   "type": "IFrame",
   "seamless": true,
   "heading": "List Details",

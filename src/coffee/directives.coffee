@@ -35,7 +35,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         else
           element.removeAttr('seamless')
 
-  Directives.directive 'currentStep', Array '$window', 'stepConfig', ($window, conf) ->
+  Directives.directive 'currentStep', Array '$window', 'Mines', 'stepConfig', ($window, mines, conf) ->
     restrict: 'C'
     scope:
       tool:     '='
@@ -77,6 +77,13 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
       channel.bind 'has-list', (trans, data) -> scope.hasList {data}
 
+      for link in $window.document.getElementsByTagName('link') then do (link) ->
+        channel.call
+          method: 'style'
+          params:
+            stylesheet: link.href
+          success: -> console.log "Applied stylesheet: #{ link.href }"
+
       scope.$watch 'tool.ident', (ident) ->
         return unless ident and conf[ident]
         channel.call
@@ -88,19 +95,28 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         return unless step?
         step.$promise.then ->
 
-          channel.call
-            method: 'init'
-            params: step.data
-            error: -> console.error "initialization failed"
-            success: -> console.log "Initialized"
-
-          for link in $window.document.getElementsByTagName('link') then do (link) ->
+          init = ->
+            console.log "Initialising with", step.data
             channel.call
-              method: 'style'
-              params:
-                stylesheet: link.href
-              success: -> console.log "Applied stylesheet: #{ link.href }"
+              method: 'init'
+              params: step.data
+              error: -> console.error "initialization failed"
+              success: -> console.log "Initialized"
 
+          if step.data.service?.root and not step.data.service.token
+            root = step.data.service.root
+            console.log "NEEDS A TOKEN FOR", root
+            mines.all().then (services) ->
+              console.log "SERVICES", services.map (s) -> "#{ s.root } => #{ s.token }"
+              token = do (services) ->
+                for s in services when root.indexOf(s.root) >= 0
+                  return s.token
+              console.log "TOKEN", token
+          
+              step.data.service.token = token
+              init()
+          else
+            init()
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
@@ -188,6 +204,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     replace: true
     scope:
       previousStep: '='
+      appendStep: '&'
       data: '='
       tool: '='
     link: (scope, element, attrs) ->
@@ -195,8 +212,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       scope.$watch 'tool.headingURI', ->
         if scope.tool
 
-          ctrl = $window.location.origin + scope.tool.controllerURI
-          tmpl = $window.location.origin + scope.tool.headingURI
+          ctrl = $window.location.origin + scope.tool.headingControllerURI
+          tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
           require [ctrl, "text!#{ tmpl }"], (controller, template) ->
 

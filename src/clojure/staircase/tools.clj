@@ -4,25 +4,44 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]))
 
-(def tool-defaults
-  {:headingURI "./heading.html"
+(def tool-defaults ;; Lots of duplication here - be less explicit?
+  {:headingTemplateURI "./heading.html"
+   :headingControllerURI "./heading-controller.js"
    :templateURI "./template.html"
    :controllerURI "./controller.js"
    :width 1})
 
-(defn get-tool-conf
+(defn- fix-uris
+  [conf fixer]
+  (reduce #(update-in %1 [%2] fixer)
+          conf
+          [:headingTemplateURI :headingControllerURI :templateURI :controllerURI]))
+
+(defn strip-by-cap
+  [conf]
+  (let [caps (set (:capabilities conf))
+        conf (if (not (caps "next"))
+               (dissoc conf [:headingTemplateURI :headingControllerURI])
+               conf)
+        conf (if (or (not (caps "initial")) (= "native" (:type conf)))
+               (dissoc conf [:templateURI :controllerURI])
+               conf)]
+    conf))
+
+(defn get-tool-conf*
   [tool-name]
   (with-open [r (-> (str "tools/" (name tool-name) "/tool.json")
                     io/resource
                     io/reader)]
-    (let [prefix #(replace-first % "." (str "/" (name tool-name)))]
-      (-> (slurp r)
-          (json/parse-string true)
-          (#(merge tool-defaults %))
-          (assoc :ident (name tool-name))
-          (update-in [:headingURI] prefix)
-          (update-in [:templateURI] prefix)
-          (update-in [:controllerURI] prefix)))))
+    (-> (slurp r)
+        (json/parse-string true)
+        (#(merge tool-defaults %))
+        (assoc :ident (name tool-name))
+        (fix-uris #(replace-first % "." (str "/" (name tool-name))))
+        (strip-by-cap))))
+
+;; Don't do io on every access.
+(def get-tool-conf (memoize get-tool-conf*))
 
 (defn has-capability
   [capability tool-conf]

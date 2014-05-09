@@ -68,8 +68,11 @@
 
   (get-where [_ constraint]
     (sql/query (:connection db)
-               (hsql/format {:select [:*] :from [:services] :where constraint})
-               :result-set-fn (partial into [])))
+               (hsql/format {:select [:*]
+                             :from   [:services]
+                             :where  [:and constraint [:= :owner :?user]]}
+                            :params staircase.resources/context)
+               :result-set-fn vec))
   )
 
 (defn new-services-resource [& {:keys [db]}] (map->ServicesResource {:db db}))

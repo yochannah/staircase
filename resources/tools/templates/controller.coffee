@@ -56,7 +56,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
           ed: "ran"
           ing: "running"
         thing: "#{ q.title } template query"
-        tool: '/tools/show-table',
+        tool: 'show-table',
         data:
           url: scope.connection.root,
           token: scope.connection.token,

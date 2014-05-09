@@ -24,7 +24,7 @@ define(['angular', 'imjs'], function (ng, im) {
           ing: "choosing"
         },
         thing: "list " + list.title,
-        tool: "/tools/show-list",
+        tool: "show-list",
         data: {
           service: {
             root: scope.connection.root,

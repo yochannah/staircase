@@ -4,7 +4,8 @@ define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
   scope.services = []
 
   scope.previousStep.$promise.then (step) ->
-    origin = step.data.service.root
+    # TODO: make this consistent.
+    origin = (step.data.url or step.data.root or step.data.service.root)
     mines.all().then (services) ->
       scope.services = (s for s in services when Service.connect(s).root isnt origin)
 

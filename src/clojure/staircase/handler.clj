@@ -226,12 +226,17 @@
                    (DELETE "/" [] (delete-resource steps id)))))
 
 (defn build-service-routes [{:keys [config services]}]
-  (let [real-id #(if (= "default" %) (:default-service config) %)]
+  (let [ensure-token (fn [service] (if (:token service)
+                                     service
+                                     (let [token (register-for service)
+                                           id (create services {:root (:root service) :token token})]
+                                       (merge service (get-one services id)))))
+        real-id #(if (= "default" %) (:default-service config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
                 (let [user-services (get-all services)
                       configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
-                  (response (left-outer-join configured-services user-services :root :root))))
+                  (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root))))))
             (context "/:ident" [ident]
                      (GET "/" []
                           (let [ident (real-id ident)
@@ -242,11 +247,7 @@
                                                              :root
                                                              :root)
                                             first)]
-                            (response (if (:token service)
-                                        service
-                                        (let [token (register-for service)
-                                              id (create services {:root (:root service) :token token})]
-                                          (merge service (get-one services id)))))))
+                            (response (ensure-token service))))
                     (PUT "/" {doc :body}
                           (let [uri (get-in config [:services (real-id ident)])]
                             (create-new services (assoc doc :root uri))))))))

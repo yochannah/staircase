@@ -18,7 +18,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
           ed: "ran",
           ing: "running"
         },
-        tool: "/tools/show-table",
+        tool: "show-table",
         data: {
           url: scope.connection.root,
           token: scope.connection.token,

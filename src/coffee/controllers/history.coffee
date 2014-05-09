@@ -1,18 +1,17 @@
 define ['lodash'], (L) ->
   Array '$scope', '$http', '$location', '$routeParams', '$timeout', 'Histories', (scope, http, location, params, to, Histories) ->
 
+    scope.nextTools = []
+    scope.items = {}
+
     currentCardinal = parseInt params.idx, 10
     scope.history = Histories.get id: params.id
     scope.steps = Histories.getSteps id: params.id
     scope.step = Histories.getStep id: params.id, idx: currentCardinal - 1
-    scope.step.$promise.then ({tool}) -> http.get(tool).then ({data}) ->
-      scope.tool = data
-
-    scope.nextTools = []
-    scope.items = {}
-
-    http.get('/tools', {params: {capabilities: 'next'}})
-        .then ({data}) -> scope.nextTools = data
+    scope.step.$promise.then ({tool}) ->
+      http.get('/tools/' + tool).then ({data}) -> scope.tool = data
+      http.get('/tools', {params: {capabilities: 'next'}})
+          .then ({data}) -> scope.nextTools = data.filter (nt) -> nt.ident isnt tool
 
     scope.nextSteps = []
 
@@ -46,7 +45,6 @@ define ['lodash'], (L) ->
     scope.hasList = (data) -> to -> scope.list = data
 
     scope.nextStep = (step) ->
-      console.log "Appending step"
       step = Histories.append {id: scope.history.id}, step, ->
         console.log "Created step " + step.id
         location.url "/history/#{ scope.history.id }/#{ currentCardinal + 1 }"

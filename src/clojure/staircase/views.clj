@@ -219,6 +219,7 @@
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"
+         :append-step "nextStep(data)"
          :tool "ns.tool"
          :data "ns.data"}
         ]]
