@@ -1,8 +1,9 @@
-deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-ui-select2',
+deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-animate', 'angular-ui-select2',
         './filters', './services', './directives', './controllers']
 
 modules = [
   'ngRoute',
+  'ngAnimate',
   'steps.controllers',
   'steps.services',
   'steps.filters',
@@ -38,6 +39,14 @@ define deps, (angular, router) ->
         icons: 'fontawesome'
 
   router Steps
+
+  Steps.run Array '$rootScope', '$http', (scope, http) ->
+    scope.startingPoints = []
+
+    http.get("/tools", {params: {capabilities: "initial"}})
+        .then ({data}) ->
+          console.log data
+          scope.startingPoints = data
 
   return Steps
 
