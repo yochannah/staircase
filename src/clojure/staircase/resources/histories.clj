@@ -66,7 +66,9 @@
         (sql/delete! conn :history_step
                      ["history_id=?" uuid])
         (sql/delete! conn :histories
-                     ["id=? and owner=?" uuid (:user staircase.resources/context)])))
+                     ["id=? and owner=?" uuid (:user staircase.resources/context)])
+        ;; TODO - delete orphaned steps?
+        ))
     nil)
 
   (create [histories doc]
