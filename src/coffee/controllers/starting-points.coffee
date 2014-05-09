@@ -1,9 +1,5 @@
 define ['lodash'], (L) ->
-  Array '$rootScope', '$scope', '$http', '$location', 'startHistory', (root, scope, http, location, startHistory) ->
-    root.startingPoints = []
-
-    http.get("/tools", {params: {capabilities: "initial"}})
-        .then ({data}) -> root.startingPoints = data
+  Array '$scope', 'startHistory', (scope, startHistory) ->
 
     scope.expandTool = (tool) ->
       for other in scope.startingPoints when other isnt tool
