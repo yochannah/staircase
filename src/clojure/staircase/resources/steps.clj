@@ -62,7 +62,7 @@
         (sql/delete! conn :history_step ["step_id=?" uuid])))
     nil)
 
-  (create [_ doc]
+  (create [_ doc] ;; TODO: reuse existing steps where possible...
     (let [id (new-id)
           step (-> doc
                    (dissoc "history_id" :history_id :id) 
