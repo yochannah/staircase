@@ -2,12 +2,15 @@ define ['lodash'], (L) -> Array '$scope', '$log', '$modal', (scope, log, modalFa
 
   InputEditCtrl = Array '$scope', '$modalInstance', 'history', 'step', (scope, modal, history, step, index) ->
 
-    scope.data = L.clone step.data
+    scope.data = L.clone step.data, true
     delete scope.data.service # Not editable
 
-    scope.ok = -> modal.close history.id, index, scope.data
+    scope.ok = ->
+      modal.close history.id, index, scope.data
 
-    scope.cancel = -> modal.dismiss 'cancel'
+    scope.cancel = ->
+      modal.dismiss 'cancel'
+      scope.data = L.clone step.data, true
 
   scope.openEditDialogue = ->
     dialogue = modalFactory.open
