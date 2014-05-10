@@ -1,6 +1,11 @@
 define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
-  
+
   Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
+
+  requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
+    require ['controllers/' + ident], (ctrl) -> injector.invoke(ctrl, this, {$scope})
+
+  mountController = (name, ident) -> Controllers.controller name, requiredController ident
 
   Controllers.controller 'FooterCtrl', Array '$scope', '$cookies', (scope, cookies) ->
     scope.showCookieMessage = cookies.ShowCookieWarning isnt "false"
@@ -43,13 +48,11 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
     scope.startQuickSearchHistory = (term) ->
       log.info "TERM", term # TODO: send this to interested parties.
 
-  # Required controller.
-  Controllers.controller('StartingPointsController', ['$scope', '$injector', ($scope, $injector) ->
-    require ['controllers/starting-points'], (ctrl) -> $injector.invoke(ctrl, this, {$scope})
-  ])
+  mountController 'StartingPointsController', 'starting-points'
 
-  Controllers.controller 'HistoryCtrl', Array '$scope', '$injector', ($scope, injector) ->
-    require ['controllers/history'], (ctrl) -> injector.invoke(ctrl, this, {$scope})
+  mountController 'HistoryStepCtrl', 'history-step'
+
+  mountController 'HistoryCtrl', 'history'
 
   return Controllers
 
