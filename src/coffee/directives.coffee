@@ -8,6 +8,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     replace: true
     scope:
       item: '='
+    controller: ($scope) ->
+      $scope.removeElementAt = (i) -> $scope.item.value.splice(i, 1)
     template: """
       <div class="form-group">
         <label>
@@ -47,8 +49,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           """
             <div class="well well-sm clearfix">
               <span class="array-element label label-default"
-                    ng-repeat="elem in item.value">
-                <i tooltip="remove this element" class="pull-left fa fa-times-circle"></i>
+                    ng-repeat="elem in item.value track by $index">
+                <i tooltip="remove this element"
+                   ng-click="removeElementAt($index)"
+                   class="pull-left fa fa-times-circle"></i>
                 <i tooltip="edit this element" class="pull-right fa fa-edit"></i>
                 {{elem}}
               </span>
