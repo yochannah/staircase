@@ -20,8 +20,9 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
         },
         tool: "show-table",
         data: {
-          url: scope.connection.root,
-          token: scope.connection.token,
+          service: {
+            root: scope.connection.root,
+          },
           query: getQuery(scope)
         }
       });
@@ -115,7 +116,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
       if (scope.useConstraint && scope.fieldName && scope.fieldValue) {
         constraint.path = scope.fieldName[0];
         constraint.value = scope.fieldValue;
-        query.where = [constraint];
+        query.constraints = [constraint];
       }
     }
     return query;
