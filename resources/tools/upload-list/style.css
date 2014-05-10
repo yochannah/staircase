@@ -2,6 +2,10 @@
     min-width: 12em;
 }
 
+.identifier-upload .tokens input {
+    color: #555;
+}
+
 .identifier-upload .form-group.half-width {
     width: 45%;
 }

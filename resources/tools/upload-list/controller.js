@@ -48,6 +48,10 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       scope.parsedIds = L.without(scope.parsedIds, token);
     };
 
+    scope.addToken = function () {
+      scope.parsedIds.push({token: '', editing: true});
+    };
+
     scope.$watch('parsedIds', function (ids) {
       scope.state.disabled = !(ids && ids.length);
       if (!scope.state.disabled) {
@@ -94,6 +98,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     });
 
     scope.$watch('ids.file', function (file) {
+      if (!file) return;
       var reader = new FileReader();
       reader.onloadend = function (e) {
         timeout(function () { // Set timeout to trigger digest.
