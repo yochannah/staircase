@@ -18,7 +18,7 @@
     "requirejs-text": "~2.0.10",
     "angular-route": "~1.2.9",
     "angular": "~1.2.9",
-    "angular-ui-bootstrap-bower": "~0.10.0",
+    "angular-ui-bootstrap-bower": "~0.11.0",
     "angular-cookies": "~1.2.16",
     "imjs": "~3.2.2",
     "lodash": "~2.4.1",
