@@ -72,7 +72,7 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       querying = conn.query select: ['id'], from: type, where: [constraint]
       Q.all([naming, querying]).then ([name, query]) ->
         console.log {name, tags, description}
-        query.saveAsList {name, tags, description}
+        query.saveAsList {name, description}
 
     return maker
 
