@@ -197,6 +197,11 @@
 (def edit-button
        [:i.fa.fa-edit.pull-right {:ng-show "!editing" :ng-click "editing = true"}])
 
+(def collapse-button
+  [:i.fa.pull-left.collapser
+   {:ng-click "collapsed = !collapsed"
+    :ng-class "{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"}])
+
 (defn cancel-button [cb]
   [:i.fa.fa-undo.pull-right {:ng-show "editing" :ng-click cb}])
 
@@ -214,10 +219,11 @@
    [:div.row
 
     [:div.sidebar.slide-left.col-xs-12.col-md-2
-     {:ng-class "{minimised: expanded}"}
+     {:ng-class "{minimised: expanded, collapsed: collapsed}"}
      [:div.panel.panel-default
       (apply vector
              :div.panel-heading
+             collapse-button
              edit-button
              (cancel-button "updateHistory()")
              (save-button "saveHistory()")
@@ -228,9 +234,13 @@
              (label-input-pair "history.description"))
       [:div.list-group
         [:a.list-group-item {:ng-repeat "s in steps"
+                             :ng-controller "HistoryStepCtrl" 
                              :ng-class "{active: step.id == s.id}"
                              :href "/history/{{history.id}}/{{$index + 1}}"}
 
+         [:i.pull-right.fa.fa-edit
+            {:ng-click "openEditDialogue()"
+             :ng-show "step.id == s.id"}]
          "{{s.title}}"]]]]
 
     [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
@@ -258,8 +268,19 @@
        :has-list "hasList(data)"
        :next-step "nextStep(data)"
        :on-toggle "expanded = !expanded"} ]]
-
     ]])
+
+(def edit-step (html
+   [:div.modal-header
+    [:h3.modal-title
+     "Edit step data"]]
+   [:div.modal-body.edit-step-data
+    [:form.form
+     [:editable-data {:data "data"}]]]
+   [:div.modal-footer
+    [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
+    [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]]
+  ))
 
 (def about
   [:div.container-fluid
@@ -315,6 +336,7 @@
   (case fragment
     "frontpage" (html starting-points)
     "starting-point" (html starting-point)
+    "edit-step-data" edit-step
     "history" (html history)
     "about" (html about)
     {:status 404})) 

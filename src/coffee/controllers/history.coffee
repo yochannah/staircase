@@ -2,6 +2,7 @@ define ['lodash'], (L) ->
   Array '$scope', '$http', '$location', '$routeParams', '$timeout', 'Histories', (scope, http, location, params, to, Histories) ->
 
     scope.nextTools = []
+    scope.collapsed = true # Hide details in reduced real-estate view.
     scope.items = {}
 
     currentCardinal = parseInt params.idx, 10

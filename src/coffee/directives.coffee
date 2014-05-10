@@ -2,6 +2,96 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
+  # Pair of recursive directives for turning any json structure into an editable form.
+  Directives.directive 'editableItem', ($compile) ->
+    restrict: 'E'
+    replace: true
+    scope:
+      item: '='
+    template: """
+      <div class="form-group">
+        <label>
+          {{item.category == 'array' ? item.value.length : ''}} {{item.name}}
+        </label>
+      </div>
+    """
+    link: (scope, element) ->
+
+      if scope.item.category is 'bool'
+        element.append """
+          <button class="btn btn-default boolean-control"
+                  ng-class="{active: item.value}"
+                  ng-click="item.value = !item.value">
+            {{item.value}}
+          </button>
+        """
+      else if scope.item.category is 'array'
+        if L.isObject scope.item.value[0] # array of objects
+          element.append """
+            <div class="form-group collapsible"
+                 ng-class="{collapsed: elem.collapsed}"
+                 ng-repeat="elem in item.value">
+              <button class="pull-right btn btn-default"
+                      ng-click="removeElem(item, elem)">
+                Remove
+              </button>
+              <label ng-click="elem.collapsed = !elem.collapsed">
+                <i class="fa"
+                   ng-class="{'fa-caret-right': elem.collapsed, 'fa-caret-down': !elem.collapsed}">
+                </i>
+                {{item.name}} {{$index + 1}}
+              </label>
+              <editable-data data="elem"/>
+            </div>
+          """
+        else # Array of scalar values
+          element.append """
+            <div class="well well-sm clearfix">
+              <span class="array-element label label-default"
+                    ng-repeat="elem in item.value">
+                <i tooltip="remove this element" class="pull-left fa fa-times-circle"></i>
+                <i tooltip="edit this element" class="pull-right fa fa-edit"></i>
+                {{elem}}
+              </span>
+            </div>
+          """
+      else if scope.item.category is 'scalar'
+        element.append """
+          <input class="form-control"
+                ng-model="item.value">
+        """
+      else if scope.item.category is 'object'
+        element.append """
+          <editable-data data="item.value"/>
+        """
+
+      $compile(element.contents())(scope)
+
+  Directives.directive 'editableData', ->
+    restrict: 'E'
+    replace: true
+    scope:
+      data: '='
+    controller: ($scope) ->
+      categorise = (value) ->
+        if L.isBoolean(value)
+          'bool'
+        else if L.isArray value
+          'array'
+        else if L.isObject value
+          'object'
+        else
+          'scalar'
+
+      $scope.$watch 'data', (data) ->
+        $scope.items = for name, value of data when name[0] isnt '$'
+          {name, value, category: categorise(value)}
+
+    template: """
+      <editable-item item="item" ng-repeat="item in items">
+      </editable-item>
+    """
+
   Directives.directive 'html5FileUpload', ->
     restrict: 'E'
     require: ['ngModel']

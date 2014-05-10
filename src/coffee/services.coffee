@@ -17,6 +17,32 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
 
   Services.provider 'stepConfig', StepConfig
 
+  # A service for getting a computed style.
+  Services.factory 'getComputedStyle', ($window) ->
+    body = $window.document.getElementsByTagName('body')[0]
+    e = $window.document.createElement 'div'
+    addDummy = (className) ->
+      e = $window.document.createElement('div')
+      e.className = className
+      e.style.display = 'none'
+      body.appendChild(e)
+      return e
+
+    if e.currentStyle
+      return (className, prop) ->
+        elem = addDummy className
+        style = elem.currentStyle[prop]
+        body.removeChild elem
+        return style
+    else if $window.getComputedStyle
+      return (className, prop) ->
+        elem = addDummy className
+        style = $window.document.defaultView.getComputedStyle(elem, null)[prop]
+        body.removeChild elem
+        return style
+    else
+      return -> null
+
   # Little pull parsing state machine for tokenising identifiers.
   Services.factory 'tokenise', -> (string) ->
     charIndex = 0
