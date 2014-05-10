@@ -58,8 +58,8 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
         thing: "#{ filters('templateTitle')(q) } template query"
         tool: 'show-table',
         data:
-          url: scope.connection.root,
-          token: scope.connection.token,
+          service:
+            root: scope.connection.root,
           query: q
 
     scope.classes = []
