@@ -43,11 +43,12 @@
       [:span.sr-only "Toggle navigation"]
       (for [_ (range 3)]
         [:span.icon-bar])]
-     [:a.navbar-brand.dropdown-toggle
-      [:span.app-name "Steps"]] ;; Make configurable?
-     (unordered-list {:class "dropdown-menu"}
-                     (for [[title icon path] home-links]
-                       (link-to (or path (str "/" title)) [:i.fa.fa-fw {:class (str "fa-" icon)}] " " title)))]
+     [:div {:dropdown "dropdown"}
+      [:a.navbar-brand.dropdown-toggle
+        [:span.app-name "Steps"]] ;; Make configurable?
+      (unordered-list {:class "dropdown-menu"}
+                      (for [[title icon path] home-links]
+                        (link-to (or path (str "/" title)) [:i.fa.fa-fw {:class (str "fa-" icon)}] " " title)))]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
@@ -265,7 +266,7 @@
        :step "step"
        :full-size "expanded"
        :has-items "setItems(key, type, ids)"
-       :has-list "hasList(data)"
+       :has "hasSomething(what, data)"
        :next-step "nextStep(data)"
        :on-toggle "expanded = !expanded"} ]]
     ]])

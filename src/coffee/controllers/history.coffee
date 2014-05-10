@@ -1,5 +1,7 @@
 define ['lodash'], (L) ->
-  Array '$scope', '$http', '$location', '$routeParams', '$timeout', 'Histories', (scope, http, location, params, to, Histories) ->
+  injectables = ['$scope', '$http', '$location', '$routeParams', '$timeout', 'makeList', 'Histories']
+
+  Array injectables..., (scope, http, location, params, to, makeList, Histories) ->
 
     scope.nextTools = []
     scope.collapsed = true # Hide details in reduced real-estate view.
@@ -43,7 +45,18 @@ define ['lodash'], (L) ->
 
     scope.setItems = (key, type, ids) -> to -> scope.items[key] = {type, ids}
 
-    scope.hasList = (data) -> to -> scope.list = data
+    scope.hasSomething = (what, data) ->
+      if what is 'list'
+        to -> scope.list = data
+      else if what is 'ids'
+        category = scope.step.data.request?.extra
+        makeList.fromIds(data, category).then (list) ->
+          scope.nextStep
+            title: "Created list #{ list.name }"
+            tool: 'show-list'
+            data:
+              listName: list.name
+              service: data.service
 
     scope.nextStep = (step) ->
       step = Histories.append {id: scope.history.id}, step, ->

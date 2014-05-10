@@ -237,6 +237,7 @@
             (GET "/" []
                 (let [user-services (get-all services)
                       configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
+                  (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                   (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root))))))
             (context "/:ident" [ident]
                      (GET "/" []

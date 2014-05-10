@@ -1,4 +1,4 @@
-require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
+require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   asData = ({data}) -> data
 
@@ -42,6 +42,39 @@ require ['angular', 'angular-resource', 'lodash'], (ng, _, L) ->
         return style
     else
       return -> null
+
+  Services.factory 'generateListName', Array '$q', (Q) -> (conn, type, category) ->
+    naming = conn.fetchModel().then (model) -> model.makePath(type).getDisplayName()
+    gettingLists = conn.fetchLists()
+    Q.all([naming, gettingLists]).then ([name, lists]) ->
+      currentNames = L.pluck lists, 'name'
+      baseName = "#{ name } list - #{ new Date().toDateString() }"
+      baseName = "#{ category } #{ baseName }" if category
+      currentName = baseName
+      suffix = 1
+      while L.contains currentNames, currentName
+        currentName = "#{ currentName } (#{ suffix++ })"
+      return currentName
+
+  # Provide a function for connecting to a mine by URL.
+  Services.factory 'connectTo', Array 'Mines', (mines) -> (root) -> mines.all().then (services) ->
+    conf = L.find services, (s) -> root.indexOf(s.root) is 0
+    imjs.Service.connect conf
+
+  Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
+    maker = {}
+    
+    maker.fromIds = ({objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
+      constraint = {path: type, op: 'IN', ids: objectIds}
+      tags = ['source:identifiers']
+      description = "Created by resolving identifiers"
+      naming = genName conn, type, category
+      querying = conn.query select: ['id'], from: type, where: [constraint]
+      Q.all([naming, querying]).then ([name, query]) ->
+        console.log {name, tags, description}
+        query.saveAsList {name, tags, description}
+
+    return maker
 
   # Little pull parsing state machine for tokenising identifiers.
   Services.factory 'tokenise', -> (string) ->

@@ -27,8 +27,7 @@ define(['angular', 'imjs'], function (ng, im) {
         tool: "show-list",
         data: {
           service: {
-            root: scope.connection.root,
-            token: scope.connection.token,
+            root: scope.connection.root
           },
           listName: list.name
         }

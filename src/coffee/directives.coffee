@@ -141,7 +141,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       fullSize: '='
       onToggle: '&'
       hasItems: '&'
-      hasList:  '&'
+      has:      '&'
       nextStep: '&'
     template: """
       <div class="panel-heading">
@@ -173,7 +173,9 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       channel.bind 'has-items', (trans, {key, noun, categories, ids}) ->
         scope.hasItems {type: noun, key, ids}
 
-      channel.bind 'has-list', (trans, data) -> scope.hasList {data}
+      channel.bind 'has-list', (trans, data) -> scope.has {what: 'list', data}
+
+      channel.bind 'has-ids', (trans, data) -> scope.has {what: 'ids', data}
 
       for link in $window.document.getElementsByTagName('link') then do (link) ->
         channel.call
