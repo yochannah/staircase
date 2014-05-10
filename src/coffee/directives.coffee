@@ -16,9 +16,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       </div>
     """
     link: (scope, element) ->
-
-      if scope.item.category is 'bool'
-        element.append """
+      toAppend = if scope.item.category is 'bool'
+        """
           <button class="btn btn-default boolean-control"
                   ng-class="{active: item.value}"
                   ng-click="item.value = !item.value">
@@ -27,7 +26,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         """
       else if scope.item.category is 'array'
         if L.isObject scope.item.value[0] # array of objects
-          element.append """
+          """
             <div class="form-group collapsible"
                  ng-class="{collapsed: elem.collapsed}"
                  ng-repeat="elem in item.value">
@@ -45,7 +44,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
             </div>
           """
         else # Array of scalar values
-          element.append """
+          """
             <div class="well well-sm clearfix">
               <span class="array-element label label-default"
                     ng-repeat="elem in item.value">
@@ -56,16 +55,11 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
             </div>
           """
       else if scope.item.category is 'scalar'
-        element.append """
-          <input class="form-control"
-                ng-model="item.value">
-        """
+        """<input class="form-control" ng-model="item.value">"""
       else if scope.item.category is 'object'
-        element.append """
-          <editable-data data="item.value"/>
-        """
+        """<editable-data data="item.value"/>"""
 
-      $compile(element.contents())(scope)
+      $compile(toAppend) scope, (cloned) -> element.append cloned
 
   Directives.directive 'editableData', ->
     restrict: 'E'
