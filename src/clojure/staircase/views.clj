@@ -273,6 +273,7 @@
 (def edit-step (html
    [:div.modal-header
     [:h3.modal-title
+     [:button.btn.btn-warning.pull-right {:ng-click "cancel()"} "close"]
      "Edit step data"]]
    [:div.modal-body.edit-step-data
     [:form.form
