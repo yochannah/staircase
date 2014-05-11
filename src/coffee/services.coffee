@@ -43,6 +43,14 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     else
       return -> null
 
+  Services.factory 'meetRequest', Array '$q', '$injector', (Q, injector) -> (tool, step, data) ->
+    d = Q.defer()
+    require [tool.providerURI], (factory) ->
+      handleRequest = injector.invoke factory, this
+      handleRequest(step, data).then d.resolve, d.reject
+      
+    return d.promise
+
   Services.factory 'generateListName', Array '$q', (Q) -> (conn, type, category) ->
     naming = conn.fetchModel().then (model) -> model.makePath(type).getDisplayName()
     gettingLists = conn.fetchLists()

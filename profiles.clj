@@ -17,6 +17,7 @@
                         :hello-world
                         :show-table ;; TODO: make these autoconfigure...
                         :show-list
+                        :show-enrichment
                         :resolve-ids
                         :convert-list
                         :export

@@ -267,6 +267,7 @@
        :full-size "expanded"
        :has-items "setItems(key, type, ids)"
        :has "hasSomething(what, data)"
+       :wants "wantsSomething(what, data)"
        :next-step "nextStep(data)"
        :on-toggle "expanded = !expanded"} ]]
     ]])
@@ -283,6 +284,23 @@
     [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
     [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]]
   ))
+
+(def choose-tool-dialogue
+  (html
+    [:div.modal-header
+     [:h3.modal-title
+      [:button.btn.btn-warning.pull-right {:ng-click "cancel()"} "close"]
+      "Choose Tool"]]
+    [:div.modal-body.choose-tool
+     [:ul.list-group
+      [:li.list-group-item
+       {:ng-repeat "item in items"
+        :ng-class "{active: item == selected.item}"}
+       [:a {:ng-click "selected.item = item"} "{{item.heading}}"]]]]
+    [:div.modal-footer
+     [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
+     [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]]
+    ))
 
 (def about
   [:div.container-fluid
@@ -339,6 +357,7 @@
     "frontpage" (html starting-points)
     "starting-point" (html starting-point)
     "edit-step-data" edit-step
+    "choose-tool-dialogue" choose-tool-dialogue
     "history" (html history)
     "about" (html about)
     {:status 404})) 

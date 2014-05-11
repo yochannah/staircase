@@ -7,6 +7,7 @@
 (def tool-defaults ;; Lots of duplication here - be less explicit?
   {:headingTemplateURI "./heading.html"
    :headingControllerURI "./heading-controller.js"
+   :providerURI "./provider.js"
    :templateURI "./template.html"
    :controllerURI "./controller.js"
    :width 1})
@@ -15,16 +16,19 @@
   [conf fixer]
   (reduce #(update-in %1 [%2] fixer)
           (if (:style conf) (update-in conf [:style] fixer) conf)
-          [:headingTemplateURI :headingControllerURI :templateURI :controllerURI]))
+          [:providerURI :headingTemplateURI :headingControllerURI :templateURI :controllerURI]))
 
 (defn strip-by-cap
   [conf]
   (let [caps (set (:capabilities conf))
         conf (if (not (caps "next"))
-               (dissoc conf [:headingTemplateURI :headingControllerURI])
+               (dissoc conf :headingTemplateURI :headingControllerURI)
+               conf)
+        conf (if (not (caps "provider"))
+               (dissoc conf :providerURI)
                conf)
         conf (if (or (not (caps "initial")) (= "native" (:type conf)))
-               (dissoc conf [:templateURI :controllerURI])
+               (dissoc conf :templateURI :controllerURI)
                conf)]
     conf))
 
