@@ -53,7 +53,7 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       currentName = baseName
       suffix = 1
       while L.contains currentNames, currentName
-        currentName = "#{ currentName } (#{ suffix++ })"
+        currentName = "#{ baseName } (#{ suffix++ })"
       return currentName
 
   # Provide a function for connecting to a mine by URL.
