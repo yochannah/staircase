@@ -46,10 +46,6 @@
         left: -15%;
     }
 
-    .next-steps {
-        position: absolute;
-    }
-
     .sidebar.collapsed {
         .panel-body, .list-group {
             display: none;
@@ -59,16 +55,29 @@
         }
     }
 
-    .next-steps.slide-right.offscreen {
-        right: -100%;
+    .next-steps.slide-right {
+        position: relative;
         @media (min-width: @screen-md-min) {
             position: absolute;
-            right: -16%;
         }
-    }
 
-    .next-steps.slide-right.onscreen {
-        right: 1%;
+        &.offscreen {
+            right: -100%;
+            display: none;
+            @media (min-width: @screen-md-min) {
+                display: block;
+                right: -16%;
+            }
+        }
+
+        &.onscreen {
+            right: 0%;
+            display: block;
+            @media (min-width: @screen-md-min) {
+                right: 1%;
+            }
+        }
+
     }
 
 
