@@ -20,17 +20,13 @@
 
 (defn strip-by-cap
   [conf]
-  (let [caps (set (:capabilities conf))
-        conf (if (not (caps "next"))
-               (dissoc conf :headingTemplateURI :headingControllerURI)
-               conf)
-        conf (if (not (caps "provider"))
-               (dissoc conf :providerURI)
-               conf)
-        conf (if (or (not (caps "initial")) (= "native" (:type conf)))
-               (dissoc conf :templateURI :controllerURI)
-               conf)]
-    conf))
+  (let [has-cap (set (:capabilities conf))
+        strippers [
+                  [#(not (has-cap "next")) [:headingTemplateURI :headingControllerURI]]
+                  [#(not (has-cap "provider")) [:providerURI]]
+                  [#(and (not (has-cap "initial")) (not (= "native" (:type conf)))) [:templateURI :controllerURI]]]
+        reduce-f (fn [c [test-f to-strip]] (if (test-f) (apply dissoc c to-strip) c))]
+    (reduce reduce-f conf strippers)))
 
 (defn get-tool-conf*
   [tool-name]
@@ -44,8 +40,8 @@
         (fix-uris #(replace-first % "." (str "/" (name tool-name))))
         (strip-by-cap))))
 
-;; Don't do io on every access.
-(def get-tool-conf (memoize get-tool-conf*))
+;; Don't do io on every access. - but for now in development we should.
+(def get-tool-conf get-tool-conf*) ;;(memoize get-tool-conf*))
 
 (defn has-capability
   [capability tool-conf]
