@@ -82,6 +82,12 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
         console.log {name, tags, description}
         query.saveAsList {name, description}
 
+    maker.fromQuery = (query, service) -> connectTo(service.root).then (conn) ->
+      description = "Need a better way to pass along descriptions..."
+      naming = genName conn, query.from
+      querying = conn.query query
+      Q.all([naming, querying]).then ([name, query]) -> query.saveAsList {name, description}
+
     return maker
 
   # Little pull parsing state machine for tokenising identifiers.

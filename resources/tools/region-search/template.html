@@ -23,28 +23,36 @@
                 ng-options="org.shortName for org in organisms">
         </select>
     </div>
-    <tabset type="navType">
+    <tabset type="pills">
         <tab heading="Enter regions">
             <div class="form-group">
                 <textarea class="literal"
-                    ng-model="pastedRegions"
+                    ng-model="regions.pasted"
                     spellcheck="false"
                     rows="{{tool.state === 'FULL' ? 10 : 2}}"
                     style="width: 100%">
                 </textarea>
                 <p class="help-block">
                 Type or paste in a list of regions.
-                <a ng-click="pastedRegions = tool.sampleData">
+                <a ng-click="regions.pasted = tool.sampleData">
                     Click here for an example.
                 </a>
                 </p>
             </div>
         </tab>
         <tab heading="Choose file">
-            <div class="form-group">
-                <input type="file" ng-model="regionFile">
+            <div class="alert alert-danger" ng-if="!filesAreSupported">
+                <strong>Sorry!</strong> The HTML5 file API is not supported in this browser.
+            </div>
+            <div class="form-group" ng-if="filesAreSupported">
+                <html5-file-upload ng-model="regions.file"/>
+            </div>
+            <div>
+                <div class="alert alert-info" ng-show="regions.file">
+                    <strong>{{regions.file.name}}</strong> ({{regions.file.type || 'unknown'}}) - {{regions.file.size}} bytes
+                </div>
                 <p class="help-block">
-                Upload regions from a new-line delimited text file.
+                Upload regions from tab-delimited or new-line delimited sets of regions.
                 </p>
             </div>
         </tab>

@@ -1,22 +1,58 @@
-define(['angular', 'imjs'], function (ng, im) {
+define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', 'Mines', 'ClassUtils',
-          function (scope, logger, timeout, mines, ClassUtils) {
+  return ['$scope', '$log', '$timeout', '$window', 'tokenise', 'Mines', 'ClassUtils',
+          function (scope, logger, timeout, window, tokenise, mines, ClassUtils) {
     scope.navType = "pills";
     scope.classes = [];
     scope.organisms = [];
     scope.serviceName = "";
+    scope.regions = {pasted: null, file: null, parsed: null};
+
+    scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 
     scope.$on('act', function () {
-      logger.info(scope.featureTypes, "in", scope.regions);
+      logger.info(scope.organism.shortName, scope.featureTypes, "in", scope.regions.parsed);
+      scope.$emit('start-history', {
+        thing: scope.regions.parsed.length + ' genomic intervals',
+        verb: {
+          ed: 'submitted',
+          ing: 'submitting'
+        },
+        tool: 'region-search',
+        data: {
+          service: { root: scope.serviceRoot },
+          request: {
+            regions: scope.regions.parsed,
+            types: scope.featureTypes,
+            organism: scope.organism.shortName
+          }
+        }
+      });
     });
 
     var fetchingDefaultMine = mines.get('default');
 
     scope.$watch('serviceName', function (name) {
       scope.tool.heading = 'Search ' + name + ' by chromosome location';
+    });
+
+    scope.$watch('regions.pasted', function (pasted) {
+      timeout(function () {
+        scope.regions.parsed = L.uniq(tokenise(pasted));
+      });
+    });
+
+    scope.$watch('regions.file', function (file) {
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onloadend = function (e) {
+        timeout(function () { // Set timeout to trigger digest.
+          scope.regions.pasted = e.target.result;
+        });
+      };
+      reader.readAsText(file);
     });
     
     fetchingDefaultMine.then(setMineDetails);
@@ -36,7 +72,10 @@ define(['angular', 'imjs'], function (ng, im) {
     }, logger.warn);
 
     function setMineDetails (mine) {
-      timeout(function () { scope.serviceName = mine.ident; });
+      timeout(function () {
+        scope.serviceRoot = mine.root;
+        scope.serviceName = mine.ident;
+      });
     }
 
     function filterToSequenceFeatures (classes) {

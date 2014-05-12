@@ -1,11 +1,12 @@
 {
-  "capabilities": ["initial"],
+  "capabilities": ["initial", "now"],
   "type": "native",
+  "handles": "genomic-regions",
   "heading": "Region Search",
   "width": 1,
   "action": "Search",
   "resettable": true,
+  "src": "http://alexkalderimis.github.io/region-search-tool/tool.html",
   "sampleData": "2L:14615455..14619002\n2R:5866646..5868384\n3R:2578486..2580016"
 }
-
 

@@ -11,6 +11,14 @@ define [], ->
           data:
             listName: list.name
             service: data.service
+    else if data.request?.query?
+      makeList.fromQuery(data.request.query, data.service).then (list) ->
+        d.resolve
+          title: "Created list #{ list.name }"
+          tool: 'show-list'
+          data:
+            listName: list.name
+            service: data.service
     else
       log.error "Don't know how to make a list from", data
       d.reject 'Unable to handle request'
