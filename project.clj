@@ -36,12 +36,14 @@
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
+	    [org.clojars.wokier/lein-bower "0.3.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
   :ring {:handler staircase.app/handler}
+  :prep-tasks ["javac" "compile" "bower"]
   :source-paths ["src/clojure"]
   :aliases {
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]

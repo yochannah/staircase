@@ -7,37 +7,28 @@ The webapp that serves the step-based data-flow interface to the
 
 ## Quick Start
 
-Assuming all dependencies installed and the DB is configured (or you are using the default
-user DB).
-
 ```sh
-bower install
 lein ring server
 ```
 
 ## Prerequisites
 
-You will need [Leiningen][1] 1.7.0 or above installed, as well as (at least for now
-until I get `lein-bower` set up) [bower][2], and thus [node.js][3].
+You will need [Leiningen][1] 2.0 or above installed. This handles all
+dependencies, including runtime javascript, which are managed by
+[Bower][lein]. As clojure is a JVM language, this requires a JDK be installed;
+please see you friendly java vendor for details.
 
-Before running you should must install the runtime javascript dependencies. This is
-currently done with the following commands:
-
-```sh
-# Installs bower.
-npm install
-# Installs runtime dependencies.
-./node_modules/bower/bin/bower install
-```
+This application also makes use of a postgres database. So you will need
+[postgres][psql] installed and configured.
 
 ## Configuration
 
 You must configure the database and add a secrets file before you can run
 the application.
 
-The secrets file is needed to sign authentication tokens. You can use private/public
-key peirs, or simply provide a key phrase for HMAC hashing. In the latter case, add
-a `resources/secrets.edn` file which defines a key-phrase:
+The secrets file is needed to sign authentication tokens. You can use
+private/public key pairs, or simply provide a key phrase for HMAC hashing. In
+the latter case, add a `resources/secrets.edn` file which defines a key-phrase:
 
 ```clj
 {
@@ -45,12 +36,13 @@ a `resources/secrets.edn` file which defines a key-phrase:
 }
 ```
 
-The database and the toolset are configured using [Environ][environ], which
-has a flexible configuration system. Most settings are to be found in `profiles.clj`.
+The database and the toolset are configured using [Environ][environ], which has
+a flexible configuration system. Most settings are to be found in
+`profiles.clj`.
 
-It is recommended that DB authentication settings do not live in source controlled files,
-but should instead be configured through environment variables or in the user config
-(`~./lein/profile.clj`).
+It is recommended that DB authentication settings do not live in source
+controlled files, but should instead be configured through environment
+variables or in the user config (`~./lein/profile.clj`).
 
 The following configuration values are recognized, here presented
 as you might configure them in a `profiles.clj` file:
@@ -97,6 +89,6 @@ Copyright © 2014 Alex Kalderimis and InterMine
 [travis-badge]: https://travis-ci.org/alexkalderimis/staircase.svg?branch=master
 [ci]: https://travis-ci.org/alexkalderimis/staircase
 [environ]: https://github.com/weavejester/environ
-[1]: https://github.com/technomancy/leiningen
-[2]: http://bower.io/
-[3]: http://nodejs.org/
+[psql]: http://www.postgresql.org/
+[lein]: https://github.com/technomancy/leiningen
+[bower]: http://bower.io/
