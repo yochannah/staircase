@@ -66,7 +66,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
     scope.$watch('rootClass.className', function (className) {
       var fields, promises;
       if (!scope.summaryFields) return;
-      fields = scope.summaryFields[className];
+      fields = [className].concat(scope.summaryFields[className]);
       promises = fields.map(getDisplayName(scope.model));
       Q.all(promises).then(function (names) {
         scope.fields = L.zip(fields, names);
@@ -110,12 +110,14 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
   }
 
   function getQuery (scope) {
-    var constraint = {op: '='}, query = {select: []};
+    var className, constraint = {op: '='}, query = {select: []};
     if (scope.rootClass) {
-      query.select.push(scope.rootClass.className + ".*");
+      className = scope.rootClass.className;
+      query.select.push(className + ".*");
       if (scope.useConstraint && scope.fieldName && scope.fieldValue) {
         constraint.path = scope.fieldName[0];
         constraint.value = scope.fieldValue;
+        if (scope.fieldName[0] === className) constraint.op = 'LOOKUP';
         query.constraints = [constraint];
       }
     }
