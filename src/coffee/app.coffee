@@ -44,9 +44,7 @@ define deps, (angular, router) ->
     scope.startingPoints = []
 
     http.get("/tools", {params: {capabilities: "initial"}})
-        .then ({data}) ->
-          console.log data
-          scope.startingPoints = data
+        .then ({data}) -> scope.startingPoints = data.map (tool) -> tool.active = true; tool
 
   return Steps
 

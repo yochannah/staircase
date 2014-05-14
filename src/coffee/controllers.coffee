@@ -3,7 +3,9 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
   Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
-    require ['controllers/' + ident], (ctrl) -> injector.invoke(ctrl, this, {$scope})
+    require ['controllers/' + ident], (ctrl) ->
+      injector.invoke(ctrl, this, {$scope})
+      $scope.$apply()
 
   mountController = (name, ident) -> Controllers.controller name, requiredController ident
 
@@ -53,6 +55,8 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
   mountController 'HistoryStepCtrl', 'history-step'
 
   mountController 'HistoryCtrl', 'history'
+
+  mountController 'BrandCtrl', 'brand'
 
   return Controllers
 

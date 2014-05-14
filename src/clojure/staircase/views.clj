@@ -1,5 +1,6 @@
 (ns staircase.views
   (:require [hiccup.form :refer :all]
+            [clojure.string :as string]
             [hiccup.def :as d]
             [persona-kit.view :as pv])
   (:use [hiccup.core :only (html)]
@@ -32,7 +33,9 @@
 
 (declare search-form nav-list)
 
-(def home-links [["home" "home" "/"] ["about intermine" "info" "/about"] ["options" "cog"]])
+(def home-links [["home" "home" "/"]
+                 ["about intermine" "info" "/about"]
+                 ["options" "cog" {:ng-click "showOptions()"}]])
 
 (defn header []
   [:div.navbar.navbar-inverse.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
@@ -43,12 +46,15 @@
       [:span.sr-only "Toggle navigation"]
       (for [_ (range 3)]
         [:span.icon-bar])]
-     [:div {:dropdown "dropdown"}
+     [:div {:ng-controller "BrandCtrl" :dropdown "dropdown"}
       [:a.navbar-brand.dropdown-toggle
         [:span.app-name "Steps"]] ;; Make configurable?
       (unordered-list {:class "dropdown-menu"}
                       (for [[title icon path] home-links]
-                        (link-to (or path (str "/" title)) [:i.fa.fa-fw {:class (str "fa-" icon)}] " " title)))]]
+                        (let [icon [:i.fa.fa-fw {:class (str "fa-" icon)}]]
+                          (if (string? path)
+                            (link-to path icon " " title)
+                            (link-to path "" icon " " title)))))]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
@@ -182,7 +188,7 @@
    [:div.row.starting-points {:ng-controller "StartingPointsController"}
 
     (initiator {:ng-class "getWidthClass(tool)"
-                :ng-repeat "tool in startingPoints"
+                :ng-repeat "tool in startingPoints | filter:{active:true}"
                 :ng-hide "tool.state == 'DOCKED'"}
                {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
                [[:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]])
@@ -272,35 +278,58 @@
        :on-toggle "expanded = !expanded"} ]]
     ]])
 
-(def edit-step (html
-   [:div.modal-header
-    [:h3.modal-title
-     [:button.btn.btn-warning.pull-right {:ng-click "cancel()"} "close"]
-     "Edit step data"]]
-   [:div.modal-body.edit-step-data
-    [:form.form
-     [:editable-data {:data "data"}]]]
-   [:div.modal-footer
-    [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
-    [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]]
-  ))
+(defn modal-dialogue ;; template for a dialogue whose controller provides close and ok methods.
+  ([title body-content]
+   (modal-dialogue title
+                   (->> (string/split title #" ")
+                        (map string/lower-case)
+                        (string/join "-"))
+                   body-content))
+  ([title body-class body-content]
+   (html
+     [:div.modal-header
+      [:h3.modal-title
+       [:button.btn.btn-warning.pull-right {:ng-click "cancel()"} "close"]
+       title]]
+     [:div.modal-body {:class body-class} body-content]
+     [:div.modal-footer
+      [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
+      [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]])))
+
+(def edit-step
+  (modal-dialogue "Edit step data"
+                  [:form.form
+                   [:editable-data {:data "data"}]]))
 
 (def choose-tool-dialogue
-  (html
-    [:div.modal-header
-     [:h3.modal-title
-      [:button.btn.btn-warning.pull-right {:ng-click "cancel()"} "close"]
-      "Choose Tool"]]
-    [:div.modal-body.choose-tool
-     [:ul.list-group
-      [:li.list-group-item
-       {:ng-repeat "item in items"
-        :ng-class "{active: item == selected.item}"}
-       [:a {:ng-click "selected.item = item"} "{{item.heading}}"]]]]
-    [:div.modal-footer
-     [:button.btn.btn-primary {:ng-click "ok()"} "OK"]
-     [:button.btn.btn-warning {:ng-click "cancel()"} "cancel"]]
-    ))
+  (modal-dialogue "Choose tool"
+                  [:ul.list-group
+                   [:li.list-group-item
+                    {:ng-repeat "item in items"
+                     :ng-class "{active: item == selected.item}"}
+                    [:a {:ng-click "selected.item = item"} "{{item.heading}}"]]]))
+
+(def options-dialogue
+  (modal-dialogue "Options"
+                  [:form.form
+                   [:div.form-group.services
+                    [:label "Active services"]
+                    [:table.table
+                     [:tbody
+                      [:tr {:ng-repeat "service in services"}
+                       [:td [:input {:type "checkbox" :ng-model "service.active"}]]
+                       [:td "{{service.ident}}"]
+                       [:td "{{service.root}}"]
+                       [:td "{{service.user.username || 'anonymous'}}"]]]]]
+                   [:div.form-group.starting-tools
+                    [:label "Starting Tools"]
+                    [:table.table
+                     [:tbody
+                      [:tr {:ng-repeat "tool in startingPoints"}
+                       [:td [:input {:type "checkbox" :ng-model "tool.active"}]]
+                       [:td "{{tool.ident}}"]
+                       [:td "{{tool.heading}}"]]]]]
+                   ]))
 
 (def about
   [:div.container-fluid
@@ -358,6 +387,7 @@
     "starting-point" (html starting-point)
     "edit-step-data" edit-step
     "choose-tool-dialogue" choose-tool-dialogue
+    "options-dialogue" options-dialogue
     "history" (html history)
     "about" (html about)
     {:status 404})) 
