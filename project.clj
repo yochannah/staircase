@@ -43,7 +43,7 @@
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
   :ring {:handler staircase.app/handler}
-  :prep-tasks ["javac" "compile" "bower"]
+  :prep-tasks ["javac" "bower" "compile"]
   :source-paths ["src/clojure"]
   :aliases {
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
