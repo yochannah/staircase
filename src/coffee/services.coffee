@@ -6,6 +6,8 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.value('version', '0.1.0')
 
+  Services.factory 'assign', ['$timeout', (to) -> (obj, prop) -> (x) -> to -> obj[prop] = x]
+
   class StepConfig
 
     constructor: ->
