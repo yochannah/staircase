@@ -5,8 +5,6 @@ require.loadCss = loadCss = (url) -> # Helper for css dependencies.
   link.href = url
   document.getElementsByTagName('head')[0].appendChild link
 
-
-
 require.config
   baseUrl: '/js',
   shim:
