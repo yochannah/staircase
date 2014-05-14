@@ -29,7 +29,9 @@
   (k @configuration))
 
 (defn db-options [opts]
-  (options opts "db-"))
+  (if-let [uri (:database-url opts)]
+    {:connection-uri uri}
+    (options opts "db-")))
 
 (defn app-options [opts]
   (options opts "web-"))
