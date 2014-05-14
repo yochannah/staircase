@@ -11,20 +11,22 @@
       (edn/read rdr))
     (throw (IllegalArgumentException. (str fname " not found")))))
 
-;; Empty secrets if not configured.
-(defn secrets [] (try (from-edn "secrets.edn") (catch Exception e {}))) 
-
-(def configuration (delay (from-edn "config.edn")))
-
-(defn config [k]
-  (k @configuration))
-
 (defn- options [opts prefix]
   (->> opts
        keys 
        (map name) ;; From keyword -> str
        (filter #(.startsWith % prefix))
        (reduce #(assoc %1 (keyword (replace-first %2 prefix "")) (opts (keyword %2))) {})))
+
+;; Empty secrets if not configured.
+(defn secrets [opts]
+  (merge (try (from-edn "secrets.edn") (catch Exception e {}))
+         (options opts "secret-")))
+
+(def configuration (delay (from-edn "config.edn")))
+
+(defn config [k]
+  (k @configuration))
 
 (defn db-options [opts]
   (options opts "db-"))

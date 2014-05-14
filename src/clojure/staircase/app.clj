@@ -28,7 +28,7 @@
                                              :ls     "src/ls"
                                              :less   "src/less")
             :config (app-options options)
-            :secrets (secrets)
+            :secrets (secrets options)
             :session-store (sessions/new-pg-session-store)
             :db (data/new-pooled-db db)
             :histories (new-history-resource)
