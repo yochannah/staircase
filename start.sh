@@ -4,13 +4,14 @@ set -e
 
 BOWER=$(which bower)
 NPM=$(which npm)
-LEIN=$(which lein)
 
 if test -z "$BOWER"; then
+	echo "Using local bower"
 	$NPM install bower
 	./node_modules/bower/bin/bower install 
 else
+	echo "Using system bower"
 	$BOWER install
 fi
 
-$LEIN with-profile production trampoline ring server-headless
+echo "Installed client dependencies"
