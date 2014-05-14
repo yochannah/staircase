@@ -28,9 +28,15 @@
 (defn config [k]
   (k @configuration))
 
+(defn- parse-url
+  [url]
+  (let [parsed (java.net.URI. url)
+        [user password] (.split (.getUserInfo parsed) ":")]
+    (str "jdbc:postgresql://" (.getHost parsed) ":" (.getPort parsed) (.getPath parsed) "?user=" user "&password=" password)))
+
 (defn db-options [opts]
-  (if-let [uri (:database-url opts)]
-    {:connection-uri uri}
+  (if-let [url (:database-url opts)]
+    (parse-url url)
     (options opts "db-")))
 
 (defn app-options [opts]
