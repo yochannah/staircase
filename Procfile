@@ -1,1 +1,2 @@
-web: sh start.sh && lein with-profile production trampoline ring server-headless
+bower: npm install bower && ./node_modules/bower/bin/bower install
+web: lein with-profile production trampoline ring server-headless
