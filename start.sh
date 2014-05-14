@@ -1,7 +1,5 @@
 #!/usr/bin/bash
 
-set -e
-
 BOWER=$(which bower)
 NPM=$(which npm)
 
