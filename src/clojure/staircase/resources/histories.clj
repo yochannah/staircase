@@ -34,10 +34,10 @@
 
   (get-all [histories]
     (into [] (sql/query (:connection db)
-                        (-> (select :h.* [:%count.hs.* :steps])
+                        (-> (select :h.id :h.title :h.created_at :h.description :h.owner [:%count.hs.* :steps])
                             (from [:histories :h])
                             (left-join [:history_step :hs] [:= :h.id :hs.history_id])
-                            (group :h.id)
+                            (group :h.id :h.title :h.created_at :h.description :h.owner)
                             (where [:= :h.owner :?user])
                             (hsql/format :params staircase.resources/context)))))
 
@@ -58,7 +58,7 @@
                        (:connection db)
                        :histories
                        id (:user staircase.resources/context)
-                       doc))
+                       (dissoc doc :created_at "created_at")))
 
   (delete [histories id]
     (when-let [uuid (string->uuid id)]

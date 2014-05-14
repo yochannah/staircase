@@ -36,7 +36,7 @@
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
-	    [org.clojars.wokier/lein-bower "0.3.0"]
+            [org.clojars.wokier/lein-bower "0.3.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
@@ -55,6 +55,23 @@
                    :database :database
                    :default (complement :acceptance)}
   :env {
+      :web-services {"flymine" "http://www.flymine.org/query/service"
+                     "mousemine" "http://www.mousemine.org/mousemine/service"}
+      :web-tools [
+                  :templates
+                  :choose-list
+                  :new-query
+                  :region-search
+                  :upload-list
+                  :histories
+                  :hello-world
+                  :show-table ;; TODO: make these autoconfigure...
+                  :show-list
+                  :show-enrichment
+                  :resolve-ids
+                  :convert-list
+                  :export
+                  ]
         :web-max-session-age ~(* 60 60 24)
         :db-classname "org.postgresql.Driver"
         :db-subprotocol "postgresql"

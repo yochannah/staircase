@@ -74,11 +74,12 @@
         (is (= 1 (count hists))))
       (testing "The existence of the new history"
         (is (exists? histories new-id)))
-      (let [updated (update histories new-id {:title "changed the title"})
+      (let [updated (update histories new-id {:title "changed the title" :created_at "sneaky attempt to change the past"})
             retrieved (get-one histories new-id)
             hists (get-all histories)]
         (testing "Changed the title"
           (is (= "changed the title" (:title updated)))
+          (is (= (:created_at got) (:created_at updated)))
           (is (= "changed the title" (:title retrieved))))
         (testing "Changed, and did not add a history"
           (let [retrieved (hists 0)
