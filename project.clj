@@ -36,14 +36,14 @@
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
   :plugins [[com.jakemccrary/lein-test-refresh "0.4.0"]
-            [org.clojars.wokier/lein-bower "0.3.0"]
+            [lein-bower "0.4.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
   :ring {:handler staircase.app/handler}
-  :prep-tasks ["javac" "bower" "compile"]
+  :prep-tasks ["javac" "compile"]
   :source-paths ["src/clojure"]
   :aliases {
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
@@ -54,6 +54,20 @@
                    :all (constantly true)
                    :database :database
                    :default (complement :acceptance)}
+  :bower {:directory "resources/public/vendor"}
+  :bower-dependencies [[
+    requirejs "~2.1.9",
+    requirejs-text "~2.0.10",
+    angular-route "~1.2.9",
+    angular "~1.2.9",
+    angular-ui-bootstrap-bower "~0.11.0",
+    angular-cookies "~1.2.16",
+    imjs "~3.2.2",
+    lodash "~2.4.1",
+    angular-resource "~1.2.16",
+    requirejs-domready "~2.0.1",
+    angular-ui-select2 "~0.0.5",
+    angular-animate "~1.2.16"]]
   :env {
       :web-services {"flymine" "http://www.flymine.org/query/service"
                      "mousemine" "http://www.mousemine.org/mousemine/service"}

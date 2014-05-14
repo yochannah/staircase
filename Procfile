@@ -1,1 +1,1 @@
-web: lein with-profile production trampoline ring server-headless
+web: sh start.sh

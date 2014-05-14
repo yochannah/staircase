@@ -10,6 +10,9 @@
             :db-subname "//localhost/staircase" }
  }
  :test {
+        :bower-dependencies [[angular-scenario "~1.2.9"]
+                             [angular-mocks "~1.2.9"]
+                             [should "~3.3.1"]]
         :env { :db-subname "//localhost/staircase-test" }
         :resource-paths ["test/resources"]
  }
