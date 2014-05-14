@@ -36,7 +36,7 @@
 
 (defn db-options [opts]
   (if-let [url (:database-url opts)]
-    (parse-url url)
+    {:connection-uri (parse-url url)}
     (options opts "db-")))
 
 (defn app-options [opts]
