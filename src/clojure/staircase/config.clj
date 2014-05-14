@@ -21,7 +21,8 @@
 ;; Empty secrets if not configured.
 (defn secrets [opts]
   (merge (try (from-edn "secrets.edn") (catch Exception e {}))
-         (options opts "secret-")))
+         (options opts "secret-")
+         (options opts "secrets-")))
 
 (def configuration (delay (from-edn "config.edn")))
 
