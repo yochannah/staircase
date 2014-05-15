@@ -53,5 +53,21 @@
    [[:id :uuid :primary :key ]
     [:root string ]
     [:token data ]
+    owner-column
+    [:UNIQUE "(owner, root)"]]})
+
+(def toolsets
+  {:toolsets
+   [[:id :uuid :primary :key]
+    [:active :boolean]
     owner-column]})
+
+(def tool-config
+   {:toolconfs
+    [[:name string :primary :key]
+     [:toolset :uuid :REFERENCES :toolsets "(id)"]
+     [:index :integer]
+     [:frontpage :boolean]
+     [:data data]
+     [:UNIQUE "(toolset, index)"]]})
       
