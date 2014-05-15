@@ -235,24 +235,27 @@
         real-id #(if (= "default" %) (:default-service config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
-                (let [user-services (get-all services)
-                      configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
-                  (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
-                  (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root))))))
+                 (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
+                  (let [user-services (get-all services)
+                        configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
+                    (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
+                    (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root)))))))
             (context "/:ident" [ident]
                      (GET "/" []
-                          (let [ident (real-id ident)
-                                uri (get-in config [:services ident])
-                                user-services (get-where services [:= :root uri])
-                                service (-> (left-outer-join [{:root uri :ident ident}]
-                                                             user-services
-                                                             :root
-                                                             :root)
-                                            first)]
-                            (response (ensure-token service))))
+                          (locking services
+                            (let [ident (real-id ident)
+                                  uri (get-in config [:services ident])
+                                  user-services (get-where services [:= :root uri])
+                                  service (-> (left-outer-join [{:root uri :ident ident}]
+                                                              user-services
+                                                              :root
+                                                              :root)
+                                              first)]
+                              (response (ensure-token service)))))
                     (PUT "/" {doc :body}
-                          (let [uri (get-in config [:services (real-id ident)])]
-                            (create-new services (assoc doc :root uri))))))))
+                         (locking services
+                            (let [uri (get-in config [:services (real-id ident)])]
+                              (create-new services (assoc doc :root uri)))))))))
 
 (defn- build-api-session-routes [router]
   (-> (routes
