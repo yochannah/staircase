@@ -26,7 +26,9 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
     startHistory scope
 
     scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
-      scope.tool = L.find startingPoints, (sp) -> sp.ident is params.tool
+      tool = L.find startingPoints, (sp) -> sp.ident is params.tool
+      scope.tool = Object.create tool
+      scope.tool.state = 'FULL'
 
   Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'startHistory', (http, scope, startHistory) ->
     http.get('/tools', {params: {capabilities: 'initial'}})
