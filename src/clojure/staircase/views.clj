@@ -12,6 +12,8 @@
 
 (def ^:dynamic require-js "/vendor/requirejs/require.js")
 
+(def repo "https://github.com/alexkalderimis/staircase")
+
 (defn- entry-point [ep]
   (->> (include-js require-js)
        (map (fn [[tag attrs]] [tag (assoc attrs :data-main ep)]))
@@ -96,9 +98,12 @@
                               [:span
                                [:i.fa.fa-envelope-o]
                                " Contact"])
-                     (link-to "https://github.com/alexkalderimis/staircase"
+                     (link-to repo
                               [:i.fa.fa-github]
-                              " View on github")])]
+                              " View on github")
+                     (link-to (str repo "/issues")
+                              [:i.fa.fa-warning]
+                              " Report a problem")])]
    [:li {:ng-show "auth.loggedIn"} (logout)]
    [:li {:ng-hide "auth.loggedIn"} (login)]
    ])
