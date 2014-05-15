@@ -9,7 +9,14 @@
     </li>
 </ul>
 <ul class="list-group">
-    <li class="list-group-item" ng-repeat="list in lists | filter:listFilter">
+    <img class="loading" src="/images/loading.gif" ng-hide="lists">
+    <div class="alert alert-info" ng-show="lists && !filteredLists.length">
+        <p>
+            <strong>Sorry</strong>
+            No templates found.
+        </p>
+    </div>
+    <li class="list-group-item" ng-repeat="list in filteredLists = (lists | filter:listFilter)">
         <span class="badge">{{list.size}} {{list.type}}s</span>
         <a ng-click="viewList(list)">{{list.name}}</a>
         <p class="list-group-item-text">{{list.description}}</p>

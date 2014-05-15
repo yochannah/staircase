@@ -11,7 +11,14 @@
 </form>
 
 <div class="list-group">
-    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates | filter:templateFilter">
+    <img class="loading" src="/images/loading.gif" ng-hide="templates">
+    <div class="alert alert-info" ng-show="templates && !filteredTemplates.length">
+        <p>
+            <strong>Sorry</strong>
+            No templates found.
+        </p>
+    </div>
+    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates = (suitableTemplates | filter:templateFilter)">
         <a ng-click="showConstraints = !showConstraints"
             class="list-group-item-heading">
             {{template | templateTitle}}

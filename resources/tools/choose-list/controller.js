@@ -6,7 +6,6 @@ define(['angular', 'imjs'], function (ng, im) {
   return ['$scope', '$log', '$timeout', '$cacheFactory', 'Mines',
           function (scope, logger, timeout, cacheFactory, mines) {
 
-    scope.lists = [];
     scope.serviceName = "";
 
     var fetchingDefaultMine = mines.get('default');

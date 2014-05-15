@@ -43,7 +43,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
     setTemplates = ({query}) -> (ts) ->
       Q.all(query t for _, t of ts).then (qs) -> timeout ->
         scope.templates = qs
-        scope.filteredTemplates = filterTemplates scope
+        scope.suitableTemplates = filterTemplates scope
 
     scope.$on 'reset', (evt) ->
       scope.outputType = scope.defaults.outputType
@@ -77,7 +77,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
 
     connecting.then (connection) -> connection.fetchTemplates().then setTemplates connection
 
-    updateTemplates = -> scope.filteredTemplates = filterTemplates scope
+    updateTemplates = -> scope.suitableTemplates = filterTemplates scope
     typeWatcher = ({inputType, outputType}) -> inputType?.className + outputType?.className
 
     scope.$watch typeWatcher, updateTemplates
