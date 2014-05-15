@@ -140,12 +140,23 @@
   (common "Page Not Found"
           [:div#four-oh-four "The page you requested could not be found"]))
 
+(def about-header
+     [:div.about-header
+      [:div.container
+       [:h1 "InterMine Steps"]
+       [:p "The data-flow interface to InterMine data-warehouses,
+           providing an extensible, programmable tool-box for
+           scientists."]]])
+
 (def welcome
    [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
     [:div.panel.panel-default
      [:div.panel-heading
       "Welcome to " [:strong "Steps"]]
      [:div.panel-body
+
+      about-header 
+
       [:p
        "This is the data-flow interface for intermine data-warehouses.
        If this is your first time here, maybe you might like to read more about
@@ -335,12 +346,9 @@
   [:div.container-fluid
    [:div.row
     [:div.about.col-xs-10.col-xs-offset-1
-     [:div.about-header
-      [:div.container
-       [:h1 "InterMine Steps"]
-       [:p "The data-flow interface to InterMine data-warehouses,
-           providing an extensible, programmable tool-box for
-           scientists."]]]
+
+     about-header
+
      [:section
       [:h2 "Using the home-page"]
       [:p.lead
