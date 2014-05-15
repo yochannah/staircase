@@ -93,7 +93,8 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     return maker
 
   # Little pull parsing state machine for tokenising identifiers.
-  Services.factory 'tokenise', -> (string) ->
+  Services.factory 'tokenise', -> (string, delimiters) ->
+    delimiters ?= [' ', ',', "\n", "\t", ';']
     charIndex = 0
     escaping = false
     inQuotes = false
@@ -105,7 +106,7 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
         tokens.push current.join ''
         current = []
 
-    isDelimiter = (c) -> /\s/.test(char) or ',' is char
+    isDelimiter = (c) -> c in delimiters
 
     if string
       while char = string.charAt(charIndex++)
