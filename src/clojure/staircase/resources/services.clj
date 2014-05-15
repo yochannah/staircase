@@ -61,10 +61,8 @@
   (create [_ doc]
     (let [id (new-id)
           owner (:user staircase.resources/context)
-          service (-> (dissoc doc :id "id") (assoc "id" id "owner" owner))]
-      (sql/with-db-transaction [trs (:connection db)]
-        (sql/delete! trs :services ["root=? and owner=?" (:root service) owner]) ;; Preserve invariant.
-        (sql/insert! trs :services service))
+          service (-> doc (dissoc :id "id" :owner) (assoc "id" id "owner" owner))]
+      (sql/insert! (:connection db) :services service)
       id))
   
   Searchable
