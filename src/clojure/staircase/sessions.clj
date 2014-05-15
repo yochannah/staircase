@@ -53,6 +53,8 @@
                  (warn "Invalid data:" data e)
                  (delete-session store uuid))))))
 
+(def write-monitor (Object.))
+
 (defrecord PGSessionStore [config db cache next-expiry]
 
   component/Lifecycle
@@ -75,7 +77,8 @@
     (swap! cache dissoc id) ;; Evict from cache.
     (when-let [uuid (string->uuid id)]
       ;; Delete this session.
-      (sql/delete! (:connection db) :sessions ["id = ?" uuid])
+      (locking write-monitor
+        (sql/delete! (:connection db) :sessions ["id = ?" uuid]))
       ;; Use this db-access opportunity to clean out the db a little.
       (clear-old-sessions (:connection db))
       nil))
@@ -95,18 +98,19 @@
             where-clause ["id=?" uuid]
             con (:connection db)]
         (debug "Storing" data "until" valid-until)
-        (if (get-from-db store uuid)
-          (sql/update! con
-                       :sessions
-                       session
-                       where-clause)
-          (sql/with-db-transaction [t-con con]
-            (sql/delete! t-con
-                         :sessions
-                         where-clause)
-            (sql/insert! t-con
+        (locking write-monitor
+          (if (get-from-db store uuid)
+            (sql/update! con
                         :sessions
-                        (assoc session :id uuid))))
+                        session
+                        where-clause)
+            (sql/with-db-transaction [t-con con]
+              (sql/delete! t-con ;; Might be a lingering expired session in there.
+                          :sessions
+                          where-clause)
+              (sql/insert! t-con
+                          :sessions
+                          (assoc session :id uuid)))))
         (swap! next-expiry #(if (and %1 (.before %1 %2)) %1 %2) valid-until)
         (swap! cache dissoc id) ;; Evict from cache.
         uuid)
