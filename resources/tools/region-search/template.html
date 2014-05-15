@@ -14,22 +14,47 @@
                 </option>
         </select>
     </div>
-    <div class="form-group">
-        <label class="control-label">
-            in organism:
-        </label>
-        <select
-                ng-model="organism"
-                ng-options="org.shortName for org in organisms">
-        </select>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="control-label">
+                    in organism:
+                </label>
+                <select class="form-control"
+                        ng-model="organism"
+                        ng-options="org.shortName for org in organisms">
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Extension</label>
+                <div class="input-group">
+                    <input min="0" class="form-control" type="number" ng-model="extension.value">
+                    <div dropdown class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown">
+                        {{extension.unit.name}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu pull-right">
+                            <li ng-repeat="unit in extensionUnits"
+                                ng-class="{active: extension.unit === unit}">
+                                <a ng-click="extension.unit = unit">{{unit.name}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <tabset type="pills">
         <tab heading="Enter regions">
             <div class="form-group">
                 <textarea class="literal"
+                    ng-keydown="watchForTabs($event)"
                     ng-model="regions.pasted"
                     spellcheck="false"
-                    rows="{{tool.state === 'FULL' ? 10 : 2}}"
+                    rows="{{(tool.state === 'FULL') || isFull ? 10 : 2}}"
                     style="width: 100%">
                 </textarea>
                 <p class="help-block">
@@ -54,6 +79,44 @@
                 <p class="help-block">
                 Upload regions from tab-delimited or new-line delimited sets of regions.
                 </p>
+            </div>
+        </tab>
+        <tab heading="Parsed Regions">
+            <div class="well tokens">
+                <span class="token label label-default pull-left fade-out"
+                    ng-class="{'label-danger': region.invalid}"
+                    ng-repeat="region in regions.parsed | orderBy:sorting">
+                    <i class="pull-left fa fa-times-circle"
+                       tooltip="Remove this interval"
+                       ng-click="removeToken(region)"></i>
+                    <span ng-show="!region.editing && !region.invalid">
+                        {{applyExtension(region)}}
+                    </span>
+                    <span ng-show="!region.editing && region.invalid">
+                        {{region.interval}}
+                    </span>
+                </span>
+                <div class="clearfix"></div>
+            </div>
+            <div class="col-sm-8">
+                <div class="btn-group">
+                    <button class="btn btn-default"
+                        ng-click="sorting = ''"
+                        ng-class="{active: sorting == ''}">
+                        As entered
+                    </button>
+                    <button class="btn btn-default"
+                        ng-click="sorting = byLocation"
+                        ng-class="{active: sorting === byLocation}">
+                        Sort by location
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-default"
+                        ng-click="addToken()">
+                        Add an interval
+                    </button>
+                </div>
             </div>
         </tab>
     </tabset>
