@@ -145,11 +145,11 @@
       [:div.container
        [:h1 "InterMine Steps"]
        [:p "The data-flow interface to InterMine data-warehouses,
-           providing an extensible, programmable tool-box for
+           providing an extensible, programmable work-bench for
            scientists."]]])
 
 (def welcome
-   [:div.row {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
+   [:div.row.welcome {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
     [:div.panel.panel-default
      [:div.panel-heading
       "Welcome to " [:strong "Steps"]]
@@ -161,8 +161,32 @@
        "This is the data-flow interface for intermine data-warehouses.
        If this is your first time here, maybe you might like to read more about
        the intermine system " (link-to "/about" "here") "."]
-      [:button.btn.btn-default {:ng-click "showWelcome = false"}
-       "Do not show again"]]]])
+      [:p
+       "Below you will find a number of "
+       [:strong "different tools"]
+       " to get started. Each one offers
+       a different specialised entry point into all the data available to you, and can 
+       be linked in turn to a sequence of composable actions. The easiest way to get
+       started is to enter a search term:"
+       [:div.row
+        [:form.search-form.col-sm-6.col-sm-offset-3
+          [:div.input-group
+          [:input.form-control {:placeholder "enter a search term"}]
+          [:span.input-group-btn
+            [:button.btn.btn-primary "search"]]]]]]
+      [:p
+       [:strong "You do not need to be logged in"]
+       " to use this site - all the site's functionality is
+       available to you to use as a temporary anonymous user. But if you want to store your
+       histories permanently you "
+       [:strong "can sign in with any email address"]
+       " - we don't store your
+       personal information and you won't have to remember any new passwords."]
+      [:div.btn-toolbar
+        [:button.btn.btn-default.pull-right {:ng-click "showWelcome = false"}
+        "Do not show again"]
+        [:div.login.pull-left {:ng-hide "auth.loggedIn"} (login)]]
+      ]]])
 
 (defn initiator
   [attrs panel-attrs heading-buttons]
