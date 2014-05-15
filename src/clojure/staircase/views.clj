@@ -109,12 +109,13 @@
    [:div.panel.panel-info
     [:div.panel-heading "Cookies"]
     [:div.panel-body
+     [:button.btn.pull-right {:ng-click "showCookieMessage = false"} "Do not show again"]
      [:p
       "This site uses cookies to provide essential functionality, such as remembering your
       identity. You can find out details of what information we store here "
       (link-to "/cookies" "here")
       "."]
-     [:button.btn {:ng-click "showCookieMessage = false"} "Do not show again"]]]])
+     ]]])
 
 (defn common
   ([title body] (common title body []))
