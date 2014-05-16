@@ -133,35 +133,20 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         else
           element.removeAttr('seamless')
 
-  Directives.directive 'currentStep', Array '$window', 'Mines', 'stepConfig', ($window, mines, conf) ->
-    restrict: 'C'
-    scope:
-      tool:     '='
-      step:     '='
-      fullSize: '='
-      onToggle: '&'
-      hasItems: '&'
-      has:      '&'
-      wants:    '&'
-      nextStep: '&'
+  Directives.directive 'iframeTool', Array '$window', 'Mines', 'stepConfig', (win, mines, conf) ->
+    restrict: 'E'
+    replace: true
     template: """
-      <div class="panel-heading">
-        <i class="fa pull-right"
-           ng-click="onToggle()"
-           ng-class="{'fa-compress': fullSize, 'fa-expand': !fullSize}"></i>
-        {{tool.heading}}
-      </div>
       <div class="panel-body">
         <iframe is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
       </div>
     """
     link: (scope, element, attrs) ->
-      element.addClass('panel panel-default')
       iframe = element.find('iframe')
 
-      do resize = -> iframe.css height: ng.element($window).height() * 0.85
+      do resize = -> iframe.css height: ng.element(win).height() * 0.85
 
-      $window.addEventListener 'resize', resize
+      win.addEventListener 'resize', resize
 
       channel = Channel.build
         window: iframe[0].contentWindow
@@ -183,7 +168,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
       channel.bind 'wants', (trans, {what, data}) -> scope.wants {what, data}
 
-      for link in $window.document.getElementsByTagName('link') then do (link) ->
+      for link in win.document.getElementsByTagName('link') then do (link) ->
         channel.call
           method: 'style'
           params:
@@ -223,6 +208,38 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
               init()
           else
             init()
+
+  Directives.directive 'currentStep', Array '$compile', ($compile) ->
+    restrict: 'C'
+    scope:
+      tool:     '='
+      step:     '='
+      fullSize: '='
+      onToggle: '&'
+      hasItems: '&'
+      has:      '&'
+      wants:    '&'
+      nextStep: '&'
+    template: """
+      <div class="panel-heading">
+        <i class="fa pull-right"
+           ng-click="onToggle()"
+           ng-class="{'fa-compress': fullSize, 'fa-expand': !fullSize}"></i>
+        {{tool.heading}}
+      </div>
+    """
+    link: (scope, element, attrs) ->
+      element.addClass('panel panel-default')
+      scope.$watch 'tool.type', (toolType) ->
+        console.log toolType
+
+        toAppend = if toolType is 'IFrame'
+          "<iframe-tool/>"
+        else if toolType is 'native'
+          "<angular-tool/>"
+
+        if toAppend?
+          $compile(toAppend) scope, (cloned) -> element.append cloned
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
@@ -293,35 +310,40 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   toolCssLoaded = {}
 
+  injectingLinker = (window, compile, injector) -> (scope, element, attrs) ->
+    scope.$watch 'tool.controllerURI', ->
+      if scope.tool
+
+        if scope.tool.style and not toolCssLoaded[scope.tool.style]
+          link = window.document.createElement('link')
+          link.rel = 'stylesheet'
+          link.href = scope.tool.style
+          window.document.getElementsByTagName('head')[0].appendChild(link)
+          toolCssLoaded[scope.tool.style] = true
+
+        ctrl = window.location.origin + scope.tool.controllerURI
+        tmpl = window.location.origin + scope.tool.templateURI
+
+        require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+
+          injector.invoke controller, this, {'$scope': scope}
+
+          element.html(template)
+          compile(element.contents())(scope)
+
+          scope.$apply()
+
   Directives.directive 'nativeTool', ($window, $compile, $injector) ->
     restrict: 'E'
     scope:
       tool: '=tool'
       actions: '=actions'
       state: '=state'
-    link: (scope, element, attrs) ->
+    link: injectingLinker $window, $compile, $injector
 
-      scope.$watch 'tool.controllerURI', ->
-        if scope.tool
-
-          if scope.tool.style and not toolCssLoaded[scope.tool.style]
-            link = $window.document.createElement('link')
-            link.rel = 'stylesheet'
-            link.href = scope.tool.style
-            document.getElementsByTagName('head')[0].appendChild(link)
-            toolCssLoaded[scope.tool.style] = true
-
-          ctrl = $window.location.origin + scope.tool.controllerURI
-          tmpl = $window.location.origin + scope.tool.templateURI
-
-          require [ctrl, "text!#{ tmpl }"], (controller, template) ->
-
-            $injector.invoke controller, this, {'$scope': scope}
-
-            element.html(template)
-            $compile(element.contents())(scope)
-
-            scope.$apply()
+  Directives.directive 'angular-tool', Array ($window, $compile, $injector) ->
+    restrict: 'E'
+    link: injectingLinker $window, $compile, $injector
 
   Directives.directive 'nextStep', ($window, $compile, $injector) ->
     restrict: 'E'
