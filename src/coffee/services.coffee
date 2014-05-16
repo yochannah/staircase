@@ -206,14 +206,18 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       delete: {method: 'DELETE', headers: headers}
       append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
-  Services.factory 'startHistory', Array 'Histories', '$location', (Histories, location) -> (scope) ->
-    scope.$on 'start-history', (evt, {thing, verb, tool, data}) ->
+  Services.factory 'historyListener', Array 'Histories', '$location', (Histories, location) ->
+    startHistory = ({thing, verb, tool, data}) ->
       historyTitle = "Started by #{ verb.ing } #{ thing }"
       history = Histories.create {title: historyTitle}, ->
         stepTitle = "#{ verb.ed } #{ thing }"
         step = Histories.append {id: history.id}, {title: stepTitle, tool, data}, ->
           console.log("Created history " + history.id + " and step " + step.id)
           location.url "/history/#{ history.id }/1"
+
+    watch = (scope) -> scope.$on 'start-history', (evt, message) -> startHistory message
+
+    return {watch, startHistory}
 
   Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
     watch = request = logout = -> log.warn "Persona authentication not available."

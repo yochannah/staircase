@@ -1,5 +1,5 @@
 define ['lodash'], (L) ->
-  Array '$scope', 'startHistory', (scope, startHistory) ->
+  Array '$scope', 'historyListener', (scope, historyListener) ->
 
     scope.expandTool = (tool) ->
       for other in scope.startingPoints when other isnt tool
@@ -26,7 +26,7 @@ define ['lodash'], (L) ->
 
     scope.anyToolDocked = -> L.some scope.startingPoints, state: 'DOCKED'
 
-    startHistory scope
+    historyListener.watch scope
 
     scope.$apply()
 

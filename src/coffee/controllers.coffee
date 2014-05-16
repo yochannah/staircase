@@ -21,22 +21,22 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
   Controllers.controller 'IndexCtrl', ->
 
-  Controllers.controller 'StartingPointCtrl', Array '$scope', '$routeParams', 'startHistory', (scope, params, startHistory) ->
+  Controllers.controller 'StartingPointCtrl', Array '$scope', '$routeParams', 'historyListener', (scope, params, historyListener) ->
 
-    startHistory scope
+    historyListener.watch scope
 
     scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
       tool = L.find startingPoints, (sp) -> sp.ident is params.tool
       scope.tool = Object.create tool
       scope.tool.state = 'FULL'
 
-  Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'startHistory', (http, scope, startHistory) ->
+  Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'historyListener', (http, scope, historyListener) ->
     http.get('/tools', {params: {capabilities: 'initial'}})
         .then ({data}) ->
           scope.tool = L.chain(data).where(width: 1).find('description').value()
           scope.tool.expandable = false
 
-    startHistory scope
+    historyListener.watch scope
 
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
@@ -48,9 +48,17 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     scope.persona = new Persona {changeIdentity, loggedInUser: scope.auth.identity}
 
-  Controllers.controller 'QuickSearchController', Array '$log', '$scope', (log, scope) ->
+  Controllers.controller 'QuickSearchController', Array '$log', '$scope', 'historyListener', (log, scope, {startHistory}) ->
+
     scope.startQuickSearchHistory = (term) ->
-      log.info "TERM", term # TODO: send this to interested parties.
+      startHistory
+        thing: "a search"
+        verb:
+          ed: "ran"
+          ing: "running"
+        tool: "keyword-search"
+        data:
+          searchTerm: term
 
   mountController 'StartingPointsController', 'starting-points'
 

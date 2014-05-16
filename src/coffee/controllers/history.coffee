@@ -8,12 +8,15 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
     scope.collapsed = true # Hide details in reduced real-estate view.
     scope.items = {}
 
+    toolNotFound = (e) -> to -> scope.error = e
+
     currentCardinal = parseInt params.idx, 10
     scope.history = Histories.get id: params.id
     scope.steps = Histories.getSteps id: params.id
     scope.step = Histories.getStep id: params.id, idx: currentCardinal - 1
     scope.step.$promise.then ({tool}) ->
-      http.get('/tools/' + tool).then ({data}) -> scope.tool = data
+      http.get('/tools/' + tool)
+          .then (({data}) -> scope.tool = data), toolNotFound
       http.get('/tools', {params: {capabilities: 'next'}})
           .then ({data}) -> scope.nextTools = data.filter (nt) -> nt.ident isnt tool
     http.get('/tools', {params: {capabilities: 'provider'}}).then ({data}) -> scope.providers = data
