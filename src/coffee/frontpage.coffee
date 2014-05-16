@@ -10,6 +10,8 @@ require.config
   shim:
     'angular':
       exports: 'angular'
+    'underscore':
+      exports: '_'
     'angular-route': ['angular']
     'angular-animate': ['angular']
     'angular-ui': ['angular']
@@ -34,6 +36,7 @@ require.config
   paths:
     angular:         '/vendor/angular/angular'
     domReady:        '/vendor/requirejs-domready/domReady'
+    'underscore':    '/vendor/lodash/dist/lodash.underscore'
     'jschannel':      '/vendor/jschannel'
     'angular-route': '/vendor/angular-route/angular-route'
     'angular-animate': '/vendor/angular-animate/angular-animate'
