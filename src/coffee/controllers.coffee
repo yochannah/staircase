@@ -52,10 +52,10 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     scope.startQuickSearchHistory = (term) ->
       startHistory
-        thing: "a search"
+        thing: "for #{ term }"
         verb:
-          ed: "ran"
-          ing: "running"
+          ed: "searched"
+          ing: "searching"
         tool: "keyword-search"
         data:
           searchTerm: term

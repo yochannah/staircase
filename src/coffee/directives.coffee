@@ -321,10 +321,11 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           window.document.getElementsByTagName('head')[0].appendChild(link)
           toolCssLoaded[scope.tool.style] = true
 
-        ctrl = window.location.origin + scope.tool.controllerURI
-        tmpl = window.location.origin + scope.tool.templateURI
+        console.log('.' + scope.tool.controllerURI)
+        ctrl = '.' + scope.tool.controllerURI
+        tmpl = scope.tool.templateURI
 
-        require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+        require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
 
           injector.invoke controller, this, {'$scope': scope}
 
@@ -341,7 +342,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       state: '=state'
     link: injectingLinker $window, $compile, $injector
 
-  Directives.directive 'angular-tool', Array ($window, $compile, $injector) ->
+  Directives.directive 'angularTool', ($window, $compile, $injector) ->
     restrict: 'E'
     link: injectingLinker $window, $compile, $injector
 
