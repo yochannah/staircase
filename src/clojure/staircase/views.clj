@@ -69,17 +69,18 @@
 
      ]]])
 
+(def search-input
+  [:div.input-group
+   {:ng-controller "QuickSearchController"}
+   [:input.form-control {:ng-model "searchTerm" :placeholder "enter a search term"}] ;; TODO: Definitely make placeholders injectable.
+   [:span.input-group-btn
+    [:button.btn.btn-primary
+     {:type "submit" :ng-click "startQuickSearchHistory(searchTerm)"}
+     "Search "
+     [:i.fa.fa-search]]]])
+
 (defn search-form []
-  [:form.navbar-form.navbar-left
-   {:ng-controller "QuickSearchController"
-    :role "search"
-    :ng-submit "startQuickSearchHistory(searchTerm)"}
-   [:div.input-group
-    [:input.form-control {:ng-model "searchTerm" :placeholder "eve"}] ;; TODO: Definitely make placeholders injectable.
-    [:span.input-group-btn
-     [:button.btn.btn-default {:type "submit"}
-      "Search "
-      [:i.fa.fa-search]]]]])
+  [:form.navbar-form.navbar-left {:role "search"} search-input])
 
 (defn nav-list []
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
@@ -168,6 +169,7 @@
        "This is the data-flow interface for intermine data-warehouses.
        If this is your first time here, maybe you might like to read more about
        the intermine system " (link-to "/about" "here") "."]
+
       [:p
        "Below you will find a number of "
        [:strong "different tools"]
@@ -176,11 +178,8 @@
        be linked in turn to a sequence of composable actions. The easiest way to get
        started is to enter a search term:"
        [:div.row
-        [:form.search-form.col-sm-6.col-sm-offset-3
-          [:div.input-group
-          [:input.form-control {:placeholder "enter a search term"}]
-          [:span.input-group-btn
-            [:button.btn.btn-primary "search"]]]]]]
+        [:form.search-form.col-sm-6.col-sm-offset-3 search-input]]]
+
       [:p
        [:strong "You do not need to be logged in"]
        " to use this site - all the site's functionality is
