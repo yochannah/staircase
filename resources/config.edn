@@ -1,7 +1,6 @@
 {
-    :tools {
-        :im-tables {:uri "https://github.com/intermine/im-tables.git"
-                    :ref "v1.6.0"
-                    :options {:branch-name "master"}}}
+	:tools {
+		:keyword-search {:uri "https://github.com/joshkh/multimine-search-tool.git"
+			         :options {:branch-name "master"}}}
 }
 

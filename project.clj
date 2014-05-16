@@ -85,6 +85,7 @@
                   :resolve-ids
                   :convert-list
                   :export
+		  :keyword-search ;; From resources/config - really must auto-configure this list...
                   ]
         :web-max-session-age ~(* 60 60 24)
         :db-classname "org.postgresql.Driver"
