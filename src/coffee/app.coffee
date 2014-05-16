@@ -35,6 +35,7 @@ define deps, (angular, router) ->
     ])
     stepConfigProvider.configureStep 'show-table',
       IndicateOffHostLinks: false,
+      CellPreviewTrigger: 'click'
       Style:
         icons: 'fontawesome'
 
