@@ -1,7 +1,7 @@
 (ns staircase.views
   (:require [hiccup.form :refer :all]
             [clojure.string :as string]
-            [hiccup.def :as d]
+            [hiccup.def :refer (defelem)]
             [persona-kit.view :as pv])
   (:use [hiccup.core :only (html)]
         [hiccup.page :only (html5 include-css include-js)]
@@ -265,6 +265,20 @@
     (str "{{" model "}}")]
    [:input.form-control {:ng-show "editing" :ng-model model}]])
 
+(defelem tool-not-found []
+  [:div.alert.alert-danger 
+   [:h3 "Error"]
+   [:p
+    " The required tool for this step could not be found. Check with the site
+    administrator to make sure that the "
+    [:code "{{step.tool}}"]
+    " tool is installed"]
+   (update-in (mail-to contact
+                       [:span
+                        [:i.fa.fa-envelope-o]
+                        " Send a grumpy email"])
+              [1 :class] (constantly "btn btn-default"))])
+
 (def history
   [:div.container-fluid.history-view
    [:div.row
@@ -311,18 +325,7 @@
 
     [:div.col-xs-12.slide-left
      {:ng-class "{'col-md-8': (!expanded && nextSteps.length), 'col-md-10': (!expanded && !nextSteps.length), 'col-md-offset-2': !expanded}"}
-     [:div.alert.alert-danger {:ng-show "error.status === 404"}
-      [:h3 "Error"]
-      [:p
-       " The required tool for this step could not be found. Check with the site
-       administrator to make sure that the "
-       [:code "{{step.tool}}"]
-       " tool is installed"]
-      (update-in (mail-to contact
-                          [:span
-                           [:i.fa.fa-envelope-o]
-                           " Send a grumpy email"])
-                 [1 :class] (constantly "btn btn-default"))]
+     (tool-not-found {:ng-show "error.status === 404"})
      [:div.current-step
       {:ng-hide "error.status === 404"
        :tool "tool"
