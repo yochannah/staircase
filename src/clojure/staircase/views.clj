@@ -12,7 +12,10 @@
 
 (def ^:dynamic require-js "/vendor/requirejs/require.js")
 
+;; TODO - read these from conf
 (def repo "https://github.com/alexkalderimis/staircase")
+
+(def contact "alex@intermine.org")
 
 (defn- entry-point [ep]
   (->> (include-js require-js)
@@ -95,7 +98,7 @@
     [:a.dropdown-toggle
      "get in touch! " [:b.caret]]
     (unordered-list {:class "dropdown-menu"}
-                    [(mail-to "alex.kalderimis@gmail.com" ;; TODO: Make configurable.
+                    [(mail-to contact
                               [:span
                                [:i.fa.fa-envelope-o]
                                " Contact"])
@@ -308,8 +311,21 @@
 
     [:div.col-xs-12.slide-left
      {:ng-class "{'col-md-8': (!expanded && nextSteps.length), 'col-md-10': (!expanded && !nextSteps.length), 'col-md-offset-2': !expanded}"}
+     [:div.alert.alert-danger {:ng-show "error.status === 404"}
+      [:h3 "Error"]
+      [:p
+       " The required tool for this step could not be found. Check with the site
+       administrator to make sure that the "
+       [:code "{{step.tool}}"]
+       " tool is installed"]
+      (update-in (mail-to contact
+                          [:span
+                           [:i.fa.fa-envelope-o]
+                           " Send a grumpy email"])
+                 [1 :class] (constantly "btn btn-default"))]
      [:div.current-step
-      {:tool "tool"
+      {:ng-hide "error.status === 404"
+       :tool "tool"
        :step "step"
        :full-size "expanded"
        :has-items "setItems(key, type, ids)"
