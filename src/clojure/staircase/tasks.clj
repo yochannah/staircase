@@ -29,7 +29,7 @@
     (doseq [tool-name names
             :let [tool-settings (settings tool-name)
                   repo-uri  (:uri tool-settings)
-                  repo-path (str "tools/" (name tool-name))
+                  repo-path (str "resources/tools/" (name tool-name))
                   options   (or (:options tool-settings) {})]]
       (info "Updating" repo-path "from" repo-uri "with options:" (prn-str options))
       (let [repo         (load-or-clone repo-uri repo-path options)
