@@ -8,7 +8,7 @@
         </a>
     </li>
 </ul>
-<ul class="list-group">
+<ul class="list-group available-lists">
     <img class="loading" src="/images/loading.gif" ng-hide="lists">
     <div class="alert alert-info" ng-show="lists && !filteredLists.length">
         <p>
@@ -19,7 +19,7 @@
     <li class="list-group-item" ng-repeat="list in filteredLists = (lists | filter:listFilter)">
         <span class="badge">{{list.size}} {{list.type}}s</span>
         <a ng-click="viewList(list)">{{list.name}}</a>
-        <p class="list-group-item-text">{{list.description}}</p>
+        <p class="description list-group-item-text">{{list.description}}</p>
     </li>
 </ul>
 
