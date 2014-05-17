@@ -1,6 +1,6 @@
 {
 	:tools {
-		:keyword-search {:uri "https://github.com/joshkh/multimine-search-tool.git"
+		:keyword-search {:uri "https://github.com/alexkalderimis/multimine-search-tool.git"
 			         :options {:branch-name "master"}}}
 }
 
