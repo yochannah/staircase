@@ -237,7 +237,7 @@
             (GET "/" []
                  (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
                   (let [user-services (get-all services)
-                        configured-services (->> config :services (map (fn [[k v]] {:root v :ident k})))]
+                        configured-services (->> config :services (map (fn [[k v]] {:root v :name k})))]
                     (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                     (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root)))))))
             (context "/:ident" [ident]
@@ -246,7 +246,7 @@
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
                                   user-services (get-where services [:= :root uri])
-                                  service (-> (left-outer-join [{:root uri :ident ident}]
+                                  service (-> (left-outer-join [{:root uri :name ident}]
                                                               user-services
                                                               :root
                                                               :root)
