@@ -2,8 +2,6 @@
   "capabilities": ["initial"],
   "type": "native",
   "heading": "Previous Steps",
-  "width": 1,
-  "templateURI": "./template.html",
-  "controllerURI": "./controller.js"
+  "width": 1
 }
 

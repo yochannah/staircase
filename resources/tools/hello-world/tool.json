@@ -1,8 +1,6 @@
 {
   "capabilities": ["initial"],
   "type": "native",
-  "heading": "Hello World",
-  "templateURI": "./template.html",
-  "controllerURI": "./controller.js"
+  "heading": "Hello World"
 }
 
