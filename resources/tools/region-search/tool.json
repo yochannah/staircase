@@ -1,6 +1,6 @@
 {
   "capabilities": ["initial", "now"],
-  "type": "native",
+  "type": "IFrame",
   "handles": "genomic-regions",
   "heading": "Region Search",
   "width": 1,
