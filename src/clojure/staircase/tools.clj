@@ -6,10 +6,10 @@
 
 (def tool-defaults ;; Lots of duplication here - be less explicit?
   {:headingTemplateURI "./heading.html"
-   :headingControllerURI "./heading-controller.js"
-   :providerURI "./provider.js"
+   :headingControllerURI "./heading-controller"
+   :providerURI "./provider"
    :templateURI "./template.html"
-   :controllerURI "./controller.js"
+   :controllerURI "./controller"
    :width 1})
 
 (defn- fix-uris
