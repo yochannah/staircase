@@ -118,7 +118,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     });
 
     function setMineDetails (mine) {
-      timeout(function () { scope.serviceName = mine.ident; });
+      timeout(function () { scope.serviceName = mine.name; });
     }
 
     function classFilter (scope) {
