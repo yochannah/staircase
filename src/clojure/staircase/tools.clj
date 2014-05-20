@@ -56,8 +56,7 @@
 (defn get-tools
   [config capability]
   (debug "Getting tools with the" capability "capability")
-  (let [tools (config :tools)]
-    (->> tools
-         (map get-tool-conf)
-         (filter (partial has-capability capability)))))
+  (->> (:tools config)
+        (map get-tool-conf)
+        (filter (partial has-capability capability))))
 
