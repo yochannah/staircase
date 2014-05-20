@@ -1,6 +1,8 @@
 (ns staircase.assets
-  (:import de.sandroboehme.lesscss.LessCompiler) ;; replace this with org.lesscss once changes are merged.
+  (:import de.sandroboehme.lesscss.LessCompiler ;; replace this with org.lesscss once changes are merged.
+           [java.util Date])
   (:require [dieter.settings :as settings]
+            [ring.util.time  :as ring-time]
             [clojure.string  :as string]
             [ring.util.codec :as codec]
             [clojure.java.io :as io])
@@ -37,17 +39,26 @@
 
 (defmulti checksum ext)
 
-(defmethod checksum :coffee
-  [f]
-  (file-md5 f))
-
-(defmethod checksum :ls
+(defmethod checksum :default
   [f]
   (file-md5 f))
 
 (defmethod checksum :less
   [f]
   (dir-md5 f))
+
+(defmulti get-modification-time ext)
+
+(defmethod get-modification-time :default
+  [f]
+  (and f (Date. (.lastModified f))))
+
+(defmethod get-modification-time :less
+  [f]
+  (let [dir (.getParentFile f)
+        files (filter #(.isFile %) (file-seq dir))
+        mod-time #(.lastModified %)]
+    (Date. (reduce max 0 (map mod-time files)))))
 
 (defn get-kind [file-name]
   (cond (.endsWith file-name ".js") :script
@@ -106,40 +117,57 @@
 
 (defonce asset-cache (atom {}))
 
+;; Be generous about who can load our css.
 (def cors {"Access-Control-Allow-Origin" "*"})
+
+;; Allow content to be cached
+(def caching {"Cache-Control" (str "public, max-age=" (* 30 24 60 60))})
 
 (defn generate-response [asset-file]
   (case (ext asset-file)
     :coffee {:body (compile-coffeescript asset-file)
              :status 200
-             :headers {"Content-Type" "text/javascript"}}
+             :headers (assoc caching "Content-Type" "text/javascript")}
     :ls     {:body (compile-livescript asset-file)
              :status 200
-             :headers {"Content-Type" "text/javascript"}}
+             :headers (assoc caching "Content-Type" "text/javascript")}
     :less {:body (less asset-file)
             :status 200
-            :headers (assoc cors "Content-Type" "text/css")}
+            :headers (merge caching (assoc cors "Content-Type" "text/css"))}
     {:status 500 :body "Unknown asset type" :content-type "text/plain"})) ;; Should never happen.
 
-(defn serve-asset [file options]
+(defn serve-from-cache
+  [cksm file]
+  (let [cache-record (@asset-cache file)]
+    (if (= (:hash cache-record) cksm)
+      (:resp cache-record)
+      (let [response (generate-response file)
+            cache-record {:hash cksm :resp response}]
+        (swap! asset-cache assoc file cache-record)
+        response))))
+
+(defn serve-asset [file options etag]
   (if (:no-cache? options)
     (generate-response file)
     (let [cksm (checksum file)
-          cache-record (@asset-cache file)]
-      (if (= (:hash cache-record) cksm)
-        (do (debug "Serving asset from cache") (:resp cache-record))
-        (do
-          (debug "Generating new response for" file)
-          (let [response (generate-response file)
-                cache-record {:hash cksm :resp response}]
-            (swap! asset-cache assoc file cache-record)
-            response))))))
+          new-etag (str cksm)]
+      (if (= etag new-etag)
+        {:status 304 :body ""}
+        (update-in (serve-from-cache cksm file) [:headers] merge caching {"ETag" new-etag})))))
+
+(defn asset-not-modified-since?
+  [req file]
+  (when-let [mod-since (get-in req [:headers "if-modified-since"])]
+    (when-let [last-seen (ring-time/parse-date mod-since)]
+      (.after last-seen (get-modification-time file)))))
 
 (defn serve [options req]
   (settings/with-options options
     (when (is-asset-req req)
       (when-let [asset-file (asset-file-for req options)]
-        (serve-asset asset-file options)))))
+        (if (asset-not-modified-since? req asset-file)
+          {:status 304 :body ""}
+          (serve-asset asset-file options (get-in req [:headers "if-none-match"])))))))
 
 (defn pipeline [& {:keys [strategy] :as options}]
   "Take options and return a function that will wrap a ring handler in an assets pipeline.
