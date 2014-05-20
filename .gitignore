@@ -14,3 +14,5 @@ resources/secret*
 node_modules
 resources/public/vendor/*
 .DS_Store
+tools
+external
