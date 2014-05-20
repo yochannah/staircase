@@ -45,6 +45,7 @@
   :ring {:handler staircase.app/handler}
   :prep-tasks ["javac" "compile"]
   :source-paths ["src/clojure"]
+  :resource-paths ["resources" "external"]
   :aliases {
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
             "clean-js" ["run" "-m" "staircase.tasks/clean-js"]
@@ -69,26 +70,27 @@
     angular-ui-select2 "~0.0.5",
     angular-animate "~1.2.16"]]
   :env {
-      :web-services {"flymine" "http://www.flymine.org/query/service"
-                     "mousemine" "http://www.mousemine.org/mousemine/service"}
-      :web-tools [
-                  :templates
-                  :choose-list
-                  :new-query
-                  :region-search
-                  :upload-list
-                  :histories
-                  :hello-world
-                  :show-table ;; TODO: make these autoconfigure...
-                  :show-list
-                  :show-enrichment
-                  :resolve-ids
-                  :convert-list
-                  :export
-		  :keyword-search ;; From resources/config - really must auto-configure this list...
-                  ]
-        :web-max-session-age ~(* 60 60 24)
-        :db-classname "org.postgresql.Driver"
-        :db-subprotocol "postgresql"
+      :db-classname "org.postgresql.Driver"
+      :db-subprotocol "postgresql"
+      :web-max-session-age ~(* 60 60 24)
+      :web-services {
+        "flymine" "http://www.flymine.org/query/service"
+        "mousemine" "http://www.mousemine.org/mousemine/service"}
+       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
+                   :templates
+                   :choose-list
+                   :new-query
+                   :region-search
+                   :upload-list
+                   :histories
+                   :hello-world
+                   :show-table ;; TODO: make these autoconfigure...
+                   :show-list
+                   :show-enrichment
+                   :resolve-ids
+                   :convert-list
+                   :export
+                   :keyword-search ;; From resources/config - really must auto-configure this list...
+                   ]
   }
 )
