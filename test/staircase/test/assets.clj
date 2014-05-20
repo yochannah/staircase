@@ -223,6 +223,19 @@
         (is (= 200 (:status resp)))
         (is (= expected-css (-> resp :body (.trim))))))))
 
+(deftest not-modified-responses
+  (testing "use of the if-none-match header"
+    (let [pipeline (pipeline :ls "ls" :coffee "coffee"
+                             :js-dir "/js"
+                             :css-dir "/css"
+                             :as-resource "assets")
+          handler (fn [{uri :uri :as req}] (if (= uri "/") fake-index i-know-nothing!))
+          app (pipeline handler)
+          cksm (checksum ls-file)
+          req  (-> (GET "/js/test.ls") (assoc :headers {"if-none-match" (str cksm)}))
+          resp (app req)]
+      (is (= 304 (:status resp))))))
+
 (deftest test-pipeline
   (testing "default pipeline"
     (let [pipeline (pipeline :ls "ls" :coffee "coffee"
