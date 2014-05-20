@@ -37,7 +37,8 @@
       (let [repo         (load-or-clone repo-uri repo-path options)
             fetch-result (git-fetch repo)
             git-ref      (or (:ref tool-settings) "master")]
-        (git-checkout repo git-ref)))))
+        (git-checkout repo git-ref)
+        (git-pull repo)))))
 
 (defn- rm-r [path]
   (let [f' (fn [f file] ;; y-combinator for non-tail recursion.
