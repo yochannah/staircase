@@ -146,14 +146,17 @@
         (swap! asset-cache assoc file cache-record)
         response))))
 
-(defn serve-asset [file options etag]
+(defn serve-asset
+  ([file options]
+   (serve-asset file options nil))
+  ([file options etag]
   (if (:no-cache? options)
     (generate-response file)
     (let [cksm (checksum file)
           new-etag (str cksm)]
       (if (= etag new-etag)
         {:status 304 :body ""}
-        (update-in (serve-from-cache cksm file) [:headers] merge caching {"ETag" new-etag})))))
+        (update-in (serve-from-cache cksm file) [:headers] merge caching {"ETag" new-etag}))))))
 
 (defn asset-not-modified-since?
   [req file]
