@@ -7,8 +7,15 @@ The webapp that serves the step-based data-flow interface to the
 
 ## Quick Start
 
+Assuming leingingen and nodejs are installed:
+
 ```sh
-lein ring server
+export PORT=3000 \
+       DB_USER=YOU \
+       SECRET_KEY_PHRASE="some long and unguessable phrase" \
+       WEB_AUDIENCE=http://localhost:$PORT
+createdb staircase
+lein do load-tools, js-deps, ring server
 ```
 
 ## Prerequisites
