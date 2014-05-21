@@ -121,19 +121,21 @@
 (def cors {"Access-Control-Allow-Origin" "*"})
 
 ;; Allow content to be cached
-(def caching {"Cache-Control" (str "public, max-age=" (* 30 24 60 60))})
+(defn caching
+  [{max-age :max-age}]
+  {"Cache-Control" (str "public,must-revalidate,max-age=" (or max-age 0))})
 
 (defn generate-response [asset-file]
   (case (ext asset-file)
     :coffee {:body (compile-coffeescript asset-file)
              :status 200
-             :headers (assoc caching "Content-Type" "text/javascript")}
+             :headers {"Content-Type" "text/javascript"}}
     :ls     {:body (compile-livescript asset-file)
              :status 200
-             :headers (assoc caching "Content-Type" "text/javascript")}
+             :headers {"Content-Type" "text/javascript"}}
     :less {:body (less asset-file)
             :status 200
-            :headers (merge caching (assoc cors "Content-Type" "text/css"))}
+            :headers (assoc cors "Content-Type" "text/css")}
     {:status 500 :body "Unknown asset type" :content-type "text/plain"})) ;; Should never happen.
 
 (defn serve-from-cache
@@ -150,13 +152,15 @@
   ([file options]
    (serve-asset file options nil))
   ([file options etag]
-  (if (:no-cache? options)
-    (generate-response file)
-    (let [cksm (checksum file)
-          new-etag (str cksm)]
-      (if (= etag new-etag)
-        {:status 304 :body ""}
-        (update-in (serve-from-cache cksm file) [:headers] merge caching {"ETag" new-etag}))))))
+   (if (:no-cache? options)
+     (generate-response file)
+     (let [cksm (checksum file)
+           new-etag (str cksm)]
+       (if (= etag new-etag)
+         {:status 304 :body ""}
+         (update-in (serve-from-cache cksm file)
+                    [:headers]
+                    merge (caching options) {"ETag" new-etag}))))))
 
 (defn asset-not-modified-since?
   [req file]

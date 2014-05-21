@@ -23,6 +23,7 @@
             :asset-pipeline (assets/pipeline :js-dir "/js"
                                              :css-dir "/css"
                                              :engine :v8
+                                             :max-age (:web-max-age options)
                                              :as-resource "tools"
                                              :coffee "src/coffee"
                                              :ls     "src/ls"
