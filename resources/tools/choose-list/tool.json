@@ -4,8 +4,6 @@
   "style": "./lists.css",
   "heading": "View Existing List",
   "width": 1,
-  "tall": true,
-  "templateURI": "./template.html",
-  "controllerURI": "./controller.js"
+  "tall": true
 }
 

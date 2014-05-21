@@ -47,7 +47,7 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.factory 'meetRequest', Array '$q', '$injector', (Q, injector) -> (tool, step, data) ->
     d = Q.defer()
-    require [tool.providerURI], (factory) ->
+    require {baseUrl: '/'}, ['.' + tool.providerURI], (factory) ->
       handleRequest = injector.invoke factory, this
       handleRequest(step, data).then d.resolve, d.reject
       

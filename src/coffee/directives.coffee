@@ -321,7 +321,6 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           window.document.getElementsByTagName('head')[0].appendChild(link)
           toolCssLoaded[scope.tool.style] = true
 
-        console.log('.' + scope.tool.controllerURI)
         ctrl = '.' + scope.tool.controllerURI
         tmpl = scope.tool.templateURI
 
@@ -359,10 +358,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       scope.$watch 'tool.headingURI', ->
         if scope.tool
 
-          ctrl = $window.location.origin + scope.tool.headingControllerURI
+          ctrl = '.' + scope.tool.headingControllerURI
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
-          require [ctrl, "text!#{ tmpl }"], (controller, template) ->
+          require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
 
             $injector.invoke controller, this, {'$scope': scope}
 

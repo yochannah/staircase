@@ -38,7 +38,6 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
         listHandlers.push {tool, data: scope.list}
       otherSteps = (s for s in scope.nextSteps when s.tool.handles isnt 'list')
       scope.nextSteps = otherSteps.concat(listHandlers)
-      console.log listHandlers
 
     scope.saveHistory = ->
       scope.editing = false
