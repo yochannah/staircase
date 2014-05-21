@@ -4,6 +4,7 @@
                      [org.marianoguerra/clj-rhino "0.2.1"]
                      [ring-mock "0.1.5"]]
       :env {
+            :web-max-age 300
             :web-default-service "flymine"
             :web-audience "http://localhost:3000"
             :verifier "https://verifier.login.persona.org/verify"

@@ -73,6 +73,7 @@
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
       :web-max-session-age ~(* 60 60 24)
+      :web-max-age ~(* 30 24 60 60)
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
