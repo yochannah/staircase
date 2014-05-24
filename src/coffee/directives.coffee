@@ -2,6 +2,14 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
+  Directives.directive 'blurOn', ->
+    restrict: 'A'
+    scope:
+      blurOn: '@'
+    link: (scope, element) ->
+      el = element[0]
+      element.on scope.blurOn, el.blur.bind(el)
+
   # Pair of recursive directives for turning any json structure into an editable form.
   Directives.directive 'editableItem', ($compile) ->
     restrict: 'E'
@@ -215,6 +223,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       tool:     '='
       step:     '='
       fullSize: '='
+      state:    '='
       onToggle: '&'
       hasItems: '&'
       has:      '&'
