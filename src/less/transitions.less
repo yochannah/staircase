@@ -8,6 +8,15 @@
     transition: right 0.3s ease-in,width 0.3s ease-in;
 }
 
+.slide-up {
+    height: initial;
+    transition: height 0.3s ease-in;
+}
+
+.slide-up.closed {
+    height: 0;
+}
+
 .fade-out.ng-leave {
     opacity: 1;
     transition: opacity 0.25s ease-in;

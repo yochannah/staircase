@@ -12,7 +12,7 @@
             }
         }
 
-        font-size: 1.2em;
+        font-size: 1.1em;
 
         .list-group-item.active {
             position: relative;
@@ -80,6 +80,27 @@
 
     }
 
+    .facets {
+        .panel-body {
+            padding-right: 10px; /* fixed value bad. TODO: calculate */
+        }
+
+        h4 {
+            margin-left: 1em;
+
+            .fa {
+                margin-right: 0.5em;
+            }
+        }
+        .facet.btn {
+            border-right: none;
+            border-left: none;
+            border-bottom-width: 0;
+        }
+        .facet.btn:last-child {
+            border-bottom-width: 1px;
+        }
+    }
 
 }
 

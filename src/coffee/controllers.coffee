@@ -68,5 +68,7 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
   mountController 'BrandCtrl', 'brand'
 
+  mountController 'FacetCtrl', 'facets'
+
   return Controllers
 

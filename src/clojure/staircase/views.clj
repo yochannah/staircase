@@ -279,6 +279,28 @@
                         " Send a grumpy email"])
               [1 :class] (constantly "btn btn-default"))])
 
+(def facets ;; Facets panel displayed when there are facets to show.
+  [:div.facets.panel.panel-default
+   {:ng-controller "FacetCtrl"
+    :ng-show "state.facets"}
+   [:div.panel-heading "Facets"]
+   [:div.panel-body
+    [:div.row
+     {:ng-repeat "(name, facetSet) in state.facets"}
+     [:h4 
+      {:ng-click "closed = !closed"}
+      [:i.fa {:ng-class "{'fa-caret-right': closed, 'fa-caret-down': !closed}"}]
+      "{{countFacets(facetSet)}} {{name}}"]
+     [:div.slide-up {:ng-class "{closed: closed}"}
+      [:button.col-xs-12.facet.btn.btn-default.clearfix
+       {:blur-on "click"
+        :ng-class "{active: info.selected}"
+        :ng-repeat "info in facetSet | mappingToArray | orderBy:'count':true"
+        :ng-click "info.selected = !info.selected"}
+       [:span.pull-right.badge "{{info.count}}"]
+       [:span.pull-left        "{{info.$key}}"]]
+      ]]]])
+
 (def history
   [:div.container-fluid.history-view
    [:div.row
@@ -306,7 +328,9 @@
          [:i.pull-right.fa.fa-edit
             {:ng-click "openEditDialogue()"
              :ng-show "step.id == s.id"}]
-         "{{s.title}}"]]]]
+         "{{s.title}}"]]]
+
+     facets]
 
     [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
      {:ng-class "{onscreen: (!expanded && nextSteps.length)}"}
@@ -330,6 +354,7 @@
       {:ng-hide "error.status === 404"
        :tool "tool"
        :step "step"
+       :state "state"
        :full-size "expanded"
        :has-items "setItems(key, type, ids)"
        :has "hasSomething(what, data)"

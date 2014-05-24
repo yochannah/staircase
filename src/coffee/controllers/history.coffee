@@ -7,6 +7,7 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
     scope.providers = []
     scope.collapsed = true # Hide details in reduced real-estate view.
     scope.items = {}
+    scope.state = {}
 
     toolNotFound = (e) -> to -> scope.error = e
 
