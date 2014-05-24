@@ -4,6 +4,10 @@ define ['angular', 'services'], (ng, services) ->
 
   Filters.filter('interpolate', ['version', (v) -> (t) -> String(t).replace(/\%VERSION\%/mg, v)])
 
+  Filters.filter 'mappingToArray', -> (obj) ->
+    return obj unless obj instanceof Object
+    (Object.defineProperty v, '$key', {__proto__: null, value: k} for k, v of obj)
+
   Filters.filter 'roughDate', Array '$filter', (filters) -> (str) ->
     date = new Date str
     now = new Date()
