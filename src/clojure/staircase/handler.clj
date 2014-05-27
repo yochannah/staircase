@@ -89,10 +89,10 @@
     NOT_FOUND))
 
 (defn add-step-to [histories steps id doc]
-  (if (.exists? histories id)
+  (if (exists? histories id)
     (let [to-insert (assoc doc "history_id" id)
-          step-id (.create steps to-insert)]
-      (response (.get-one steps step-id)))
+          step-id (create steps to-insert)]
+      (response (get-one steps step-id)))
     NOT_FOUND))
 
 (defn- issue-session [config secrets ident]
