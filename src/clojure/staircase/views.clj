@@ -316,7 +316,7 @@
    [:div.row
 
     [:div.sidebar.slide-left.col-xs-12.col-md-2
-     {:ng-class "{minimised: expanded, collapsed: collapsed}"}
+     {:ng-class "{minimised: state.expanded, collapsed: collapsed}"}
      [:div.panel.panel-default
       (apply vector
              :div.panel-heading
@@ -343,7 +343,7 @@
      facets]
 
     [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
-     {:ng-class "{onscreen: (!expanded && nextSteps.length)}"}
+     {:ng-class "{onscreen: (!state.expanded && nextSteps.length)}"}
      [:div.panel.panel-default
       [:div.panel-heading "Next steps"]
       [:div.list-group {:ng-show "nextSteps.length"}
@@ -358,19 +358,20 @@
        [:em "No steps available"]]]]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-8': (!expanded && nextSteps.length), 'col-md-10': (!expanded && !nextSteps.length), 'col-md-offset-2': !expanded}"}
+     {:ng-class "{'col-md-8': (nextSteps.length && !state.expanded),
+                  'col-md-10': (!state.expanded && !nextSteps.length),
+                  'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"})
      [:div.current-step
       {:ng-hide "error.status === 404"
        :tool "tool"
        :step "step"
        :state "state"
-       :full-size "expanded"
        :has-items "setItems(key, type, ids)"
        :has "hasSomething(what, data, key)"
        :wants "wantsSomething(what, data)"
        :next-step "nextStep(data)"
-       :on-toggle "expanded = !expanded"} ]]
+       :toggle "state.expanded = !state.expanded"} ]]
     ]])
 
 (defn modal-dialogue ;; template for a dialogue whose controller provides close and ok methods.
