@@ -189,10 +189,13 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
     all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
 
+    atURL = (url) -> all().then (mines) ->
+      L.find mines, (m) -> (m.root.indexOf(url) >= 0) || (url && url.indexOf(m.root) >= 0)
+
     get = (ident) ->
       auth.authorize().then (headers) -> http.get("#{URL}/#{ident}", {headers}).then asData
 
-    return {all, get}
+    return {all, get, atURL}
 
   Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
     headers = auth.headers
