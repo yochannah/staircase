@@ -7,6 +7,7 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
     scope.providers = []
     scope.collapsed = true # Hide details in reduced real-estate view.
     scope.items = {}
+    scope.messages = {}
     scope.state = {}
 
     toolNotFound = (e) -> to -> scope.error = e
@@ -24,14 +25,20 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
 
     scope.nextSteps = []
 
+    scope.watchDeeply = (name, f) -> scope.$watch ((s) -> JSON.stringify s[name]), -> f s[name]
+
     scope.$watchCollection 'items', ->
-      console.log "Items changed"
       exporters = []
       for tool in scope.nextTools when tool.handles is 'items'
         for key, data of scope.items when data.ids.length
           exporters.push {key, data, tool}
       otherSteps = (s for s in scope.nextSteps when s.tool.handles isnt 'items')
       scope.nextSteps = otherSteps.concat(exporters)
+
+    scope.$watchCollection 'messages', (msgs) ->
+      handlers = L.values msgs
+      otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
+      scope.nextSteps = otherSteps.concat(handlers)
 
     scope.$watch 'list', ->
       listHandlers = []
@@ -50,9 +57,16 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
 
     scope.setItems = (key, type, ids) -> to -> scope.items[key] = {type, ids}
 
-    scope.hasSomething = (what, data) ->
+    scope.hasSomething = (what, data, key) ->
       if what is 'list'
         to -> scope.list = data
+      else
+        for tool in scope.nextTools when tool.handles is what then do (tool, what, data, key) ->
+          idx = tool.ident + what + key
+          if scope.messages[idx]?
+            scope.messages[idx].data = data
+          else
+            to -> scope.messages[idx] = {tool, data, kind: 'msg'}
 
     letUserChoose = (tools) ->
       dialogue = $modal.open
