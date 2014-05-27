@@ -43,6 +43,14 @@
                  ["options" "cog" {:ng-click "showOptions()"}]])
 
 (defn header []
+  [:headroom
+    {:offset 205
+     :tolerance 5
+     :classes "{initial:'animated',
+                pinned:'slideDown',
+                unpinned:'slideUp',
+                top:'headroom--top',
+                notTop:'headroom--not-top'}"}
   [:div.navbar.navbar-inverse.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
 
@@ -70,7 +78,7 @@
 
      (search-form)
 
-     ]]])
+     ]]]])
 
 (def search-input
   [:div.input-group
@@ -290,7 +298,9 @@
      [:h4 
       {:ng-click "closed = !closed"}
       [:i.fa {:ng-class "{'fa-caret-right': closed, 'fa-caret-down': !closed}"}]
-      "{{countFacets(facetSet)}} {{name}}"]
+      [:ng-pluralize
+       {:count "countFacets(facetSet)"
+        :when "{'one': 'One {{name}}', 'other': '{} {{name}}s'}"}]]
      [:div.slide-up {:ng-class "{closed: closed}"}
       [:button.col-xs-12.facet.btn.btn-default.clearfix
        {:blur-on "click"
@@ -357,7 +367,7 @@
        :state "state"
        :full-size "expanded"
        :has-items "setItems(key, type, ids)"
-       :has "hasSomething(what, data)"
+       :has "hasSomething(what, data, key)"
        :wants "wantsSomething(what, data)"
        :next-step "nextStep(data)"
        :on-toggle "expanded = !expanded"} ]]
