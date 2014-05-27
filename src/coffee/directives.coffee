@@ -353,6 +353,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
   Directives.directive 'angularTool', ($window, $compile, $injector) ->
     restrict: 'E'
     link: injectingLinker $window, $compile, $injector
+    controller: ($scope) -> $scope.$on 'has', (event, msg) -> $scope.has msg # {what, key, data}
 
   Directives.directive 'nextStep', ($window, $compile, $injector) ->
     restrict: 'E'
