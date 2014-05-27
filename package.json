@@ -6,7 +6,8 @@
     "test": "test/steps"
   },
   "scripts": {
-    "test": "sh script/test.sh"
+    "test": "sh script/test.sh",
+    "postinstall":  "./node_modules/bower/bin/bower install"
   },
   "devDependencies": {
     "bower": "^1.3.2",
