@@ -222,9 +222,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     scope:
       tool:     '='
       step:     '='
-      fullSize: '='
       state:    '='
-      onToggle: '&'
+      toggle:   '&'
       hasItems: '&'
       has:      '&'
       wants:    '&'
@@ -232,8 +231,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     template: """
       <div class="panel-heading">
         <i class="fa pull-right"
-           ng-click="onToggle()"
-           ng-class="{'fa-compress': fullSize, 'fa-expand': !fullSize}"></i>
+           ng-click="toggle()"
+           ng-class="{'fa-compress': state.expanded, 'fa-expand': !state.expanded}"></i>
         {{tool.heading}}
       </div>
     """
