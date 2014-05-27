@@ -101,7 +101,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     function setMineDetails (mine) {
       timeout(function () {
         scope.serviceRoot = mine.root;
-        scope.serviceName = mine.ident;
+        scope.serviceName = mine.name;
       });
     }
 

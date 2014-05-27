@@ -25,8 +25,14 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     historyListener.watch scope
 
+    byIdent = ({ident}) -> ident is params.tool
+    if params.service?
+      filter = (sp) -> byIdent(sp) and params.service is sp.args?.service
+    else
+      filter = byIdent
+
     scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
-      tool = L.find startingPoints, (sp) -> sp.ident is params.tool
+      tool = L.find startingPoints, filter
       scope.tool = Object.create tool
       scope.tool.state = 'FULL'
 

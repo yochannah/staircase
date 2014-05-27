@@ -67,7 +67,7 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
 
     fetchingDefaultMine = Mines.get 'default'
 
-    fetchingDefaultMine.then ({ident}) -> timeout -> scope.serviceName = ident
+    fetchingDefaultMine.then ({name}) -> timeout -> scope.serviceName = name
 
     connecting = fetchingDefaultMine.then Service.connect
 
@@ -81,4 +81,6 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
     typeWatcher = ({inputType, outputType}) -> inputType?.className + outputType?.className
 
     scope.$watch typeWatcher, updateTemplates
+
+    scope.$watch 'serviceName', (name) -> scope.tool.heading += " in #{ name }" if name
 

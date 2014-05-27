@@ -33,13 +33,18 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
       scope.useConstraint = false;
     });
 
-    var fetchingDefaultMine = mines.get('default');
+    var mineName = 'default';
+    if (scope.tool.args && scope.tool.args.service) {
+      mineName = scope.tool.args.service;
+    }
+    var fetchingDefaultMine = mines.get(mineName);
 
     scope.$watch('serviceName', function (name) {
       scope.tool.heading = 'Browse ' + name + ' by Data-Type';
     });
 
-    scope.$watch(watchQuery, function (key) {
+    scope.$watch(watchQuery, function (queryString) {
+      var key = mineName + queryString;
       var cachedN = countCache.get(key);
       if (cachedN != null) {
         setRowCount(cachedN);

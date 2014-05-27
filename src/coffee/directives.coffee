@@ -279,7 +279,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       scope.$watch 'tool.expandable', (expandable) ->
         if expandable
           doResize = ->
-            margin = 38 # HARDCODED! TODO! CALCULATE!
+            margin = 30 # HARDCODED! TODO! CALCULATE!
             offsets = getOffsets(document, 'starting-point')
             maxx = L.max offsets.map (o) -> o.left + o.width
             maxy = L.max offsets.map (o) -> o.top + o.height
@@ -304,7 +304,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
                 factor += 1
 
             if factor > 1 and panelBody = element[0].querySelector('.panel-body')
-              totalHeight = ystep * factor - margin
+              totalHeight = ystep * factor - ((factor - 1) * margin)
               console.log totalHeight, ystep, factor
               panelBody.style.height = "#{ totalHeight - (p1.y - panelBody.offsetTop) }px"
               element.addClass 'expanded'

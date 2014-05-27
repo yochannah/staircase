@@ -28,7 +28,7 @@
         reduce-f (fn [c [test-f to-strip]] (if (test-f) (apply dissoc c to-strip) c))]
     (reduce reduce-f conf strippers)))
 
-(defn get-tool-conf*
+(defn get-tool-by-name
   [tool-name]
   (with-open [r (-> (str "tools/" (name tool-name) "/tool.json")
                     io/resource
@@ -39,6 +39,13 @@
         (assoc :ident (name tool-name))
         (fix-uris #(replace-first % "." (str "/" (name tool-name))))
         (strip-by-cap))))
+
+(defn get-tool-conf*
+  [tool-def]
+  (if (vector? tool-def)
+    (let [[tool-name args] tool-def]
+      (assoc (get-tool-by-name tool-name) :args args))
+    (get-tool-by-name tool-def)))
 
 ;; Don't do io on every access. - but for now in development we should.
 (def get-tool-conf get-tool-conf*) ;;(memoize get-tool-conf*))

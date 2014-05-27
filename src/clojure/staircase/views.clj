@@ -100,7 +100,7 @@
      "Start " [:b.caret]]
      [:ul.dropdown-menu
       [:li {:ng-repeat "tool in startingPoints"}
-           [:a {:href "/starting-point/{{tool.ident}}"}
+           [:a {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"}
                "{{tool.heading}}"]]]]
    [:li.dropdown
     [:a.dropdown-toggle

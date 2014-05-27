@@ -8,13 +8,22 @@ define(['angular', 'imjs'], function (ng, im) {
 
     scope.serviceName = "";
 
-    var fetchingDefaultMine = mines.get('default');
+    var mineName = 'default';
+    if (scope.tool.args && scope.tool.args.service) {
+      mineName = scope.tool.args.service;
+    }
+
+    var fetchingDefaultMine = mines.get(mineName);
 
     fetchingDefaultMine.then(setMineDetails);
     
     fetchingDefaultMine.then(connect).then(readLists);
     
     scope.viewList = viewList;
+
+    scope.$watch('serviceName', function (name) {
+      if (name) scope.tool.heading += " in " + name;
+    });
 
     function viewList (list) {
       scope.$emit('start-history', {
@@ -64,7 +73,7 @@ define(['angular', 'imjs'], function (ng, im) {
     }
 
     function setMineDetails (mine) {
-      timeout(function () { scope.serviceName = mine.ident; });
+      timeout(function () { scope.serviceName = mine.name; });
     }
 
   }];

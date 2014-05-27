@@ -190,6 +190,7 @@
     (GET "/about" [] (views/index))
     (GET "/history/:id/:idx" [] (views/index))
     (GET "/starting-point/:tool" [] (views/index))
+    (GET "/starting-point/:tool/:service" [] (views/index))
     (GET "/tools" [capabilities] (response (get-tools conf capabilities)))
     (GET "/tools/:id" [id] (if-let [tool (get-tool conf id)]
                              (response tool)

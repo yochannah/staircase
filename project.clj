@@ -80,12 +80,13 @@
         "mousemine" "http://www.mousemine.org/mousemine/service"}
        :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :templates
-                   :choose-list
-                   :new-query
-                   :region-search
+                   [:choose-list {:service "flymine"}]
+                   [:choose-list {:service "mousemine"}]
+                   [:new-query {:service "flymine"}]
+                   [:new-query {:service "yeastmine"}]
                    :upload-list
+                   :region-search
                    :histories
-                   :hello-world
                    :show-table ;; TODO: make these autoconfigure...
                    :show-list
                    :show-enrichment
