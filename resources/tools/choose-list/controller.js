@@ -22,7 +22,7 @@ define(['angular', 'imjs'], function (ng, im) {
     scope.viewList = viewList;
 
     scope.$watch('serviceName', function (name) {
-      if (name) scope.tool.heading += " in " + name;
+      if (name) scope.tool.heading = "Lists in " + name;
     });
 
     function viewList (list) {
