@@ -12,6 +12,7 @@ require.config
       exports: 'angular'
     'underscore':
       exports: '_'
+    'ng-headroom': ['angular', 'headroom']
     'angular-route': ['angular']
     'angular-animate': ['angular']
     'angular-ui': ['angular']
@@ -35,6 +36,8 @@ require.config
   ]
   paths:
     angular:         '/vendor/angular/angular'
+    headroom:        '/vendor/headroom.js/dist/headroom'
+    'ng-headroom':   '/vendor/headroom.js/dist/angular.headroom'
     domReady:        '/vendor/requirejs-domready/domReady'
     'underscore':    '/vendor/lodash/dist/lodash.underscore'
     'jschannel':      '/vendor/jschannel'
