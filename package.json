@@ -1,6 +1,7 @@
 {
   "name": "steps",
   "version": "0.1.0",
+  "repository": "http://github.com/alexkalderimis/staircase",
   "description": "The client application for InterMine data-flows",
   "directories": {
     "test": "test/steps"
@@ -9,8 +10,10 @@
     "test": "sh script/test.sh",
     "postinstall":  "./node_modules/bower/bin/bower install"
   },
+  "dependencies": {
+    "bower": "^1.3.2"
+  },
   "devDependencies": {
-    "bower": "^1.3.2",
     "coffee-script": "^1.7.1",
     "karma": ">=0.10.4",
     "karma-chrome-launcher": "~0.1.0",
