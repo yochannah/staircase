@@ -4,11 +4,12 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
   Array injectables..., (scope, http, location, params, to, $modal, meetRequest, Histories) ->
 
     scope.nextTools = []
+    scope.nextSteps = []
     scope.providers = []
     scope.collapsed = true # Hide details in reduced real-estate view.
     scope.items = {}
     scope.messages = {}
-    scope.state = {}
+    scope.state = {expanded: false}
 
     toolNotFound = (e) -> to -> scope.error = e
 
@@ -22,8 +23,6 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
       http.get('/tools', {params: {capabilities: 'next'}})
           .then ({data}) -> scope.nextTools = data.filter (nt) -> nt.ident isnt tool
     http.get('/tools', {params: {capabilities: 'provider'}}).then ({data}) -> scope.providers = data
-
-    scope.nextSteps = []
 
     scope.watchDeeply = (name, f) -> scope.$watch ((s) -> JSON.stringify s[name]), -> f s[name]
 
