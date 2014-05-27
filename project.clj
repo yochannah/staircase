@@ -76,6 +76,7 @@
       :web-max-age ~(* 30 24 60 60)
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
+        "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
        :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :templates
