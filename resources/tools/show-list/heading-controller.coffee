@@ -5,7 +5,7 @@ define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
   scope.activate = ->
     step =
       title: "Created list " + scope.list.name
-      tool: "/tools/show-list"
+      tool: "show-list"
       data:
         service:
           root: scope.list.root
