@@ -91,6 +91,7 @@
                    :resolve-ids
                    :convert-list
                    :export
+                   :id-handler
                    :keyword-search ;; From resources/config - really must auto-configure this list...
                    ]
   }
