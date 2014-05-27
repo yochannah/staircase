@@ -1,0 +1,16 @@
+<div class="list-group-item" ng-show="data.request.ids.length">
+    <p>
+    <strong>
+        <ng-pluralize count="data.request.ids.length"
+                      when="{'0': 'No {{typeName}}s',
+                            'one': 'One {{typeName}}',
+                            'other': '{} {{typeName}}s'}">
+        </ng-pluralize>
+    </strong>
+    at {{mineName}}
+    </p>
+    <div class="btn-group btn-group-xs">
+        <a class="btn btn-default" ng-click="makeList()">Make List</a>
+        <a class="btn btn-default" ng-click="showTable()">Show table</a>
+    </div>
+</div>
