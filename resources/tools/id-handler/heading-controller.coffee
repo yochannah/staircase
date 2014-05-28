@@ -1,18 +1,16 @@
-define ['imjs'], ({Service}) -> Array '$scope', '$timeout', 'Mines', 'makeList', (scope, to, Mines, makeList) ->
+define ['imjs'], ({Service}) -> Array '$scope', '$timeout', 'makeList', (scope, to, makeList) ->
 
   scope.mineName = ""
   scope.typeName = scope.data?.request?.type
 
-  scope.$watch 'data.service.root', (root) ->
-    return unless root
-    Mines.atURL(root).then (mine) -> to ->
-      scope.mineName = mine.name
-      scope.mine = Service.connect mine
-      scope.mine.fetchModel().then (model) ->
-        p = model.makePath(scope.data.request.type).getDisplayName().then (name) -> to ->
-          scope.typeName = name
+  scope.$watch 'service', (service) ->
+    return unless service?
+    to -> scope.mineName = service.name
+    service.fetchModel().then (model) ->
+      p = model.makePath(scope.data.request.type).getDisplayName().then (name) -> to ->
+        scope.typeName = name
 
-        p.then null, console.error.bind(console, 'Err')
+      p.then null, console.error.bind(console, 'Err')
 
   scope.showTable = ->
     step =

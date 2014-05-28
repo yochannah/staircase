@@ -356,6 +356,7 @@
          :previous-step "step"
          :append-step "nextStep(data)"
          :tool "ns.tool"
+         :service "ns.service"
          :data "ns.data"}
         ]]
       [:div.panel-body {:ng-hide "nextSteps.length"}

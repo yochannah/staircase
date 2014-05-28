@@ -1,7 +1,18 @@
-define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
-  injectables = ['$scope', '$http', '$location', '$routeParams', '$timeout', '$modal', 'meetRequest', 'Histories']
+define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
 
-  Array injectables..., (scope, http, location, params, to, $modal, meetRequest, Histories) ->
+  injectables = [
+    '$scope',
+    '$http',
+    '$location',
+    '$routeParams',
+    '$timeout',
+    '$modal',
+    'meetRequest',
+    'Histories',
+    'Mines'
+  ]
+
+  Array injectables..., (scope, http, location, params, to, $modal, meetRequest, Histories, Mines) ->
 
     scope.nextTools = []
     scope.nextSteps = []
@@ -56,16 +67,29 @@ define ['lodash', './choose-dialogue'], (L, ChooseDialogueCtrl) ->
 
     scope.setItems = (key, type, ids) -> to -> scope.items[key] = {type, ids}
 
+    connectWithName = (conf) ->
+      service = imjs.Service.connect conf
+      service.name = conf.name
+      return service
+
+    mines = Mines.all()
+    overlapping = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
+    atURL = (url) -> (ms) -> L.find ms, (m) -> overlapping m.root, url
+
     scope.hasSomething = (what, data, key) ->
+      kind ='msg'
       if what is 'list'
         to -> scope.list = data
       else
         for tool in scope.nextTools when tool.handles is what then do (tool, what, data, key) ->
           idx = tool.ident + what + key
+          url = data.service.root
           if scope.messages[idx]?
             scope.messages[idx].data = data
           else
-            to -> scope.messages[idx] = {tool, data, kind: 'msg'}
+            mines.then(atURL url)
+                 .then(connectWithName)
+                 .then (service) -> to -> scope.messages[idx] = {service, tool, data, kind}
 
     letUserChoose = (tools) ->
       dialogue = $modal.open

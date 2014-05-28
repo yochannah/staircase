@@ -362,6 +362,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       appendStep: '&'
       data: '='
       tool: '='
+      service: '=?'
     link: (scope, element, attrs) ->
 
       scope.$watch 'tool.headingURI', ->
