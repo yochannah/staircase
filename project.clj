@@ -2,7 +2,6 @@
   :description "The application holding data-flow steps."
   :url "http://steps.herokuapp.org"
   :main staircase.main
-  :uberjar-name "staircase-standalone.jar"
   :aot [staircase.main]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
