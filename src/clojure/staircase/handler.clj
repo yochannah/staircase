@@ -11,7 +11,7 @@
         [clojure.tools.logging :only (debug info error)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
-            [devlin.table-utils :refer (left-outer-join)]
+            [devlin.table-utils :refer (full-outer-join)]
             [clj-jwt.core  :as jwt]
             [clj-jwt.key   :refer [private-key public-key]]
             [clj-jwt.intdate :refer [intdate->joda-time]]
@@ -228,7 +228,8 @@
                    (DELETE "/" [] (delete-resource steps id)))))
 
 (defn build-service-routes [{:keys [config services]}]
-  (let [ensure-token (fn [service] (if (:token service)
+  (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
+        ensure-token (fn [service] (if (:token service)
                                      service
                                      (let [token (register-for service)
                                            current (first (get-where services [:= :root (:root service)]))
@@ -241,16 +242,16 @@
             (GET "/" []
                  (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
                   (let [user-services (get-all services)
-                        configured-services (->> config :services (map (fn [[k v]] {:root v :name k})))]
+                        configured-services (->> config :services (map (fn [[k v]] {:root v :confname k})))]
                     (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
-                    (response (vec (map ensure-token (left-outer-join configured-services user-services :root :root)))))))
+                    (response (vec (map (comp ensure-name ensure-token) (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
                      (GET "/" []
                           (locking services
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
                                   user-services (get-where services [:= :root uri])
-                                  service (-> (left-outer-join [{:root uri :name ident}]
+                                  service (-> (full-outer-join [{:root uri :name ident}]
                                                               user-services
                                                               :root
                                                               :root)
@@ -258,11 +259,14 @@
                               (response (ensure-token service)))))
                     (PUT "/" {doc :body}
                          (locking services
-                            (let [uri (or (:uri doc) (get-in config [:services (real-id ident)]))
+                            (let [uri (or (get doc "root") (get-in config [:services (real-id ident)]))
                                   current (first (get-where services [:= :root uri]))]
                               (if current
                                 (update services (:id current) doc)
-                                (create-new services (assoc doc :root uri))))))))))
+                                (try
+                                  (let [token (or (get doc "token") (register-for {:root uri}))] ;; New record. Ensure valid.
+                                    (create-new services (-> doc (assoc :root uri :token token) (dissoc "root" "token"))))
+                                  (catch Exception e {:status 400 :body {:message (str "bad service definition: " e)}}))))))))))
 
 (defn- build-api-session-routes [router]
   (-> (routes

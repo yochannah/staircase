@@ -21,6 +21,10 @@
     (staircase.sql/create-tables
       (:connection db)
       schema/services)
+    (let [columns (staircase.sql/get-column-names (:connection db) :services)]
+      (info "Found columns" columns)
+      (when-not (columns "name") ;; TODO BAD! Should have proper migrations. But works for now.
+        (sql/execute! (:connection db) [(str "ALTER TABLE services ADD name " schema/string)])))
     component)
 
   (stop [component] component)

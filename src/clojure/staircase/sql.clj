@@ -15,6 +15,13 @@
                   :row-fn :table_name
                   :result-set-fn doall))))
 
+(defn get-column-names [db table]
+  (sql/with-db-metadata [md db]
+    (into #{} (sql/metadata-result
+                (.getColumns md nil nil (name table) nil)
+                :row-fn :column_name
+                :result-set-fn doall))))
+
 (defn log-sql-error [e]
   (error e)
   (when-let [ne (.getNextException e)]
