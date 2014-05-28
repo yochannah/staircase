@@ -416,16 +416,37 @@
                     [:label "Active services"]
                     [:table.table
                      [:tbody
-                      [:tr {:ng-repeat "service in services"}
+                      [:tr {:ng-controller "ServiceController"
+                            :ng-repeat "service in services"}
                        [:td [:input {:type "checkbox" :ng-model "service.active"}]]
                        [:td "{{service.ident}}"]
                        [:td [:a {:href "{{service.root}}"} "{{service.name}}"]]
-                       [:td [:code "{{service.token}}"]]
+                       [:td
+                        [:div.form-group {:ng-show "service.editing" :ng-class "{'has-error': service.user == null}"}
+                          [:input.form-control.token {:ng-model "service.token"}]]
+                        [:code {:ng-hide "service.editing" :tooltip "your api token"} "{{service.token}}"]]
                        [:td "{{service.user.username || 'anonymous'}}"]
                        [:td 
                         [:div.btn-group.btn-group.sm
-                          [:button.btn.btn-default.btn-sm {:ng-click "resetService(service)"} [:i.fa.fa-undo]]
-                          [:button.btn.btn-default.btn-sm [:i.fa.fa-link]]]]]
+                          [:button.btn.btn-warning.btn-sm
+                           {:ng-show "service.editing"
+                            :ng-click "cancelEditing(service)"} "cancel"]
+                          [:button.btn.btn-primary.btn-sm
+                           {:ng-show "service.editing"
+                            :ng-click "saveChanges()"}
+                           [:i.fa.fa-save]]
+                          [:button.btn.btn-default.btn-sm
+                           {:ng-click "resetService(service)"
+                            :ng-hide "service.editing"}
+                           [:i.fa.fa-undo]]
+                          [:button.btn.btn-default.btn-sm
+                           {:tooltip "link this service to {{service.user.username ? 'a different' : 'an existing'}} account"
+                            :tooltip-placement "right"
+                            :ng-hide "service.editing"
+                            :ng-click "linkService(service)"}
+                           [:i.fa
+                            {:ng-class "{'fa-link': !service.user.username, 'fa-unlink': service.user.username}"}
+                            ]]]]]
                        ]]]
                    [:div.form-group.starting-tools
                     [:label "Starting Tools"]
@@ -434,7 +455,9 @@
                       [:tr {:ng-repeat "tool in startingPoints"}
                        [:td [:input {:type "checkbox" :ng-model "tool.active"}]]
                        [:td "{{tool.ident}}"]
-                       [:td "{{tool.heading}}"]]]]]
+                       [:td "{{tool.heading}}"]
+                       [:td [:code "{{tool.args | json }}"]]
+                       ]]]]
                    ]))
 
 (def about
