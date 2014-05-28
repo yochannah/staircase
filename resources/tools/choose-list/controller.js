@@ -3,8 +3,8 @@ define(['angular', 'imjs'], function (ng, im) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$cacheFactory', 'Mines',
-          function (scope, logger, timeout, cacheFactory, mines) {
+  return ['$scope', '$log', '$q', '$timeout', '$cacheFactory', 'Mines',
+          function (scope, logger, Q, timeout, cacheFactory, mines) {
 
     scope.serviceName = "";
 
@@ -17,7 +17,9 @@ define(['angular', 'imjs'], function (ng, im) {
 
     fetchingDefaultMine.then(setMineDetails);
     
-    fetchingDefaultMine.then(connect).then(readLists);
+    fetchingDefaultMine.then(connect)
+                       .then(readLists)
+                       .then(null, function (e) { scope.tool.error = e; });
     
     scope.viewList = viewList;
 
@@ -44,9 +46,15 @@ define(['angular', 'imjs'], function (ng, im) {
 
     function readLists (conn) {
       scope.connection = conn;
+      var d = Q.defer();
       var fetching = conn.fetchLists();
       fetching.then(setLists);
       fetching.then(setTags);
+      fetching.then(d.resolve, d.reject);
+      timeout(function () {
+        d.reject(new Error("List request timed out"));
+      }, 30000); // 30sec is more than generous for list requests.
+      return d.promise;
     }
 
     function setLists (lists) {

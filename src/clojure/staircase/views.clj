@@ -207,7 +207,7 @@
 
 (defn initiator
   [attrs panel-attrs heading-buttons]
-  [:starting-point.xs-col-12 attrs
+  [:starting-point.xs-col-12 (assoc attrs :ng-hide "tool.error")
    [:div.panel.panel-default.first-step
     panel-attrs
     (apply vector :div.panel-heading
@@ -228,6 +228,10 @@
    welcome
 
    [:div.row.starting-points
+    [:div.alert.alert-warning {:ng-show "tool.error"}
+     [:p
+      [:strong "Error"]
+      " {{tool.error.message}}"]]
     (initiator {}
                {:class "full-height" :ng-class "{'with-action': tool.action}"}
                [])]])
