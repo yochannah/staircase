@@ -231,8 +231,11 @@
   (let [ensure-token (fn [service] (if (:token service)
                                      service
                                      (let [token (register-for service)
-                                           id (create services {:root (:root service) :token token})]
-                                       (merge service (get-one services id)))))
+                                           current (first (get-where services [:= :root (:root service)]))
+                                           canon (if current
+                                                  (update services (:id current) {:token token})
+                                                  (get-one services (create services {:root (:root service) :token token})))]
+                                       (merge service canon))))
         real-id #(if (= "default" %) (:default-service config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
