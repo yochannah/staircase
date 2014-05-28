@@ -255,8 +255,11 @@
                               (response (ensure-token service)))))
                     (PUT "/" {doc :body}
                          (locking services
-                            (let [uri (get-in config [:services (real-id ident)])]
-                              (create-new services (assoc doc :root uri)))))))))
+                            (let [uri (or (:uri doc) (get-in config [:services (real-id ident)]))
+                                  current (first (get-where services [:= :root uri]))]
+                              (if current
+                                (update services (:id current) doc)
+                                (create-new services (assoc doc :root uri))))))))))
 
 (defn- build-api-session-routes [router]
   (-> (routes

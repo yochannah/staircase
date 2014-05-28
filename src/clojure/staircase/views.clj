@@ -415,8 +415,14 @@
                       [:tr {:ng-repeat "service in services"}
                        [:td [:input {:type "checkbox" :ng-model "service.active"}]]
                        [:td "{{service.ident}}"]
-                       [:td "{{service.root}}"]
-                       [:td "{{service.user.username || 'anonymous'}}"]]]]]
+                       [:td [:a {:href "{{service.root}}"} "{{service.name}}"]]
+                       [:td [:code "{{service.token}}"]]
+                       [:td "{{service.user.username || 'anonymous'}}"]
+                       [:td 
+                        [:div.btn-group.btn-group.sm
+                          [:button.btn.btn-default.btn-sm {:ng-click "resetService(service)"} [:i.fa.fa-undo]]
+                          [:button.btn.btn-default.btn-sm [:i.fa.fa-link]]]]]
+                       ]]]
                    [:div.form-group.starting-tools
                     [:label "Starting Tools"]
                     [:table.table

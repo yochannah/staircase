@@ -195,7 +195,10 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     get = (ident) ->
       auth.authorize().then (headers) -> http.get("#{URL}/#{ident}", {headers}).then asData
 
-    return {all, get, atURL}
+    put = (ident, data) ->
+      auth.authorize().then (headers) -> http.put("#{URL}/#{ident}", data, {headers}).then asData
+
+    return {all, get, atURL, put}
 
   Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
     headers = auth.headers
