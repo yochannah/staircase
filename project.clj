@@ -1,12 +1,16 @@
 (defproject staircase "0.1.0-SNAPSHOT"
   :description "The application holding data-flow steps."
-  :url "http://steps.intermine.org"
+  :url "http://steps.herokuapp.org"
+  :main staircase.main
+  :uberjar-name "staircase-standalone.jar"
+  :aot [staircase.main]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [org.clojure/java.jdbc "0.3.3"] ;; DB interface
                  [clj-http "0.9.1"] ;; Perform http requests.
+                 [http-kit "2.1.16"]
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
                  [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
@@ -43,7 +47,7 @@
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
   :ring {:handler staircase.app/handler}
-  :prep-tasks ["javac" "compile"]
+  :prep-tasks ["javac" "compile" "clean-tools" "load-tools"]
   :source-paths ["src/clojure"]
   :resource-paths ["resources" "external"]
   :aliases {
