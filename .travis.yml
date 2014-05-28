@@ -15,4 +15,6 @@ deploy:
     secure: EPS19rvOFf4Vh2YODFrvLCKnhqSFk/tKfY1xwxpYAVA/QXgKnBF3iGQ7Z31T/+0XZryHsGA4ZlcWqpXh71GB8n63nd00X6gdaHIIMKX+gqskIJo1Hell6UVR+qypYpdxkeg9tFsIu3XOj7dTSHlE5aXZYsxcYegIyFyVALgvMT0=
   app: staircase
   on:
+    branch: master
     repo: alexkalderimis/staircase
+    jdk: openjdk7
