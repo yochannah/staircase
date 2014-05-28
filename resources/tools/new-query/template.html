@@ -1,6 +1,7 @@
-<span class="pull-right badge">
-    {{(rowCount | number) || "counting..." }}
+<span ng-show="rowCount != null" class="pull-right badge">
+    {{rowCount | number}}
 </span>
+<i class="fa fa-spin fa-circle-o-notch pull-right" ng-show="rowCount == null"></i>
 
 <form role="form" class="form" ng-submit="startQuery()">
     <div class="form-group">
