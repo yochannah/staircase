@@ -251,12 +251,11 @@
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
                                   user-services (get-where services [:= :root uri])
-                                  service (-> (full-outer-join [{:root uri :name ident}]
+                                  service (-> (full-outer-join [{:root uri :confname ident}]
                                                               user-services
-                                                              :root
                                                               :root)
                                               first)]
-                              (response (ensure-token service)))))
+                              (response (ensure-name (ensure-token service))))))
                     (PUT "/" {doc :body}
                          (locking services
                             (let [uri (or (get doc "root") (get-in config [:services (real-id ident)]))
