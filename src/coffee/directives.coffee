@@ -10,6 +10,29 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       el = element[0]
       element.on scope.blurOn, el.blur.bind(el)
 
+  Directives.directive 'typeName', ($q) ->
+    restrict: 'E'
+    scope:
+      service: '='
+      type: '='
+      count: '=?'
+    template: """
+      <span class="type-name">
+        <ng-pluralize count="count"
+                      when="{'one': '{{displayName}}', 'other': '{{displayName}}s'}"/>
+      </span>
+    """
+    link: (scope) -> scope.$watch 'service', (service) ->
+      if !scope.count
+        scope.count = 0
+      if scope.type
+        scope.displayName = scope.type
+      return unless service?
+      service.fetchModel().then (model) ->
+        $q.when(model.makePath(scope.type).getDisplayName()).then (name) ->
+          scope.displayName = name
+
+
   # Pair of recursive directives for turning any json structure into an editable form.
   Directives.directive 'editableItem', ($compile) ->
     restrict: 'E'

@@ -1,8 +1,8 @@
 <filter-term term="listFilter" ng-show="lists"></filter-term>
 
 <ul class="nav nav-pills">
-    <li ng-repeat="cat in categories">
-        <a ng-click="filterTo(cat)">
+    <li ng-repeat="cat in categories" ng-class="{active: cat === filters.category}">
+        <a ng-click="filters.category = cat">
             {{cat.name}}
             <span class="badge">{{cat.size}}</span>
         </a>
@@ -17,7 +17,10 @@
         </p>
     </div>
     <li class="list-group-item" ng-repeat="list in filteredLists = (lists | filter:listFilter)">
-        <span class="badge">{{list.size}} {{list.type}}s</span>
+        <span class="badge">
+            {{list.size | number}}
+            <type-name service="list.service" type="list.type" count="list.size"></type-name>
+        </span>
         <a ng-click="viewList(list)">{{list.name}}</a>
         <p class="description list-group-item-text">{{list.description}}</p>
     </li>

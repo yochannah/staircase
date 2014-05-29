@@ -33,8 +33,9 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
       tool = L.find startingPoints, filter
-      scope.tool = Object.create tool
-      scope.tool.state = 'FULL'
+      if tool
+        scope.tool = Object.create tool
+        scope.tool.state = 'FULL'
 
   Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'historyListener', (http, scope, historyListener) ->
     http.get('/tools', {params: {capabilities: 'initial'}})

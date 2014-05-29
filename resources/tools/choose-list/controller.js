@@ -3,10 +3,11 @@ define(['angular', 'imjs'], function (ng, im) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$q', '$timeout', '$cacheFactory', 'Mines',
+  var ChooseListCtrl = ['$scope', '$log', '$q', '$timeout', '$cacheFactory', 'Mines',
           function (scope, logger, Q, timeout, cacheFactory, mines) {
 
     scope.serviceName = "";
+    scope.filters = {};
 
     var mineName = 'default';
     if (scope.tool.args && scope.tool.args.service) {
@@ -25,6 +26,11 @@ define(['angular', 'imjs'], function (ng, im) {
 
     scope.$watch('serviceName', function (name) {
       if (name) scope.tool.heading = "Lists in " + name;
+    });
+
+    scope.$watch('filters.category', function (cat) {
+      if (!cat) return;
+      scope.lists = scope.allLists.filter(cat.matches.bind(cat));
     });
 
     function viewList (list) {
@@ -59,7 +65,11 @@ define(['angular', 'imjs'], function (ng, im) {
 
     function setLists (lists) {
       timeout(function () {
-        scope.lists = lists.filter(listFilter);
+        scope.lists = scope.allLists = lists.filter(listFilter);
+        var n = scope.lists.length;
+        if (n < 5) {
+          scope.tool.tall = false;
+        }
       });
     }
 
@@ -68,15 +78,16 @@ define(['angular', 'imjs'], function (ng, im) {
         var i, j, l, k, key, cat, types = {}, tags = {};
         for (i = 0, l = lists.length; i < l; i++) {
           key = lists[i].type;
-          cat = types[key] || (types[key] = {size: 0, kind: "type", name: key});
+          cat = types[key] || (types[key] = new TypeCategory(Q, lists[i].service, key));
           cat.size++;
           for (j = 0, k = lists[i].tags.length; j < k; j++) {
             key = lists[i].tags[j];
-            cat = tags[key] || (tags[key] = {size: 0, kind: "tag", name: key});
+            cat = tags[key] || (tags[key] = new TagCategory(key));
             cat.size++;
           }
         }
-        scope.categories = values(tags).concat(values(types));
+        var all = new Category('ALL', lists.length);
+        scope.categories = [all].concat(values(tags)).concat(values(types));
       });
     }
 
@@ -97,5 +108,39 @@ define(['angular', 'imjs'], function (ng, im) {
     }
     return vals;
   }
+
+  function Category(name, size) {
+    this.size = 0;
+    if (size) this.size = size;
+    this.name = name;
+    this.matches = function () { return true; };
+  }
+
+  function TypeCategory(Q, connection, typeName) {
+    var that = this;
+    connection.fetchModel().then(function(model) {
+      Q.when(model.makePath(typeName).getDisplayName()).then(function (name) {
+        that.name = name + 's';
+      });
+    });
+
+    this.matches = function (list) {
+      return list.type === typeName;
+    };
+  }
+
+  TypeCategory.prototype = new Category();
+
+  function TagCategory(tagName) {
+    this.name = tagName.replace(/^im:/, '');
+
+    this.matches = function (list) {
+      return list.tags.some(function (t) { return t === tagName; });
+    };
+  }
+
+  TagCategory.prototype = new Category();
+
+  return ChooseListCtrl;
 
 });
