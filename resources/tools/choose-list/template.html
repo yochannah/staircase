@@ -1,4 +1,4 @@
-<filter-term term="listFilter"></filter-term>
+<filter-term term="listFilter" ng-show="lists"></filter-term>
 
 <ul class="nav nav-pills">
     <li ng-repeat="cat in categories">
@@ -9,7 +9,7 @@
     </li>
 </ul>
 <ul class="list-group available-lists">
-    <img class="loading" src="/images/loading.gif" ng-hide="lists">
+    <img class="loading" src="/images/loading.gif" ng-hide="lists != null">
     <div class="alert alert-info" ng-show="lists && !filteredLists.length">
         <p>
             <strong>Sorry</strong>
