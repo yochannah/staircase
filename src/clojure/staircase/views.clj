@@ -453,7 +453,7 @@
      [:button.btn.btn-default.pull-right
       {:ng-hide "adding.active" :ng-click "adding.active = true"}
       [:i.fa.fa-plus-square]
-      " Add an data-source"]
+      " Add a data-source"]
      [:button.btn.pull-right
       {:type "submit"
        :ng-show "adding.active"
