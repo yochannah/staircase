@@ -123,7 +123,7 @@
 ;; Allow content to be cached
 (defn caching
   [{max-age :max-age}]
-  {"Cache-Control" (str "public,must-revalidate,max-age=" (or max-age 0))})
+  {"Cache-Control" (str "public,no-cache,must-revalidate,max-age=" (or max-age 0))})
 
 (defn generate-response [asset-file]
   (case (ext asset-file)
