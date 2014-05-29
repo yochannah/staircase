@@ -217,6 +217,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           else
             init()
 
+  interpolatedHeading = "<span>{{tool.heading}}</span>"
+
+  managedHeading = (src) -> """<ng-include src="'#{ src }'"></ng-include>"""
+
   Directives.directive 'currentStep', Array '$compile', ($compile) ->
     restrict: 'C'
     scope:
@@ -233,21 +237,31 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         <i class="fa pull-right"
            ng-click="toggle()"
            ng-class="{'fa-compress': state.expanded, 'fa-expand': !state.expanded}"></i>
-        {{tool.heading}}
       </div>
     """
     link: (scope, element, attrs) ->
       element.addClass('panel panel-default')
       scope.$watch 'tool.type', (toolType) ->
-        console.log toolType
+        return unless toolType?
 
-        toAppend = if toolType is 'IFrame'
+        heading = if scope.tool.panelHeading?
+          managedHeading scope.tool.panelHeading
+        else
+          interpolatedHeading
+
+        body = if toolType is 'IFrame'
           "<iframe-tool/>"
         else if toolType is 'native'
           "<angular-tool/>"
+        else
+          """<div class="alert alert-warning">
+              Configuration error: unknown tool type - #{ toolType }
+            </div>
+          """
 
-        if toAppend?
-          $compile(toAppend) scope, (cloned) -> element.append cloned
+        $compile(heading) scope, (cloned) -> element.children()[0].appendChild cloned[0]
+
+        $compile(body) scope, (cloned) -> element.append cloned
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
@@ -322,12 +336,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     scope.$watch 'tool.controllerURI', ->
       if scope.tool
 
-        if scope.tool.style and not toolCssLoaded[scope.tool.style]
+        if scope.tool.style and not toolCssLoaded[scope.tool.ident]
           link = window.document.createElement('link')
           link.rel = 'stylesheet'
           link.href = scope.tool.style
           window.document.getElementsByTagName('head')[0].appendChild(link)
-          toolCssLoaded[scope.tool.style] = true
+          toolCssLoaded[scope.tool.ident] = true
 
         ctrl = '.' + scope.tool.controllerURI
         tmpl = scope.tool.templateURI

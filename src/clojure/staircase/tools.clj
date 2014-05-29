@@ -4,7 +4,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]))
 
-(def tool-defaults ;; Lots of duplication here - be less explicit?
+(def tool-defaults ;; Lots of duplication here - be less explicit? or zen of python?
   {:headingTemplateURI "./heading.html"
    :headingControllerURI "./heading-controller"
    :providerURI "./provider"
@@ -15,8 +15,9 @@
 (defn- fix-uris
   [conf fixer]
   (reduce #(update-in %1 [%2] fixer)
-          (if (:style conf) (update-in conf [:style] fixer) conf)
-          [:providerURI :headingTemplateURI :headingControllerURI :templateURI :controllerURI]))
+          conf
+          [:providerURI :headingTemplateURI :headingControllerURI
+           :templateURI :controllerURI :panelHeading :style]))
 
 (defn strip-by-cap
   [conf]
@@ -37,7 +38,7 @@
         (json/parse-string true)
         (#(merge tool-defaults %))
         (assoc :ident (name tool-name))
-        (fix-uris #(replace-first % "." (str "/" (name tool-name))))
+        (fix-uris #(when % (replace-first % "." (str "/" (name tool-name)))))
         (strip-by-cap))))
 
 (defn get-tool-conf*
