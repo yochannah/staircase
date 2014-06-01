@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
+export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
+
+pid=`cat ${OPENSHIFT_DIY_DIR}/clojure.pid`
+kill -0 $pid && kill -15 $pid
+killall java # really really bring it all down
+return 0

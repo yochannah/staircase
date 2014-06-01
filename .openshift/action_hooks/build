@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -e
+
+export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
+export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
+
+echo "Building application"
+
+cd ${OPENSHIFT_DIY_DIR}
+mkdir -p bin
+mkdir -p $LEIN_HOME
+mkdir -p $M2_REPO
+
+wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
+     -O bin/lein
+
+chmod +x bin/lein
+
+echo "Compiling application"
+
+cd ${OPENSHIFT_REPO_DIR}
+${OPENSHIFT_DIY_DIR}/bin/lein compile :all
+
+return 0
