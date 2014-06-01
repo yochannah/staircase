@@ -3,13 +3,14 @@
 set -e
 
 export HOME=${OPENSHIFT_DATA_DIR}
+export LEIN_HOME=${HOME}/lein
 
 echo "Building application"
 
 cd ${HOME}
-echo "Home is $HOME"
+echo "Home is $HOME, lein-home is $LEIN_HOME"
 mkdir -p bin
-mkdir -p ${HOME}/.m2
+mkdir -p $LEIN_HOME
 
 wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
      -O bin/lein

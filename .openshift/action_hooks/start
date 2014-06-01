@@ -3,6 +3,7 @@
 set -e
 
 export HOME=${OPENSHIFT_DATA_DIR}
+export LEIN_HOME=${HOME}/lein
 
 export PORT=${OPENSHIFT_DIY_PORT}
 export HOST=${OPENSHIFT_DIY_IP}
