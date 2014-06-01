@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
 export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
 PID_FILE="${OPENSHIFT_DIY_DIR}/app.pid"
