@@ -3,8 +3,6 @@
 set -e
 
 export HOME=${OPENSHIFT_DATA_DIR}
-export LEIN_HOME="${HOME}/home"
-export M2_REPO="${HOME}/maven"
 
 echo "Building application"
 
