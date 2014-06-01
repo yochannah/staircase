@@ -7,7 +7,9 @@ export HOME=${OPENSHIFT_DATA_DIR}
 echo "Building application"
 
 cd ${HOME}
+echo "Home is $HOME"
 mkdir -p bin
+mkdir -p ${HOME}/.m2
 
 wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
      -O bin/lein
