@@ -2,12 +2,12 @@
 
 set -e
 
-export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
-export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
+export HOME=${OPENSHIFT_DATA_DIR}
+export LEIN_HOME="${HOME}/home"
+export M2_REPO="${HOME}/maven"
 
 export PORT=${OPENSHIFT_DIY_PORT}
 export HOST=${OPENSHIFT_DIY_IP}
-export HOME=${OPENSHIFT_DATA_DIR}
 export DB_HOST=${OPENSHIFT_POSTGRESQL_DB_HOST}
 export DB_PORT=${OPENSHIFT_POSTGRESQL_DB_PORT}
 export DB_USER=${OPENSHIFT_POSTGRESQL_DB_USERNAME}
@@ -17,8 +17,8 @@ export WEB_AUDIENCE=http://${HOST}:${PORT}
 
 echo "Starting application"
 cd ${OPENSHIFT_REPO_DIR}
-nohup ${OPENSHIFT_DIY_DIR}/bin/lein with-profile production \
+nohup ${HOME}/bin/lein with-profile production \
       trampoline run \
       > ${OPENSHIFT_DIY_DIR}/log/server.log 2>&1 &
-echo $! > ${OPENSHIFT_DIY_DIR}/app.pid
+echo $! > ${HOME}/app.pid
 exit 0

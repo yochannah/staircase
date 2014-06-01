@@ -2,12 +2,13 @@
 
 set -e
 
-export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
-export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
+export HOME=${OPENSHIFT_DATA_DIR}
+export LEIN_HOME="${HOME}/home"
+export M2_REPO="${HOME}/maven"
 
 echo "Building application"
 
-cd ${OPENSHIFT_DIY_DIR}
+cd ${HOME}
 mkdir -p bin
 mkdir -p $LEIN_HOME
 mkdir -p $M2_REPO
@@ -19,7 +20,7 @@ chmod +x bin/lein
 
 echo "Compiling application"
 
-cd ${OPENSHIFT_REPO_DIR}
-${OPENSHIFT_DIY_DIR}/bin/lein compile :all
+cd $OPENSHIFT_REPO_DIR
+${HOME}/bin/lein compile :all
 
 return 0
