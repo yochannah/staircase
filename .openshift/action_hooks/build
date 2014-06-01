@@ -7,7 +7,7 @@ export LEIN_HOME=${HOME}/lein
 export M2_HOME=${HOME}/maven
 
 echo "Installing nodejs"
-yum install nodejs npm
+sudo yum install nodejs npm
 
 echo "Setting up leiningen"
 
