@@ -6,7 +6,10 @@ export HOME=${OPENSHIFT_DATA_DIR}
 export LEIN_HOME=${HOME}/lein
 export M2_HOME=${HOME}/maven
 
-echo "Building application"
+echo "Installing nodejs"
+yum install nodejs npm
+
+echo "Setting up leiningen"
 
 cd ${HOME}
 mkdir -p bin
@@ -24,6 +27,7 @@ chmod +x bin/lein
 echo "Compiling application"
 
 cd $OPENSHIFT_REPO_DIR
+npm install
 ${HOME}/bin/lein compile :all
 
 exit 0
