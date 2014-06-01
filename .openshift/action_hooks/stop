@@ -4,8 +4,11 @@ set -e
 
 export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
 export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
+PID_FILE="${OPENSHIFT_DIY_DIR}/app.pid"
 
-pid=`cat ${OPENSHIFT_DIY_DIR}/app`
-kill -0 $pid && kill -15 $pid
+if test -e  $PID_FILE; then
+    pid=`cat $PID_FILE`
+    kill -0 $pid && kill -15 $pid
+fi
 killall java # really really bring it all down
 return 0
