@@ -13,4 +13,4 @@ fi
 # really really bring it all down, but don't worry if nothing was killed
 killall -q java 
 
-return 0
+exit 0
