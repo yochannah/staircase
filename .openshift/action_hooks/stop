@@ -1,8 +1,6 @@
 #!/bin/bash
 
-export LEIN_HOME="${OPENSHIFT_DIY_DIR}/home"
-export M2_REPO="${OPENSHIFT_DIY_DIR}/maven"
-PID_FILE="${OPENSHIFT_DIY_DIR}/app.pid"
+PID_FILE="${OPENSHIFT_DATA_DIR}/app.pid"
 
 # Kill process if we have a PID file.
 if test -e  $PID_FILE; then

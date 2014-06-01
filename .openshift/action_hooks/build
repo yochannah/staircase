@@ -8,8 +8,6 @@ echo "Building application"
 
 cd ${HOME}
 mkdir -p bin
-mkdir -p $LEIN_HOME
-mkdir -p $M2_REPO
 
 wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
      -O bin/lein
