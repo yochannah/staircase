@@ -4,13 +4,17 @@ set -e
 
 export HOME=${OPENSHIFT_DATA_DIR}
 export LEIN_HOME=${HOME}/lein
+export M2_HOME=${HOME}/maven
 
 echo "Building application"
 
 cd ${HOME}
-echo "Home is $HOME, lein-home is $LEIN_HOME"
 mkdir -p bin
 mkdir -p $LEIN_HOME
+mkdir -p $M2_HOME
+echo "{:user {:local-repo "'"'$M2_HOME'"'"}}" > $LEIN_HOME/profiles.clj
+echo "Home is $HOME, lein-home is $LEIN_HOME"
+cat $LEIN_HOME/profiles.clj
 
 wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
      -O bin/lein
