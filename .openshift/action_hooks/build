@@ -5,9 +5,7 @@ set -e
 export HOME=${OPENSHIFT_DATA_DIR}
 export LEIN_HOME=${HOME}/lein
 export M2_HOME=${HOME}/maven
-
-echo "Installing nodejs"
-sudo yum install nodejs npm
+NPM=$(which npm)
 
 echo "Setting up leiningen"
 
@@ -24,10 +22,14 @@ wget https://raw.github.com/technomancy/leiningen/stable/bin/lein \
 
 chmod +x bin/lein
 
-echo "Compiling application"
-
 cd $OPENSHIFT_REPO_DIR
-npm install
+
+if test ! -z $NPM; then
+    echo "Installing client-side modules"
+    $NPM install
+fi
+
+echo "Compiling application"
 ${HOME}/bin/lein compile :all
 
 exit 0
