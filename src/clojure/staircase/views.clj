@@ -245,7 +245,7 @@
 
     (initiator {:ng-class "getWidthClass(tool)"
                 :ng-repeat "tool in startingPoints | filter:{active:true}"
-                :ng-hide "tool.state == 'DOCKED'"}
+                :ng-show "tool.state != 'DOCKED'"}
                {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
                [[:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]])
 

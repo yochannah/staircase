@@ -2,9 +2,9 @@ define ['lodash'], (L) ->
   Array '$scope', 'historyListener', (scope, historyListener) ->
 
     scope.expandTool = (tool) ->
+      tool.state = 'FULL'
       for other in scope.startingPoints when other isnt tool
         other.state = 'DOCKED'
-      tool.state = 'FULL'
 
     scope.getHeightClass = ({state, tall}) ->
       if state is 'FULL'
