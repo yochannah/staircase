@@ -6,6 +6,7 @@
   "directories": {
     "test": "test/steps"
   },
+  "engines": { "node": "0.10.22", "npm": "1.4.6" },
   "scripts": {
     "test": "sh script/test.sh",
     "postinstall":  "./node_modules/bower/bin/bower install --allow-root"
