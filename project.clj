@@ -3,6 +3,7 @@
   :url "http://steps.herokuapp.org"
   :main staircase.main
   :aot [staircase.main]
+  :java-agents [[com.newrelic.agent.java/newrelic-agent "2.19.0"]]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
