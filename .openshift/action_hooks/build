@@ -9,6 +9,7 @@ export M2_HOME=${HOME}/maven
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/node"
 
 ensure_node_is_installed
+setup_path_for_custom_node_version
 
 echo "Setting up leiningen"
 

@@ -2,7 +2,7 @@
 # bash profile ($OPENSHIFT_DATA_DIR/.bash_profile).
 
 # Source utility functions.
-source $OPENSHIFT_REPO_DIR/.openshift/lib/utils
+source $OPENSHIFT_REPO_DIR/.openshift/lib/node
 
 
 # Internal function to setup path and remove the wrappers.
