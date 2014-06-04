@@ -7,7 +7,7 @@ The webapp that serves the step-based data-flow interface to the
 
 ## Quick Start
 
-Assuming leingingen and nodejs are installed:
+Assuming leingingen, postgres and nodejs are installed:
 
 ```sh
 export PORT=3000 \
@@ -15,7 +15,23 @@ export PORT=3000 \
        SECRET_KEY_PHRASE="some long and unguessable phrase" \
        WEB_AUDIENCE=http://localhost:$PORT
 createdb staircase
-lein do load-tools, js-deps, ring server
+lein do js-deps, run
+```
+
+Or deploy to heroku (will require provisioning a postgres DB and
+setting the environment variables as below):
+
+```sh
+heroku config set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git \
+                  DB_PASSWORD=$YOUR_PASSWD \
+                  DB_USER=$YOUR_USER \
+                  DB_SUBNAME=//$HOST/$DBNAME \
+                  DB_PORT=$DB_PORT \
+                  WEB_AUDIENCE=$URL \
+                  WEB_DEFAULT_SERVICE=flymine \
+                  SECRET_KEY_PHRASE="long key phrase" \
+                  WEB_MAX_AGE=300
+git push heroku master
 ```
 
 ## Prerequisites
