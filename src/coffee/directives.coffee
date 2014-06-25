@@ -355,16 +355,19 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   toolCssLoaded = {}
 
+  loadStyle = (window, {ident, style}) ->
+    if style and not toolCssLoaded[ident]
+      link = window.document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = style
+      window.document.getElementsByTagName('head')[0].appendChild(link)
+      toolCssLoaded[ident] = true
+
   injectingLinker = (window, compile, injector) -> (scope, element, attrs) ->
     scope.$watch 'tool.controllerURI', ->
       if scope.tool
 
-        if scope.tool.style and not toolCssLoaded[scope.tool.ident]
-          link = window.document.createElement('link')
-          link.rel = 'stylesheet'
-          link.href = scope.tool.style
-          window.document.getElementsByTagName('head')[0].appendChild(link)
-          toolCssLoaded[scope.tool.ident] = true
+        loadStyle window, scope.tool
 
         ctrl = '.' + scope.tool.controllerURI
         tmpl = scope.tool.templateURI
@@ -403,7 +406,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     link: (scope, element, attrs) ->
 
       scope.$watch 'tool.headingURI', ->
+
         if scope.tool
+
+          loadStyle $window, scope.tool
 
           ctrl = '.' + scope.tool.headingControllerURI
           tmpl = $window.location.origin + scope.tool.headingTemplateURI

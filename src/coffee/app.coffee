@@ -34,6 +34,8 @@ define deps, (angular, router) ->
       'http://alexkalderimis.github.io/**',
       'http://intermine.github.io/**'
     ])
+    # Need to make this configurable.
+    stepConfigProvider.configureStep 'show-list', activeTabs: ['enrich']
     stepConfigProvider.configureStep 'show-table',
       IndicateOffHostLinks: false,
       CellPreviewTrigger: 'click'

@@ -1,0 +1,7 @@
+{
+  "capabilities": ["next"],
+  "handles": "list",
+  "style": "./list-templates.css",
+  "type": "native"
+}
+

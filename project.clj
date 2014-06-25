@@ -95,6 +95,7 @@
                    :show-enrichment
                    :resolve-ids
                    :convert-list
+                   :list-templates
                    :export
                    :id-handler
                    :keyword-search ;; From resources/config - really must auto-configure this list...
