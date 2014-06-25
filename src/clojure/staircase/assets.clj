@@ -10,7 +10,7 @@
         [dieter.asset.livescript   :only (compile-livescript)]
         [dieter.asset.coffeescript :only (compile-coffeescript)]))
 
-(def less-c (LessCompiler.))
+(def less-c (LessCompiler. ["--relative-urls"]))
 
 (defn less [f] (.compile less-c f))
 
