@@ -36,9 +36,9 @@
     (str "jdbc:postgresql://" (.getHost parsed) ":" (.getPort parsed) (.getPath parsed) "?user=" user "&password=" password)))
 
 (defn db-options [opts]
-  (if-let [url (:database-url opts)]
-    {:connection-uri (parse-url url)}
-    (options opts "db-")))
+  ;;(if-let [url (:database-url opts)]
+  ;;  {:connection-uri (parse-url url)}
+    (options opts "db-"));)
 
 (defn app-options [opts]
   (options opts "web-"))
