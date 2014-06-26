@@ -1,5 +1,5 @@
 (ns staircase.assets
-  (:import org.lesscss.LessCompiler
+  (:import de.sandroboehme.lesscss.LessCompiler
            [java.util Date])
   (:require [dieter.settings :as settings]
             [ring.util.time  :as ring-time]
