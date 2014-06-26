@@ -29,7 +29,7 @@
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
                  [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
+                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT" :exclusions [com.google.javascript/closure-compiler]]
                  [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
