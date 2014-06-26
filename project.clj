@@ -28,9 +28,8 @@
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
-                 ;; [dieter "0.4.1"] ;; Assets pipe-lining
-                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
                  [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0
+                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
                  ;; see: https://github.com/LightTable/LightTable/issues/794
