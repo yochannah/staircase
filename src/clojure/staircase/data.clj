@@ -10,13 +10,16 @@
 (defn- open-pool
       [config]
       (let [cpds (doto (ComboPooledDataSource.)
-                   (.setDriverClass (:classname config))
-                   (.setJdbcUrl (str "jdbc:" (:subprotocol config) ":" (:subname config)))
-                   (.setUser (:user config))
-                   (.setPassword (:password config))
-                   (.setMaxPoolSize 6)
-                   (.setMinPoolSize 1)
-                   (.setInitialPoolSize 1))]
+                    (.setDriverClass (:classname config))
+                    (.setMaxPoolSize 6)
+                    (.setMinPoolSize 1)
+                    (.setInitialPoolSize 1))]
+        (if-let [uri (:connection-uri config)]
+          (.setJdbcUrl cpds uri)
+          (doto cpds
+                (.setUser (:user config))
+                (.setPassword (:password config))
+                (.setJdbcUrl (str "jdbc:" (:subprotocol config) ":" (:subname config)))))
         {:datasource cpds}))
 
 (defrecord PooledDatabase [config connection]
