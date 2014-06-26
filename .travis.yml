@@ -3,6 +3,7 @@ lein: lein2
 before_script:
 - psql -c 'create database "staircase-test";' -U postgres
 jdk:
+- oraclejdk8
 - openjdk7
 - oraclejdk7
 - openjdk6
@@ -13,7 +14,7 @@ deploy:
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   api_key:
     secure: EPS19rvOFf4Vh2YODFrvLCKnhqSFk/tKfY1xwxpYAVA/QXgKnBF3iGQ7Z31T/+0XZryHsGA4ZlcWqpXh71GB8n63nd00X6gdaHIIMKX+gqskIJo1Hell6UVR+qypYpdxkeg9tFsIu3XOj7dTSHlE5aXZYsxcYegIyFyVALgvMT0=
-  app: staircase
+  app: staircase-staging
   on:
     branch: master
     repo: alexkalderimis/staircase
