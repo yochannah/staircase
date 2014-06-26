@@ -28,9 +28,7 @@
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
-                 ;; [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 - breaks on heroku
-                 [org.mozilla/rhino "1.7R4"] ;; Explicitly specify rhino version.
-                 [de.sandroboehme.lesscss/lesscss "1.6.1.1.0"] ;; less 1.6
+                 [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
                  [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
