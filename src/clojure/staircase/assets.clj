@@ -1,5 +1,6 @@
 (ns staircase.assets
   (:import org.lesscss.LessCompiler
+           org.mozilla.classfile.ClassFileWriter
            [java.util Date])
   (:require [dieter.settings :as settings]
             [ring.util.time  :as ring-time]
@@ -12,7 +13,11 @@
 
 (def less-c (LessCompiler. ["--relative-urls"]))
 
-(defn less [f] (.compile less-c f))
+(defn less [f]
+  (let [pdm (.getProtectionDomain ClassFileWriter)
+        src (.getCodeSource pdm)]
+    (info "Rhino is loaded from" src))
+  (.compile less-c f))
 
 (defn ext
   [f]
