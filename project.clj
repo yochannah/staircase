@@ -11,7 +11,7 @@
                  [clj-http "0.9.1"] ;; Perform http requests.
                  [http-kit "2.1.16"]
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
-                 [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
+                 [persona-kit "0.1.1-SNAPSHOT" :exclusions [org.clojure/google-closure-library]] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
                  [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
