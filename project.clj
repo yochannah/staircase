@@ -11,7 +11,7 @@
                  [clj-http "0.9.1"] ;; Perform http requests.
                  [http-kit "2.1.16"]
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
-                 [persona-kit "0.1.1-SNAPSHOT" :exclusions [org.clojure/google-closure-library]] ;; Authentication - Persona.
+                 [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
                  [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
@@ -29,8 +29,8 @@
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
                  [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                 [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
                  [org.clojars.involans/dieter "0.5.0-SNAPSHOT"]
+                 [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
                  ;; see: https://github.com/LightTable/LightTable/issues/794
