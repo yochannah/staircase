@@ -1,6 +1,8 @@
 {
-  "capabilities": ["next"],
-  "handles": "items",
-  "type": "native"
+  "capabilities": ["now", "next"],
+  "handles": ["items", "query"],
+  "type": "IFrame",
+  "heading": "Export",
+  "src": "http://alexkalderimis.github.io/steps-export-tool/tool.html"
 }
 

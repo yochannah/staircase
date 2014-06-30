@@ -24,6 +24,14 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
 
     toolNotFound = (e) -> to -> scope.error = e
 
+    toTool = (conf) ->
+      handles = conf.handles
+      if Array.isArray handles
+        conf.handles = (cat) -> handles.indexOf(cat) >= 0
+      else
+        conf.handles = (cat) -> handles is cat
+      conf
+
     currentCardinal = parseInt params.idx, 10
     scope.history = Histories.get id: params.id
     scope.steps = Histories.getSteps id: params.id
@@ -31,18 +39,18 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     scope.step.$promise.then ({tool}) ->
       http.get('/tools/' + tool)
           .then (({data}) -> scope.tool = data), toolNotFound
-      http.get('/tools', {params: {capabilities: 'next'}})
-          .then ({data}) -> scope.nextTools = data.filter (nt) -> nt.ident isnt tool
+      http.get('/tools', {params: {capabilities: 'next'}}).then ({data}) ->
+        scope.nextTools = data.filter((nt) -> nt.ident isnt tool).map toTool
     http.get('/tools', {params: {capabilities: 'provider'}}).then ({data}) -> scope.providers = data
 
     scope.watchDeeply = (name, f) -> scope.$watch ((s) -> JSON.stringify s[name]), -> f s[name]
 
     scope.$watchCollection 'items', ->
       exporters = []
-      for tool in scope.nextTools when tool.handles is 'items'
+      for tool in scope.nextTools when tool.handles 'items'
         for key, data of scope.items when data.ids.length
           exporters.push {key, data, tool}
-      otherSteps = (s for s in scope.nextSteps when s.tool.handles isnt 'items')
+      otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
       scope.nextSteps = otherSteps.concat(exporters)
 
     scope.$watchCollection 'messages', (msgs) ->
@@ -52,9 +60,9 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
 
     scope.$watch 'list', ->
       listHandlers = []
-      for tool in scope.nextTools when tool.handles is 'list'
+      for tool in scope.nextTools when tool.handles 'list'
         listHandlers.push {tool, data: scope.list}
-      otherSteps = (s for s in scope.nextSteps when s.tool.handles isnt 'list')
+      otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'list')
       scope.nextSteps = otherSteps.concat(listHandlers)
 
     scope.saveHistory = ->
@@ -81,7 +89,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       if what is 'list'
         to -> scope.list = data
       else
-        for tool in scope.nextTools when tool.handles is what then do (tool, what, data, key) ->
+        for tool in scope.nextTools when tool.handles(what) then do (tool, what, data, key) ->
           idx = tool.ident + what + key
           url = data.service.root
           if scope.messages[idx]?
