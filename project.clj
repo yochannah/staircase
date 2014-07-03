@@ -75,6 +75,7 @@
   :env {
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
+      :web-project-title "InterMine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)
       :web-services {

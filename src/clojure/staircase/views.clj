@@ -42,7 +42,7 @@
                  ["about intermine" "info" "/about"]
                  ["options" "cog" {:ng-click "showOptions()"}]])
 
-(defn header []
+(defn header [title]
   [:headroom
     {:offset 205
      :tolerance 5
@@ -61,7 +61,7 @@
         [:span.icon-bar])]
      [:div {:ng-controller "BrandCtrl" :dropdown "dropdown"}
       [:a.navbar-brand.dropdown-toggle
-        [:span.app-name "Steps"]] ;; Make configurable?
+        [:span.app-name title]]
       (unordered-list {:class "dropdown-menu"}
                       (for [[title icon path] home-links]
                         (let [icon [:i.fa.fa-fw {:class (str "fa-" icon)}]]
@@ -149,7 +149,7 @@
       ]
      (concat [
               [:body {:class "staircase"}
-               (header)
+               (header title)
                [:section#content.main body]]
                (footer)
               ]
@@ -344,13 +344,12 @@
              :ng-show "step.id == s.id"}]
          "{{s.title}}"]]]
 
-     facets]
-
-    [:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
-     {:ng-class "{onscreen: (!state.expanded && nextSteps.length)}"}
      [:div.panel.panel-default
-      [:div.panel-heading "Next steps"]
-      [:div.list-group {:ng-show "nextSteps.length"}
+      [:div.panel-heading
+       {:ng-click "nextStepsCollapsed = !nextStepsCollapsed"}
+        [:i.fa.fa-fw {:ng-class "{'fa-caret-right': nextStepsCollapsed, 'fa-caret-down': !nextStepsCollapsed}"}]
+        "Next steps"]
+      [:div.list-group {:ng-show "nextSteps.length && !nextStepsCollapsed"}
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"
@@ -360,11 +359,16 @@
          :data "ns.data"}
         ]]
       [:div.panel-body {:ng-hide "nextSteps.length"}
-       [:em "No steps available"]]]]
+       [:em "No steps available"]]]
+
+     facets]
+
+    ;;[:div.next-steps.col-xs-12.col-md-2.slide-right.pull-right.offscreen
+    ;; {:ng-class "{onscreen: (!state.expanded && nextSteps.length)}"}
+    ;; ]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-8': (nextSteps.length && !state.expanded),
-                  'col-md-10': (!state.expanded && !nextSteps.length),
+     {:ng-class "{'col-md-10': !state.expanded,
                   'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"})
      [:div.current-step
@@ -571,8 +575,8 @@
     "about" (html about)
     {:status 404})) 
 
-(defn index []
-  (common "Steps"
+(defn index [config]
+  (common (:project-title config)
           [:div {:ng-view ""}]
           (map with-utf8-charset
                (conj (apply include-js (map (partial str "/vendor/") vendor-scripts))
