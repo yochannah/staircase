@@ -119,7 +119,16 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       meetingRequest.then scope.nextStep
 
     scope.nextStep = (step) ->
-      step = Histories.append {id: scope.history.id}, step, ->
-        console.log "Created step " + step.id
-        location.url "/history/#{ scope.history.id }/#{ currentCardinal + 1 }"
+      if scope.history.steps.length isnt currentCardinal
+        title = "Fork of #{ scope.history.title }"
+        console.log "Forking at #{ currentCardinal } as #{ title }"
+        history = Histories.fork {id: scope.history.id, at: currentCardinal - 1, title}, ->
+          console.log "Forked history"
+          step = Histories.append {id: history.id}, step, ->
+            console.log "Created step " + step.id
+            location.url "/history/#{ history.id }/#{ currentCardinal + 1 }"
+      else
+        step = Histories.append {id: scope.history.id}, step, ->
+          console.log "Created step " + step.id
+          location.url "/history/#{ scope.history.id }/#{ currentCardinal + 1 }"
 

@@ -208,6 +208,7 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       getSteps: {method: 'GET', headers: headers, isArray: true, url: '/api/v1/histories/:id/steps'}
       query: {method: 'GET', headers: headers, isArray: true}
       save: {method: 'PUT', headers: headers}
+      fork: {method: 'POST', headers: headers, params: {at: '@at'}, url: '/api/v1/histories/:id/steps/:at/fork'}
       create: {method: 'POST', headers: headers}
       delete: {method: 'DELETE', headers: headers}
       append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
