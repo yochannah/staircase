@@ -41,6 +41,7 @@
                 id-b (create histories {:title "My new history B" :description nil})]
         (create steps {:title "foo" :history_id id-a})
         (create steps {:title "bar" :history_id id-a})
+        (create steps {:title "baz" :history_id id-a})
         (create steps {:title "can't be found"
                        :history_id (create histories {:title "History C"})})
         (f)))))
@@ -57,18 +58,30 @@
 (deftest test-get-steps-of
   (let [a-steps (get-steps-of {:db db} id-a)]
     (testing "history A has two steps"
-      (is (= 2 (count a-steps))))
+      (is (= 3 (count a-steps))))
     (testing "steps come out oldest -> newest"
-      (is (= (list "foo" "bar") (map :title a-steps)))))
+      (is (= (list "foo" "bar" "baz") (map :title a-steps)))))
   (let [b-steps (get-steps-of {:db db} id-b)]
     (testing "we only get steps of the history we asked for"
       (is (empty? b-steps)))))
+
+(deftest test-get-history-steps-of
+  (let [links (get-history-steps-of {:db db} id-a 2)]
+    (is (= 2 (count links)))
+    (is (= id-a (:history_id (first links))))))
+
+(deftest test-add-all-steps
+  (let [links (get-history-steps-of {:db db} id-a 2)]
+    (add-all-steps {:db db} id-b links)
+    (let [steps (get-steps-of {:db db} id-b)]
+      (is (= 2 (count steps)))
+      (is (= (list "foo" "bar") (map :title steps))))))
 
 (deftest test-get-steps-of-security
   (testing "only the owner can access the histories, even if the id is leaked"
     (binding [staircase.resources/context context]
       (let [a-steps (get-steps-of {:db db} id-a)]
-        (is (= 2 (count a-steps)))))
+        (is (= 3 (count a-steps)))))
     (binding [staircase.resources/context {:user "blackhat@pirates.r.us"}]
       (let [a-steps (get-steps-of {:db db} id-a)]
         (is (empty? a-steps))))))
