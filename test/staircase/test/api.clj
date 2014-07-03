@@ -121,6 +121,15 @@
                 response (app req)]
             (is (= (:status response) 200))
             (data-is response {:data "step" :id 1}))))
+
+      (testing "POST /api/v1/histories/1/steps/2/fork"
+        (let [added (atom nil)]
+          (with-redefs [data/get-history-steps-of (constantly [:a :b])
+                        data/add-all-steps (fn [hs id steps] (swap! added (constantly steps)))]
+            (let [req (json-request :post "/api/v1/histories/1/steps/2/fork" {})
+                  response (app req)]
+              (is (= (:status response) 200))
+              (is (= @added [:a :b]))))))
         
       (testing "POST /api/v1/histories/1/steps"
         (let [req (json-request :post "/api/v1/histories/1/steps" {:new "step" :id 4})

@@ -26,7 +26,7 @@
   (get-one [_ id] (first (filter #(= (str (:id %1)) (str id)) things)))
   (update [this id doc] (merge (get-one this id) doc))
   (delete [_ id])
-  (create [_ doc] (doc "id")))
+  (create [_ doc] (or (doc :id) (doc "id") (count things))))
 
 (defrecord MockStatefulResource [things serial]
   ;; Implementation of resource that stores its state in an atom.
