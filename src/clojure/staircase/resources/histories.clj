@@ -73,8 +73,8 @@
 
   (create [histories doc]
     (let [id (new-id)
-          created-at (sql-now)
-          values (assoc doc
+          created-at (or (:created_at doc) (sql-now))
+          values (assoc (dissoc doc :owner :created_at)
                         "id" id
                         "created_at" created-at
                         "owner" (:user staircase.resources/context))]

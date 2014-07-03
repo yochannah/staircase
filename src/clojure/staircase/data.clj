@@ -38,6 +38,13 @@
   (info "Creating new pooled db with config: " config)
   (map->PooledDatabase {:config config}))
 
+(defn add-all-steps [{db :db} hid steps]
+  (apply sql/insert! (:connection db) :history_step (map #(assoc %1 :history_id hid) steps)))
+
+(defn get-history-steps-of [{db :db} hid limit]
+  (let [query (str "select * from history_step where history_id = ? order by created_at ASC LIMIT " limit)]
+    (sql/query (:connection db) [query (string->uuid hid)] :result-set-fn vec)))
+
 (defn get-steps-of [{db :db} id & {:keys [limit] :or {limit nil}}]
   (when-let [uuid (string->uuid id)]
     (let [query-base "select s.*

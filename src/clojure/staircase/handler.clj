@@ -88,6 +88,20 @@
           (response step))
     NOT_FOUND))
 
+(defn fork-history-at [histories id idx body]
+  (or
+    (domonad maybe-m
+             [original (get-one histories id)
+              title (or (get body "title") (str "Fork of " (:title original)))
+              history (assoc (dissoc original :id :steps) :title title)
+              i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
+              inherited-steps (data/get-history-steps-of histories id (+ 1 i))
+              hid (create histories history)]
+             (do
+              (data/add-all-steps histories hid inherited-steps)
+              (response (get-one histories hid))))
+    NOT_FOUND))
+
 (defn add-step-to [histories steps id doc]
   (if (exists? histories id)
     (let [to-insert (assoc doc "history_id" id)
@@ -185,24 +199,25 @@
       :__anti-forgery-token))
 
 (defn- build-app-routes [{conf :config :as router}]
-  (routes 
-    (GET "/" [] (views/index))
-    (GET "/about" [] (views/index))
-    (GET "/history/:id/:idx" [] (views/index))
-    (GET "/starting-point/:tool" [] (views/index))
-    (GET "/starting-point/:tool/:service" [] (views/index))
-    (GET "/tools" [capabilities] (response (get-tools conf capabilities)))
-    (GET "/tools/:id" [id] (if-let [tool (get-tool conf id)]
-                             (response tool)
-                             {:status 404}))
-    (GET "/partials/:fragment.html"
-         [fragment]
-         (views/render-partial fragment))
-    (context "/auth" [] (-> (app-auth-routes router)
-                            (wrap-anti-forgery {:read-token read-token})))
-    (route/resources "/" {:root "tools"})
-    (route/resources "/" {:root "public"})
-    (route/not-found (views/four-oh-four))))
+  (let [serve-index (partial views/index conf)]
+    (routes 
+      (GET "/" [] (serve-index))
+      (GET "/about" [] (serve-index))
+      (GET "/history/:id/:idx" [] (serve-index))
+      (GET "/starting-point/:tool" [] (serve-index))
+      (GET "/starting-point/:tool/:service" [] (serve-index))
+      (GET "/tools" [capabilities] (response (get-tools conf capabilities)))
+      (GET "/tools/:id" [id] (if-let [tool (get-tool conf id)]
+                              (response tool)
+                              {:status 404}))
+      (GET "/partials/:fragment.html"
+          [fragment]
+          (views/render-partial fragment))
+      (context "/auth" [] (-> (app-auth-routes router)
+                              (wrap-anti-forgery {:read-token read-token})))
+      (route/resources "/" {:root "tools"})
+      (route/resources "/" {:root "public"})
+      (route/not-found (views/four-oh-four)))))
 
 (defn- build-hist-routes [{:keys [histories steps]}]
   (routes ;; routes that start from histories.
@@ -218,6 +233,9 @@
                    (context "/steps" []
                             (GET "/" [] (get-steps-of histories id))
                             (GET "/:idx" [idx] (get-step-of histories id idx))
+                            (POST "/:idx/fork"
+                                  {body :body {idx :idx} :params}
+                                  (fork-history-at histories id idx body))
                             (POST "/" {body :body} (add-step-to histories steps id body))))))
 
 (defn build-step-routes [{:keys [steps]}]
