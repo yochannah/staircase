@@ -6,7 +6,6 @@
 }
 
 .navbar-custom {
-    background-color: fade(@navbar-inverse-bg, 90%);
     font-weight: 400;
 }
 
@@ -14,12 +13,21 @@
     max-width: 40%;
 }
 
+@navbar-underscore-width: 4px;
+
 .navbar-inverse {
     .navbar-brand, .navbar-nav > li > .dropdown-toggle {
-        border-bottom: 2px solid transparent;
-        margin-bottom: -2px;
+        border-bottom: @navbar-underscore-width solid transparent;
         &:hover {
-            border-bottom: 2px solid #fff;
+            border-bottom: @navbar-underscore-width solid #fff;
+        }
+    }
+}
+.navbar-custom {
+    .navbar-brand, .navbar-nav > li > a {
+        border-bottom: @navbar-underscore-width solid transparent;
+        &:hover {
+            border-bottom: @navbar-underscore-width solid @navbar-default-color;
         }
     }
 }

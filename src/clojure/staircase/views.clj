@@ -51,7 +51,7 @@
                 unpinned:'slideUp',
                 top:'headroom--top',
                 notTop:'headroom--not-top'}"}
-  [:div.navbar.navbar-inverse.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
+  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
    [:div.container-fluid
 
     [:div.navbar-header ;; The elements to always display.
@@ -59,15 +59,10 @@
       [:span.sr-only "Toggle navigation"]
       (for [_ (range 3)]
         [:span.icon-bar])]
-     [:div {:ng-controller "BrandCtrl" :dropdown "dropdown"}
-      [:a.navbar-brand.dropdown-toggle
-        [:span.app-name title]]
-      (unordered-list {:class "dropdown-menu"}
-                      (for [[title icon path] home-links]
-                        (let [icon [:i.fa.fa-fw {:class (str "fa-" icon)}]]
-                          (if (string? path)
-                            (link-to path icon " " title)
-                            (link-to path "" icon " " title)))))]]
+     [:div
+      (link-to {:class "navbar-brand"} "/"
+        [:span.app-name title])
+      ]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
@@ -102,6 +97,8 @@
       [:li {:ng-repeat "tool in startingPoints"}
            [:a {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"}
                "{{tool.heading}}"]]]]
+   [:li (link-to "/about" [:i.fa.fa-fw.fa-info] "About")]
+   [:li {:ng-click "showOptions()"} (link-to "" [:i.fa.fa-fw.fa-cog] "Options")]
    [:li.dropdown
     [:a.dropdown-toggle
      "get in touch! " [:b.caret]]
@@ -116,8 +113,8 @@
                      (link-to (str repo "/issues")
                               [:i.fa.fa-warning]
                               " Report a problem")])]
-   [:li {:ng-show "auth.loggedIn"} (logout)]
-   [:li {:ng-hide "auth.loggedIn"} (login)]
+   [:li {:ng-show "auth.loggedIn"} [:div (logout)]]
+   [:li {:ng-hide "auth.loggedIn"} [:div (login)]]
    ])
 
 
@@ -159,51 +156,53 @@
   (common "Page Not Found"
           [:div#four-oh-four "The page you requested could not be found"]))
 
-(def about-header
-     [:div.about-header
-      [:div.container
-       [:h1 "InterMine Steps"]
-       [:p "The data-flow interface to InterMine data-warehouses,
-           providing an extensible, programmable work-bench for
-           scientists."]]])
+(defn about-header [{:keys [project-title]}]
+  [:div.about-header
+   [:div.container
+    [:div.row
+     [:div.col-md-8.col-md-offset-2
+      [:h1 project-title]]]
+    [:div.row
+     [:form.search-form.col-sm-6.col-sm-offset-3 search-input]]
+    [:div.row
+     [:p "The data-flow interface to InterMine data-warehouses,
+         providing an extensible, programmable work-bench for
+         scientists."]]
+    ]])
 
-(def welcome
-   [:div.row.welcome {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
-    [:div.panel.panel-default
-     [:div.panel-heading
-      "Welcome to " [:strong "Steps"]]
-     [:div.panel-body
+(defn welcome [config]
+  [:div.row.welcome {:ng-controller "WelcomeCtrl" :ng-show "showWelcome"}
+   [:div ;; .panel.panel-default
+    [:div ;; .panel-body
 
-      about-header 
+     (about-header config)
+     ;; [:p
+     ;;  "This is the data-flow interface for intermine data-warehouses.
+     ;;  If this is your first time here, maybe you might like to read more about
+     ;;  the intermine system " (link-to "/about" "here") "."]
 
-      [:p
-       "This is the data-flow interface for intermine data-warehouses.
-       If this is your first time here, maybe you might like to read more about
-       the intermine system " (link-to "/about" "here") "."]
+     ;; [:p
+     ;;  "Below you will find a number of "
+     ;;  [:strong "different tools"]
+     ;;  " to get started. Each one offers
+     ;;  a different specialised entry point into all the data available to you, and can 
+     ;;  be linked in turn to a sequence of composable actions. The easiest way to get
+     ;;  started is to enter a search term:"
+     ;;  ]
 
-      [:p
-       "Below you will find a number of "
-       [:strong "different tools"]
-       " to get started. Each one offers
-       a different specialised entry point into all the data available to you, and can 
-       be linked in turn to a sequence of composable actions. The easiest way to get
-       started is to enter a search term:"
-       [:div.row
-        [:form.search-form.col-sm-6.col-sm-offset-3 search-input]]]
-
-      [:p
-       [:strong "You do not need to be logged in"]
-       " to use this site - all the site's functionality is
-       available to you to use as a temporary anonymous user. But if you want to store your
-       histories permanently you "
-       [:strong "can sign in with any email address"]
-       " - we don't store your
-       personal information and you won't have to remember any new passwords."]
-      [:div.btn-toolbar
-        [:button.btn.btn-default.pull-right {:ng-click "showWelcome = false"}
-        "Do not show again"]
-        [:div.login.pull-left {:ng-hide "auth.loggedIn"} (login)]]
-      ]]])
+     ;; [:p
+     ;;  [:strong "You do not need to be logged in"]
+     ;;  " to use this site - all the site's functionality is
+     ;;  available to you to use as a temporary anonymous user. But if you want to store your
+     ;;  histories permanently you "
+     ;;  [:strong "can sign in with any email address"]
+     ;;  " - we don't store your
+     ;;  personal information and you won't have to remember any new passwords."]
+     ;; [:div.btn-toolbar
+     ;;  [:button.btn.btn-default.pull-right {:ng-click "showWelcome = false"}
+     ;;   "Do not show again"]
+     ;;  [:div.login.pull-left {:ng-hide "auth.loggedIn"} (login)]]
+     ]]])
 
 (defn initiator
   [attrs panel-attrs heading-buttons]
@@ -225,8 +224,6 @@
 (def starting-point
   [:div.container-fluid
 
-   welcome
-
    [:div.row.starting-points
     [:div.alert.alert-warning {:ng-show "tool.error"}
      [:p
@@ -236,10 +233,10 @@
                {:class "full-height" :ng-class "{'with-action': tool.action}"}
                [])]])
 
-(def starting-points
+(defn starting-points [config]
   [:div.container-fluid
 
-   welcome
+   (welcome config)
 
    [:div.row.starting-points {:ng-controller "StartingPointsController"}
 
@@ -517,12 +514,11 @@
 
                    ]))
 
-(def about
+(defn about [config]
   [:div.container-fluid
+   [:div.row (about-header config)]
    [:div.row
     [:div.about.col-xs-10.col-xs-offset-1
-
-     about-header
 
      [:section
       [:h2 "Using the home-page"]
@@ -564,15 +560,15 @@
         ]]]]])
 
 (defn render-partial
-  [fragment]
+  [config fragment]
   (case fragment
-    "frontpage" (html starting-points)
+    "frontpage" (html (starting-points config))
     "starting-point" (html starting-point)
     "edit-step-data" edit-step
     "choose-tool-dialogue" choose-tool-dialogue
     "options-dialogue" options-dialogue
     "history" (html history)
-    "about" (html about)
+    "about" (html (about config))
     {:status 404})) 
 
 (defn index [config]

@@ -1,4 +1,4 @@
-@about-header-size: 60px;
+@about-header-size: 128px;
 
 .about {
     background-color: @panel-bg;
@@ -9,21 +9,25 @@
 }
 
 .about-header {
-    padding-top: @about-header-size;
-    padding-bottom: @about-header-size;
     padding-left: @about-header-size / 2;
     padding-right: @about-header-size / 2;
+    margin-bottom: 1em;
     font-size: 24px;
     text-align: left;
     position: relative;
-    background-color: @brand-primary;
-    color: lighten(@brand-primary, 50%);
+    //background-color: @brand-primary;
+    //color: lighten(@brand-primary, 50%);
 
     h1 {
+        font-family: 'Open Sans Condensed',sans-serif;
+        font-weight: normal;
+        text-align: center;
         font-size: @about-header-size;
+        margin-left: auto;
+        margin-right: auto;
         line-height: 1;
         margin-top: 0;
-        color: rgb(255, 255, 255);
+        // color: rgb(255, 255, 255);
     }
 
 }

@@ -212,7 +212,7 @@
                               {:status 404}))
       (GET "/partials/:fragment.html"
           [fragment]
-          (views/render-partial fragment))
+          (views/render-partial conf fragment))
       (context "/auth" [] (-> (app-auth-routes router)
                               (wrap-anti-forgery {:read-token read-token})))
       (route/resources "/" {:root "tools"})
