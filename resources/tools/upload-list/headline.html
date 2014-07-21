@@ -1,0 +1,13 @@
+<p>
+Find items at {{serviceName}} that match your identifiers:
+</p>
+<form class="form">
+    <textarea class="form-control" model="ids.pasted"></textarea>
+    <select class="form-control"
+        ng-model="rootClass"
+        ng-options="cld.displayName for cld in classes">
+    </select>
+    <button class="btn btn-default" ng-click="sendIdentifiers()" ng-disabled="!parsedIds.length">
+        {{actions.act || 'No identifiers provided'}}
+    </button>
+</form>

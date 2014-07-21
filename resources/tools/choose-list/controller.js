@@ -64,7 +64,7 @@ define(['angular', 'imjs'], function (ng, im) {
     }
 
     function setLists (lists) {
-      timeout(function () {
+      scope.$apply(function () {
         scope.lists = scope.allLists = lists.filter(listFilter);
         var n = scope.lists.length;
         if (n < 5) {
@@ -74,7 +74,7 @@ define(['angular', 'imjs'], function (ng, im) {
     }
 
     function setTags (lists) {
-      timeout(function () {
+      scope.$apply(function () {
         var i, j, l, k, key, cat, types = {}, tags = {};
         for (i = 0, l = lists.length; i < l; i++) {
           key = lists[i].type;

@@ -1,19 +1,25 @@
 define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
+  'use strict';
+
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$cacheFactory', '$q', 'Mines', 'ClassUtils',
-          function (scope, logger, timeout, cacheFactory, Q, mines, ClassUtils) {
+  return ['$scope', '$log', '$timeout', '$cacheFactory', '$q', 'Mines', 'ClassUtils', Ctrl];
+
+  function Ctrl (scope, logger, timeout, cacheFactory, Q, mines, ClassUtils) {
+
     var countCache = (cacheFactory.get('query.counts') ||
                       cacheFactory('query.counts', {capacity: 100}));
     scope.defaults = {};
     scope.classes = [];
     scope.fields = [];
     scope.serviceName = "";
+    scope.state || (scope.state = {});
+    scope.actions || (scope.actions = {});
 
-    scope.$on('act', function (evt) {
+    scope.showResults = function (evt) {
       scope.$emit('start-history', {
-        thing: scope.rootClass.displayName + " query",
+        thing: scope.state.rootClass.displayName + " query",
         verb: {
           ed: "ran",
           ing: "running"
@@ -26,10 +32,11 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
           query: getQuery(scope)
         }
       });
-    });
+    };
+    scope.$on('act', scope.showResults);
 
     scope.$on('reset', function (evt) {
-      scope.rootClass = scope.defaults.rootClass;
+      scope.state.rootClass = scope.defaults.rootClass;
       scope.useConstraint = false;
     });
 
@@ -62,13 +69,13 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
         scope.state.disabled = true;
         scope.actions.act = "No results";
       } else if (rowCount === 1) {
-        scope.actions.act = "View " + scope.rootClass.displayName;
+        scope.actions.act = "View " + scope.state.rootClass.displayName;
       } else {
         scope.actions.act = "View Table";
       }
     });
 
-    scope.$watch('rootClass.className', function (className) {
+    scope.$watch('state.rootClass.className', function (className) {
       var fields, promises;
       if (!scope.summaryFields) return;
       fields = [className].concat(scope.summaryFields[className]);
@@ -83,23 +90,31 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
     
     fetchingDefaultMine.then(connect).then(function (conn) {
       scope.connection = conn;
-      conn.fetchModel().then(ClassUtils.setClasses(scope, groupOf.bind(null, scope), 'rootClass'));
+      conn.fetchModel()
+          .then(ClassUtils.setClasses(scope, groupOf.bind(null, scope), 'rootClass'))
+          .then(function () {
+            scope.state.rootClass = scope.rootClass;
+            L.defer(scope.$apply.bind(scope));
+          });
       conn.fetchSummaryFields().then(setSummaryFields);
     });
 
     function setRowCount (n) {
-      timeout(function () { scope.rowCount = n });
+      scope.rowCount = n;
+      L.defer(scope.$apply.bind(scope));
     }
 
     function setMineDetails (mine) {
-      timeout(function () { scope.serviceName = mine.name; });
+      scope.serviceName = mine.name;
+      L.defer(scope.$apply.bind(scope));
     }
 
     function setSummaryFields (summaryFields) {
-      timeout(function () { scope.summaryFields = summaryFields });
+      scope.summaryFields = summaryFields;
+      L.defer(scope.$apply.bind(scope));
     }
 
-  }];
+  }
 
   function groupOf (scope, cld) {
     var className = cld.className;
@@ -116,8 +131,8 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
   function getQuery (scope) {
     var className, constraint = {op: '='}, query = {select: []};
-    if (scope.rootClass) {
-      className = scope.rootClass.className;
+    if (scope.state.rootClass) {
+      className = scope.state.rootClass.className;
       query.select.push(className + ".*");
       if (scope.useConstraint && scope.fieldName && scope.fieldValue) {
         constraint.path = scope.fieldName[0];

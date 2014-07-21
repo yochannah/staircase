@@ -3,6 +3,7 @@
   "type": "IFrame",
   "handles": "genomic-regions",
   "heading": "Region Search",
+  "icon": "fa-map-marker",
   "width": 1,
   "action": "Search",
   "resettable": true,

@@ -7,6 +7,8 @@
 (def tool-defaults ;; Lots of duplication here - be less explicit? or zen of python?
   {:headingTemplateURI "./heading.html"
    :headingControllerURI "./heading-controller"
+   :headlineControllerURI "./controller"
+   :headlineTemplateURI "./headline.html"
    :providerURI "./provider"
    :templateURI "./template.html"
    :controllerURI "./controller"
@@ -17,6 +19,7 @@
   (reduce #(update-in %1 [%2] fixer)
           conf
           [:providerURI :headingTemplateURI :headingControllerURI
+           :headlineControllerURI :headlineTemplateURI
            :templateURI :controllerURI :panelHeading :style]))
 
 (defn strip-by-cap

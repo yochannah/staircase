@@ -1,0 +1,20 @@
+<p>Explore the data at {{serviceName}} with a custom query</p>
+<div class="btn-group" dropdown>
+    <button ng-click="showResults()" type="button" class="btn btn-default">
+        View {{rowCount | number}} rows
+    </button>
+    <button type="button" class="btn btn-default dropdown-toggle">
+        for {{state.rootClass.displayName}}
+        <span class="caret"></span>
+        <span class="sr-only">Choose root class</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li ng-repeat="cld in classes | filter:{group:'PRIMARY'}" ng-class="{active: cld === state.rootClass}">
+            <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
+        </li>
+        <li class="divider"></li>
+        <li ng-repeat="cld in classes | filter:{group:'SECONDARY'}" ng-class="{active: cld === state.rootClass}">
+            <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
+        </li>
+    </ul>
+</div>

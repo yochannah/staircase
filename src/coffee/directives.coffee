@@ -363,16 +363,15 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       window.document.getElementsByTagName('head')[0].appendChild(link)
       toolCssLoaded[ident] = true
 
-  injectingLinker = (window, compile, injector) -> (scope, element, attrs) ->
-    scope.$watch 'tool.controllerURI', ->
-      if scope.tool
-
+  injectingLinker = (window, compile, injector, curi = 'controllerURI', turi = 'templateURI') ->
+    (scope, element, attrs) ->
+      scope.$watch "tool.#{ curi }", (ctrl) -> if ctrl
         loadStyle window, scope.tool
 
-        ctrl = '.' + scope.tool.controllerURI
-        tmpl = scope.tool.templateURI
+        tmpl = scope.tool[turi]
+        console.log ctrl, tmpl
 
-        require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
+        require {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
 
           injector.invoke controller, this, {'$scope': scope}
 
@@ -380,6 +379,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           compile(element.contents())(scope)
 
           scope.$apply()
+
+  Directives.directive 'startingHeadline', ($window, $compile, $injector) ->
+    restrict: 'E'
+    scope:
+      tool: '=tool'
+    link: injectingLinker $window, $compile, $injector, 'headlineControllerURI', 'headlineTemplateURI'
 
   Directives.directive 'nativeTool', ($window, $compile, $injector) ->
     restrict: 'E'

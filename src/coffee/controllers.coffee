@@ -14,10 +14,7 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     scope.$watch "showCookieMessage", -> cookies.ShowCookieWarning = String scope.showCookieMessage
 
-  Controllers.controller 'WelcomeCtrl', Array '$scope', '$cookies', (scope, cookies) ->
-    scope.showWelcome = cookies.ShowWelcome isnt "false"
-
-    scope.$watch "showWelcome", (val) -> cookies.ShowWelcome = String val
+  Controllers.controller 'WelcomeCtrl', Array '$scope', (scope) -> scope.showWelcome = true
 
   Controllers.controller 'IndexCtrl', ->
 
@@ -74,6 +71,8 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
   mountController 'HistoryCtrl', 'history'
 
   mountController 'BrandCtrl', 'brand'
+
+  mountController 'NavCtrl', 'brand'
 
   mountController 'FacetCtrl', 'facets'
 

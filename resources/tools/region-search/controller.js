@@ -35,7 +35,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       }
     };
 
-    scope.$on('act', function () {
+    scope.sendRegions = function () {
       logger.info(scope.organism.shortName, scope.featureTypes, "in", scope.regions.parsed);
       scope.$emit('start-history', {
         thing: scope.regions.parsed.length + ' genomic intervals',
@@ -53,7 +53,9 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
           }
         }
       });
-    });
+    };
+
+    scope.$on('act', scope.sendRegions);
 
     var fetchingDefaultMine = mines.get('default');
 
@@ -62,20 +64,19 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     });
 
     scope.$watch('regions.pasted', function (pasted) {
-      timeout(function () {
-        scope.regions.parsed = toRegions(
-          L.uniq(tokenise(pasted, ['\n'])).filter(function(token) {
-            return token.charAt(0) !== '#';
-          })
-        );
-      });
+      scope.regions.parsed = toRegions(
+        L.uniq(tokenise(pasted, ['\n'])).filter(function(token) {
+          return token.charAt(0) !== '#';
+        })
+      );
+      L.defer(scope.$apply.bind(scope));
     });
 
     scope.$watch('regions.file', function (file) {
       if (!file) return;
       var reader = new FileReader();
       reader.onloadend = function (e) {
-        timeout(function () { // Set timeout to trigger digest.
+        scope.$apply(function () { // trigger digest.
           scope.regions.pasted = e.target.result;
         });
       };

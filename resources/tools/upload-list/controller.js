@@ -3,8 +3,15 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$cacheFactory', '$window', '$filter', 'tokenise', 'Mines', 'Histories', 'ClassUtils',
-          function (scope, logger, timeout, cacheFactory, window, filters, tokenise, mines, histories, ClassUtils) {
+  return [
+    '$scope', '$log', '$timeout', '$cacheFactory', '$window',
+    '$filter', 'tokenise', 'Mines', 'Histories', 'ClassUtils',
+    UploadListCtrl
+  ];
+
+  function UploadListCtrl (
+    scope, logger, timeout, cacheFactory, window,
+    filters, tokenise, mines, histories, ClassUtils) {
 
     scope.classes = [];
     scope.extraValues = [];
@@ -17,10 +24,12 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.ids = {pasted: '', file: null};
     scope.rowCount = "counting...";
     scope.serviceName = "";
+    scope.state || (scope.state = {});
+    scope.actions || (scope.actions = {});
 
     scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 
-    scope.$on('act', function (evt) {
+    scope.sendIdentifiers = function (evt) {
       var identifiers = L.pluck(scope.parsedIds, 'token');
       var type = scope.rootClass.className;
       scope.$emit('start-history', {
@@ -40,7 +49,9 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
           }
         }
       });
-    });
+    };
+
+    scope.$on('act', scope.sendIdentifiers);
 
     var fetchingDefaultMine = mines.get('default');
 
@@ -132,6 +143,6 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       };
     }
 
-  }];
+  }
 
 });

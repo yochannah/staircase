@@ -9,10 +9,6 @@
     font-weight: 400;
 }
 
-.navbar-custom .navbar-collapse > .navbar-form {
-    max-width: 40%;
-}
-
 @navbar-underscore-width: 4px;
 
 .navbar-inverse {
@@ -28,6 +24,23 @@
         border-bottom: @navbar-underscore-width solid transparent;
         &:hover {
             border-bottom: @navbar-underscore-width solid @navbar-default-color;
+        }
+    }
+}
+
+.navbar-custom .navbar-form[role="search"] {
+
+    @media screen and (min-width: @screen-sm-min) {
+        max-width: 28%;
+    }
+    @media screen and (min-width: @screen-sm-max) {
+        max-width: 40%;
+    }
+
+    .wordy-label {
+        display: none;
+        @media screen and (min-width: @screen-sm-max) {
+            display: inline-block;
         }
     }
 }

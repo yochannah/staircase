@@ -2,6 +2,7 @@
   "capabilities": ["initial"],
   "type": "native",
   "heading": "Previous Steps",
+  "icon": "fa-history",
   "width": 1
 }
 

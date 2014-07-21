@@ -27,12 +27,12 @@
 (def button-style :blue) ;; :orange or :dark
 
 (defn login []
-  (-> (pv/sign-in-button {:ng-click "persona.request()"} button-style)
+  (-> (pv/sign-in-button {:ng-show "persona" :ng-click "persona.request()"} button-style)
       (update-in [1 :class] str " navbar-btn")
       (update-in [2 1] (constantly "Sign in/Sign up"))))
 
 (defn logout []
-  (-> (pv/sign-in-button {:ng-click "persona.logout()"} button-style)
+  (-> (pv/sign-in-button {:ng-show "persona" :ng-click "persona.logout()"} button-style)
       (update-in [1 :class] str " navbar-btn")
       (update-in [2 1] (constantly "Sign out"))))
 
@@ -51,7 +51,8 @@
                 unpinned:'slideUp',
                 top:'headroom--top',
                 notTop:'headroom--not-top'}"}
-  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top {:role "navigation"}
+  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top
+   {:role "navigation" :ng-controller "NavCtrl"}
    [:div.container-fluid
 
     [:div.navbar-header ;; The elements to always display.
@@ -82,7 +83,7 @@
    [:span.input-group-btn
     [:button.btn.btn-primary
      {:type "submit" :ng-click "startQuickSearchHistory(searchTerm)"}
-     "Search "
+     [:span.wordy-label "Search "]
      [:i.fa.fa-search]]]])
 
 (defn search-form []
@@ -92,16 +93,16 @@
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
    [:li.dropdown
     [:a.dropdown-toggle
-     "Start " [:b.caret]]
+     "Tools " [:b.caret]]
      [:ul.dropdown-menu
       [:li {:ng-repeat "tool in startingPoints"}
            [:a {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"}
                "{{tool.heading}}"]]]]
-   [:li (link-to "/about" [:i.fa.fa-fw.fa-info] "About")]
-   [:li {:ng-click "showOptions()"} (link-to "" [:i.fa.fa-fw.fa-cog] "Options")]
+   [:li (link-to "/about" "Help")]
+   [:li {:ng-click "showOptions()"} (link-to "" "Options")]
    [:li.dropdown
     [:a.dropdown-toggle
-     "get in touch! " [:b.caret]]
+     "Contact " [:b.caret]]
     (unordered-list {:class "dropdown-menu"}
                     [(mail-to contact
                               [:span
@@ -224,7 +225,7 @@
 (def starting-point
   [:div.container-fluid
 
-   [:div.row.starting-points
+   [:div.row
     [:div.alert.alert-warning {:ng-show "tool.error"}
      [:p
       [:strong "Error"]
@@ -234,25 +235,19 @@
                [])]])
 
 (defn starting-points [config]
+
   [:div.container-fluid
 
    (welcome config)
 
    [:div.row.starting-points {:ng-controller "StartingPointsController"}
 
-    (initiator {:ng-class "getWidthClass(tool)"
-                :ng-repeat "tool in startingPoints | filter:{active:true}"
-                :ng-show "tool.state != 'DOCKED'"}
-               {:ng-class "(tool.action ? 'with-action ' : '') + getHeightClass(tool)"}
-               [[:i.fa.fa-arrows-alt.pull-right {:ng-click "expandTool(tool)"}]])
-
-    [:div.docked-tools
-     [:ul.nav.nav-pills
-      [:li.active {:ng-show "anyToolDocked()"}
-       [:a {:ng-click "undockAll()"} [:i.fa.fa-th-large]]]
-      [:li.active {:ng-repeat "tool in startingPoints"
-                   :ng-show "tool.state == 'DOCKED'"}
-       [:a {:ng-click "expandTool(tool)"} "{{tool.heading}}"]]]]]])
+    [:div.col-sm-4.col-md-3.starting-headline
+     {:ng-repeat "tool in startingPoints | filter:{active:true}"}
+     [:a.headline-heading {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"} 
+      [:div.pull-left.headline-icon [:i.fa.fa-fw.fa-5x {:ng-class "tool.icon"}]]
+      [:h2 "{{tool.heading}}"]]
+     [:starting-headline {:tool "tool"}]]]])
 
 (def edit-button
        [:i.fa.fa-edit.pull-right {:ng-show "!editing" :ng-click "editing = true"}])

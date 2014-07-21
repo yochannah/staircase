@@ -2,6 +2,8 @@
   "capabilities": ["initial"],
   "type": "native",
   "heading": "New Query",
+  "headlineControllerURI": "./controller",
+  "icon": "fa-cube",
   "width": 1,
   "action": "View Table",
   "resettable": true,

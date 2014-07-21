@@ -1,7 +1,9 @@
 {
   "capabilities": ["initial"],
   "type": "native",
+  "icon": "fa-search",
   "heading": "Structured Search",
+  "headlineControllerURI": "./headline",
   "width": 2,
   "expandable": true,
   "tall": true,

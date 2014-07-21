@@ -3,6 +3,8 @@
   "type": "native",
   "style": "./lists.css",
   "heading": "View Existing List",
+  "headlineControllerURI": "./controller",
+  "icon": "fa-cubes",
   "width": 1,
   "tall": true
 }
