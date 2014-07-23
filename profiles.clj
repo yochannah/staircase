@@ -5,6 +5,13 @@
                      [ring-mock "0.1.5"]]
       :env {
             :web-project-title "FlyMine"
+            :web-contacts [
+                           ["fa-twitter" "https://twitter.com/intermineorg" "@intermineorg"]
+                           ["fa-stack-overflow"
+                            "http://stackoverflow.com/search?q=intermine"
+                            "Stack Overflow"]
+                           ["fa-envelope" "mailto://dev@intermine.org" "Mailing list"]
+                           ]
             :web-max-age 300
             :web-default-service "flymine"
             :web-audience "http://localhost:3000"

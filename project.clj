@@ -78,11 +78,13 @@
       :web-project-title "InterMine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)
+      :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
        :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
+                   :histories
                    :templates
                    [:choose-list {:service "flymine"}]
                    [:choose-list {:service "mousemine"}]
@@ -90,7 +92,6 @@
                    [:new-query {:service "yeastmine"}]
                    :upload-list
                    :region-search
-                   :histories
                    :show-table ;; TODO: make these autoconfigure...
                    :show-list
                    :show-enrichment
