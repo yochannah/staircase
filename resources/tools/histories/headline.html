@@ -1,1 +1,7 @@
-<p>Use one of your {{histories.length}} existing histories</p>
+<p ng-show="histories.length">
+    Welcome back! Use one of your {{histories.length}} existing histories
+</p>
+<p ng-hide="histories.length">
+    When you start using these tools, a record of your activities will
+    appear here.
+</p>

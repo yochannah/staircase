@@ -2,6 +2,12 @@
 Find features at {{serviceName}} overlapping your genomic co-ordinates:
 </p>
 <form class="form">
-    <textarea class="form-control" model="regions.pasted">{{tool.sampleData}}</textarea>
+    <div class="form-group">
+        <textarea
+            rows="3"
+            class="form-control"
+            model="regions.pasted">{{tool.sampleData}}</textarea>
+    </div>
+
     <button class="btn btn-default" ng-click="sendRegions()">Send regions</button>
 </form>

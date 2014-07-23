@@ -89,15 +89,16 @@
 (defn search-form []
   [:form.navbar-form.navbar-left {:role "search"} search-input])
 
+(def tool-list
+  [:li {:ng-repeat "tool in startingPoints"}
+   [:a {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"}
+    "{{tool.heading}}"]])
+
 (defn nav-list []
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
    [:li.dropdown
     [:a.dropdown-toggle
-     "Tools " [:b.caret]]
-     [:ul.dropdown-menu
-      [:li {:ng-repeat "tool in startingPoints"}
-           [:a {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"}
-               "{{tool.heading}}"]]]]
+     "Tools " [:b.caret]] [:ul.dropdown-menu tool-list]]
    [:li (link-to "/about" "Help")]
    [:li {:ng-click "showOptions()"} (link-to "" "Options")]
    [:li.dropdown
@@ -119,9 +120,9 @@
    ])
 
 
-(defn footer []
-  [:section.footer {:ng-controller "FooterCtrl" :ng-show "showCookieMessage"}
-   [:div.panel.panel-info
+(defn footer [config]
+  [:section.footer.dark {:ng-controller "FooterCtrl"}
+   [:div.panel.panel-info {:ng-show "showCookieMessage"}
     [:div.panel-heading "Cookies"]
     [:div.panel-body
      [:button.btn.btn-warning.pull-right {:ng-click "showCookieMessage = false"} "understood"]
@@ -131,11 +132,21 @@
       (link-to "/cookies" "here")
       ". By dismissing this message you agree to let this application store the data it needs
       to operate."]
-     ]]])
+     ]]
+   [:div.row
+    [:div.col-sm-4.site-map
+     [:ul
+      [:li (link-to "/" "Home")]
+      [:li (link-to "/about" "Help")]
+      [:li "Tools" [:ul tool-list]]]]
+    [:div.col-sm-4.contacts
+     (unordered-list (for [[icon addr text] (:contacts config)]
+                       (link-to addr [:i.fa.fa-fw.fa-2x {:class icon}] " " text)))]
+    ]
+   ])
 
-(defn common
-  ([title body] (common title body []))
-  ([title body scripts]
+(defn common [config body & scripts]
+  (let [title (:project-title config)]
    (html5
      [:head
       [:meta {:charset "utf-8"}]
@@ -149,12 +160,12 @@
               [:body {:class "staircase"}
                (header title)
                [:section#content.main body]]
-               (footer)
+               (footer config)
               ]
              scripts))))
 
-(defn four-oh-four []
-  (common "Page Not Found"
+(defn four-oh-four [config]
+  (common (assoc config :project-title "Page Not Found")
           [:div#four-oh-four "The page you requested could not be found"]))
 
 (defn about-header [{:keys [project-title]}]
@@ -245,8 +256,8 @@
     [:div.col-sm-4.col-md-3.starting-headline
      {:ng-repeat "tool in startingPoints | filter:{active:true}"}
      [:a.headline-heading {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"} 
-      [:div.pull-left.headline-icon [:i.fa.fa-fw.fa-5x {:ng-class "tool.icon"}]]
-      [:h2 "{{tool.heading}}"]]
+      [:div.pull-left.headline-icon [:i.fa.fa-fw.fa-4x {:ng-class "tool.icon"}]]
+      [:h3 "{{tool.heading}}"]]
      [:starting-headline {:tool "tool"}]]]])
 
 (def edit-button
@@ -567,7 +578,7 @@
     {:status 404})) 
 
 (defn index [config]
-  (common (:project-title config)
+  (common config
           [:div {:ng-view ""}]
           (map with-utf8-charset
                (conj (apply include-js (map (partial str "/vendor/") vendor-scripts))

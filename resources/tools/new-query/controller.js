@@ -116,6 +116,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
   }
 
+  // This should read class tags.
   function groupOf (scope, cld) {
     var className = cld.className;
     if (scope.model && "genomic" === scope.model.name) {

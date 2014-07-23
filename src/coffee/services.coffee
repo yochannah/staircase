@@ -149,11 +149,20 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
         names.group = grouper names
         return names
 
+      setProp = (path) -> (obj) -> (val) ->
+        [segs..., prop] = path.split('.')
+        target = segs.reduce ((o, seg) -> o[seg] or (o[seg] = {})), obj
+        target[prop] = val
+
       andThen = (names) -> timeout ->
         scope.classes = L.sortBy names.map(group), ['group', 'displayName']
-        defaults[propName] = scope[propName] = switch model.name
+        set = setProp propName
+        def = switch model.name
           when 'genomic' then L.find scope.classes, {className: 'Gene'}
           when 'testmodel' then L.find scope.classes, {className: 'Employee'}
+
+        set(defaults)(def)
+        set(scope)(def)
         ret.resolve scope.classes
 
       orElse = (e) -> ret.reject e

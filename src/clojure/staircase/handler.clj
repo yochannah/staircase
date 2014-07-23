@@ -217,7 +217,7 @@
                               (wrap-anti-forgery {:read-token read-token})))
       (route/resources "/" {:root "tools"})
       (route/resources "/" {:root "public"})
-      (route/not-found (views/four-oh-four)))))
+      (route/not-found (views/four-oh-four conf)))))
 
 (defn- build-hist-routes [{:keys [histories steps]}]
   (routes ;; routes that start from histories.

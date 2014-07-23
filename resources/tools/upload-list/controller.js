@@ -11,7 +11,8 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
 
   function UploadListCtrl (
     scope, logger, timeout, cacheFactory, window,
-    filters, tokenise, mines, histories, ClassUtils) {
+    filters, tokenise, mines, histories, ClassUtils
+    ) {
 
     scope.classes = [];
     scope.extraValues = [];
@@ -20,20 +21,19 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.parsedIds = [];
     scope.navType = "pills";
     scope.sorting = '';
-    scope.rootClass = "";
     scope.ids = {pasted: '', file: null};
     scope.rowCount = "counting...";
     scope.serviceName = "";
-    scope.state || (scope.state = {});
+    scope.state || (scope.state = {rootClass: {}});
     scope.actions || (scope.actions = {});
 
     scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 
     scope.sendIdentifiers = function (evt) {
       var identifiers = L.pluck(scope.parsedIds, 'token');
-      var type = scope.rootClass.className;
+      var type = scope.state.rootClass.className;
       scope.$emit('start-history', {
-        thing: identifiers.length + ' ' + scope.rootClass.displayName + ' identifiers',
+        thing: identifiers.length + ' ' + scope.state.rootClass.displayName + ' identifiers',
         verb: {
           ed: 'submitted',
           ing: 'submitting'
@@ -73,7 +73,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     });
 
     scope.$watch('serviceName', function (name) {
-      scope.tool.heading = 'Resolve ' + scope.rootClass + ' identifiers at ' + name;
+      scope.tool.heading = 'Resolve identifiers at ' + name;
     });
 
     scope.$watch('ids.pasted', function (ids) {
@@ -82,7 +82,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       });
     });
 
-    scope.$watch('rootClass.className', function (className) {
+    scope.$watch('state.rootClass.className', function (className) {
       if (!className) return;
       scope.extraValues = [];
       scope.discriminator = null;
@@ -124,7 +124,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     fetchingDefaultMine.then(connect).then(function (conn) {
       scope.connection = conn;
       conn.fetchModel()
-          .then(ClassUtils.setClasses(scope, null, 'rootClass'))
+          .then(ClassUtils.setClasses(scope, null, 'state.rootClass'))
           .then(classFilter(scope));
     });
 

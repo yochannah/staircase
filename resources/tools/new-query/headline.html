@@ -1,5 +1,5 @@
 <p>Explore the data at {{serviceName}} with a custom query</p>
-<div class="btn-group" dropdown>
+<div class="btn-group" ng-show="classes.length" dropdown>
     <button ng-click="showResults()" type="button" class="btn btn-default">
         View {{rowCount | number}} rows
     </button>
@@ -14,6 +14,9 @@
         </li>
         <li class="divider"></li>
         <li ng-repeat="cld in classes | filter:{group:'SECONDARY'}" ng-class="{active: cld === state.rootClass}">
+            <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
+        </li>
+        <li ng-repeat="cld in classes | filter:{group:''}" ng-class="{active: cld === state.rootClass}">
             <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
         </li>
     </ul>

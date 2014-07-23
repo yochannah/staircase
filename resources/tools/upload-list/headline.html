@@ -2,12 +2,30 @@
 Find items at {{serviceName}} that match your identifiers:
 </p>
 <form class="form">
-    <textarea class="form-control" model="ids.pasted"></textarea>
-    <select class="form-control"
-        ng-model="rootClass"
-        ng-options="cld.displayName for cld in classes">
-    </select>
-    <button class="btn btn-default" ng-click="sendIdentifiers()" ng-disabled="!parsedIds.length">
-        {{actions.act || 'No identifiers provided'}}
-    </button>
+    <div class="form-group">
+        <textarea class="form-control"
+            rows="3"
+            placeholder="{{tool.sampleData}}"
+            ng-model="ids.pasted"></textarea>
+    </div>
+    <div class="btn-group" dropdown>
+        <button class="btn btn-default"
+            ng-click="sendIdentifiers()" ng-disabled="!parsedIds.length">
+            Look for
+        </button>
+        <button type="button" class="btn btn-default dropdown-toggle">
+            {{state.rootClass.displayName}}s
+            <span class="caret"></span>
+            <span class="sr-only">Choose root class</span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="cld in classes | filter:{group:'PRIMARY'}" ng-class="{active: cld === state.rootClass}">
+                <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
+            </li>
+            <li class="divider"></li>
+            <li ng-repeat="cld in classes | filter:{group:'SECONDARY'}" ng-class="{active: cld === state.rootClass}">
+                <a ng-click="state.rootClass = cld">{{cld.displayName}}</a>
+            </li>
+        </ul>
+    </div>
 </form>

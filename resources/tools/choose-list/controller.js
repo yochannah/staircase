@@ -48,7 +48,7 @@ define(['angular', 'imjs'], function (ng, im) {
           listName: list.name
         }
       });
-    }
+    };
 
     function readLists (conn) {
       scope.connection = conn;
