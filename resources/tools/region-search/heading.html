@@ -1,0 +1,9 @@
+<div class="list-group-item"
+     ng-repeat="regionset in regionsets">
+    <a ng-click="activate(regionset)">
+         <i class="fa fa-fw fa-map-marker"></i>
+        Find
+    </a>
+    <select class="form-control" ng-model="regionset.targetClass" ng-options="c.displayName + 's' for c in classes"></select>
+    overlapping {{regionset.summary}}
+ </div>
