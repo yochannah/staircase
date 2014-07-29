@@ -1,5 +1,5 @@
 deps = ['require', 'angular', 'angular-cookies', 'angular-route', 'angular-resource',
-        'angular-animate', 'ng-headroom'
+        'angular-animate',
         'app']
 
 define deps, (require, ng) ->

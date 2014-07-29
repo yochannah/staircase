@@ -420,12 +420,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
           require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
+            scope.previousStep.$promise.then -> # Resolve the previous step.
 
-            $injector.invoke controller, this, {'$scope': scope}
+              $injector.invoke controller, this, {'$scope': scope}
 
-            element.html(template)
-            $compile(element.contents())(scope)
+              element.html(template)
+              $compile(element.contents())(scope)
 
-            scope.$apply()
-
+              # scope.$apply()
 

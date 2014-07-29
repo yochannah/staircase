@@ -9,8 +9,8 @@ modules = [
   'steps.filters',
   'steps.directives',
   'ui.bootstrap',
-  'ui.select2',
-  'headroom']
+  'ui.select2'
+]
 
 $providers = [
   '$routeProvider', '$controllerProvider', '$compileProvider',

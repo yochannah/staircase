@@ -134,11 +134,11 @@
       to operate."]
      ]]
    [:div.row
-    [:div.col-sm-4.site-map
+    [:div.col-sm-8.site-map
      [:ul
       [:li (link-to "/" "Home")]
       [:li (link-to "/about" "Help")]
-      [:li "Tools" [:ul tool-list]]]]
+      [:li "Tools" [:ul.row (update-in tool-list [1 :class] (constantly "col-sm-6"))]]]]
     [:div.col-sm-4.contacts
      (unordered-list (for [[icon addr text] (:contacts config)]
                        (link-to addr [:i.fa.fa-fw.fa-2x {:class icon}] " " text)))]
