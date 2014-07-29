@@ -1,7 +1,7 @@
 {
-  "capabilities": ["initial", "now"],
+  "capabilities": ["initial", "now", "next"],
   "type": "IFrame",
-  "handles": "genomic-regions",
+  "handles": ["genomic-regions", "list"],
   "heading": "Region Search",
   "icon": "fa-map-marker",
   "width": 1,
