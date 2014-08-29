@@ -81,6 +81,7 @@
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
+        "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
        :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
