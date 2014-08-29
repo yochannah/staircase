@@ -43,6 +43,7 @@
              :steps [:db]
              :histories [:db]})))))
 
+;; Todo - should be possible to have multiple instances.
 (def system
   (delay
     (info "Building system with settings: " env)
