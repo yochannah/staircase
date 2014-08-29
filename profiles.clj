@@ -5,6 +5,7 @@
                      [ring-mock "0.1.5"]]
       :env {
             :web-project-title "FlyMine"
+            :web-contact-email "alex@intermine.org"
             :web-contacts [
                            ["fa-twitter" "https://twitter.com/intermineorg" "@intermineorg"]
                            ["fa-stack-overflow"

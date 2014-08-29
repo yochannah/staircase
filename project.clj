@@ -73,6 +73,7 @@
     angular-ui-select2 "~0.0.5",
     angular-animate "~1.2.16"]]
   :env {
+      :web-gh-repository "https://github.com/alexkalderimis/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
       :web-project-title "InterMine"
