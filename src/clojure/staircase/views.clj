@@ -34,6 +34,7 @@
 (defn logout []
   (-> (pv/sign-in-button {:ng-show "persona" :ng-click "persona.logout()"} button-style)
       (update-in [1 :class] str " navbar-btn")
+      (update-in [1 :title] (constantly "Signed in as {{auth.identity}}"))
       (update-in [2 1] (constantly "Sign out"))))
 
 (declare search-form nav-list)
@@ -66,9 +67,6 @@
       ]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
-
-     [:p.navbar-text.navbar-right {:ng-show "auth.loggedIn"}
-      "Signed in as {{auth.identity}}"]
 
      (nav-list)
 
