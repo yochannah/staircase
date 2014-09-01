@@ -61,7 +61,6 @@
 (defn- update-entity-where [conn tbl values constraint]
   (let  [to-update (normalise-entity-values values)
          update-cmd (-> (update tbl) (sset to-update) (where constraint) (hsql/format))]
-    (info "Executing update:" (prn-str update-cmd))
     (sql/execute! conn update-cmd)
     (sql/query conn (hsql/format {:select [:*] :from [tbl] :where constraint :limit 1}) :result-set-fn first)))
 
