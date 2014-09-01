@@ -52,12 +52,10 @@
                                  " Contact"])]]
     (if repo
       (conj links
-            (link-to repo
-                     [:i.fa.fa-github]
-                     " View on github")
-            (link-to (str repo "/issues")
-                     [:i.fa.fa-warning]
-                     " Report a problem"))
+            (link-to {:target "blank"} repo
+                     [:i.fa.fa-github] " View on github")
+            (link-to {:target "blank"} (str repo "/issues")
+                     [:i.fa.fa-warning]" Report a problem"))
       links)))
 
 (defn nav-list [config]
