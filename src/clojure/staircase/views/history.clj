@@ -3,7 +3,8 @@
             staircase.views.facets
             [hiccup.def :refer (defelem)]
             [staircase.views.buttons :as btn])
-  (:use [hiccup.element :only (mail-to)]))
+  (:use [hiccup.core :only (html)]
+        [hiccup.element :only (mail-to)]))
 
 (defelem tool-not-found [{contact :contact-email}]
   [:div.alert.alert-danger 
@@ -20,7 +21,7 @@
               [1 :class] (constantly "btn btn-default"))])
 
 (defn snippet [config]
-  [:div.container-fluid.history-view
+  (html [:div.container-fluid.history-view
    [:div.row
 
     [:div.sidebar.slide-left.col-xs-12.col-md-2
@@ -81,4 +82,4 @@
        :wants "wantsSomething(what, data)"
        :next-step "nextStep(data)"
        :toggle "state.expanded = !state.expanded"} ]]
-    ]])
+    ]]))

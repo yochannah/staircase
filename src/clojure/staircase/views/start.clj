@@ -1,4 +1,5 @@
 (ns staircase.views.start
+  (:use [hiccup.core :only (html)])
   (:require staircase.views.welcome))
 
 (defn initiator
@@ -19,7 +20,7 @@
      [:div.clearfix]]]])
 
 (defn starting-point [config]
-  [:div.container-fluid
+  (html [:div.container-fluid
 
    [:div.row
     [:div.alert.alert-warning {:ng-show "tool.error"}
@@ -28,11 +29,10 @@
       " {{tool.error.message}}"]]
     (initiator {}
                {:class "full-height" :ng-class "{'with-action': tool.action}"}
-               [])]])
+               [])]]))
 
 (defn starting-points [config]
-
-  [:div.container-fluid
+  (html [:div.container-fluid
 
    (staircase.views.welcome/snippet config)
 
@@ -43,5 +43,5 @@
      [:a.headline-heading {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"} 
       [:div.pull-left.headline-icon [:i.fa.fa-fw.fa-4x {:ng-class "tool.icon"}]]
       [:h3 "{{tool.heading}}"]]
-     [:starting-headline {:tool "tool"}]]]])
+     [:starting-headline {:tool "tool"}]]]]))
 

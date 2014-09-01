@@ -1,5 +1,6 @@
 (ns staircase.views.about
-  (:use [hiccup.element :only (link-to)])
+  (:use [hiccup.core :only (html)]
+        [hiccup.element :only (link-to)])
   (:require [staircase.views.forms :refer (search-input)]))
 
 (defn about-header [{:keys [project-title]}]
@@ -17,7 +18,7 @@
     ]])
 
 (defn snippet [config]
-  [:div.container-fluid
+  (html [:div.container-fluid
    [:div.row (about-header config)]
    [:div.row
     [:div.about.col-xs-10.col-xs-offset-1
@@ -59,5 +60,5 @@
             [:i.fa.fa-undo {:ng-click "reset()"}]]
           [:td
            "This button restores the component to its orginal state, removing any filters you may have applied."]]]]
-        ]]]]])
+        ]]]]]))
 
