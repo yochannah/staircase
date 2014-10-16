@@ -8,20 +8,22 @@
     <div class="list-group">
         <div class="list-group-item" ng-repeat="history in histories | filter:filterTerm">
             <div dropdown class="btn-group pull-right">
+                <button class="btn btn-default"
+                        ng-click="deleteHistory(history)">
+                    Delete
+                </button>
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    Edit
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a ng-click="deleteHistory(history)">Delete</a>
-                    </li>
                     <li>
                         <a ng-click="renameHistory(history)">Rename</a>
                     </li>
                 </ul>
             </div>
             <a href="/history/{{history.id}}/{{history.steps}}" class="list-group-item-heading">
-                <span class="pull-right badge">{{history.steps}}</span>
+                <span class="badge">{{history.steps}}</span>
                 {{history.title}}
             </a>
             <p class="list-group-item-text">{{history.description}}</p>
