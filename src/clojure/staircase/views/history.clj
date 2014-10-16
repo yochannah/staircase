@@ -58,7 +58,7 @@
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"
-         :append-step "nextStep(data)"
+         :append-step "controller.nextStep(data)"
          :tool "ns.tool"
          :service "ns.service"
          :data "ns.data"}

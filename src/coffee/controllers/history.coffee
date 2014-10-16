@@ -81,13 +81,13 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       {Histories, Mines, params, http} = @
 
       # See below for data fetching to fill these.
-      @scope.nextTools = []
-      @scope.providers = []
+      @scope.nextTools ?= []
+      @scope.providers ?= []
+      @scope.messages ?= {}
+      @scope.nextSteps ?= []
+      @scope.items ?= {}
 
-      @scope.nextSteps = []
       @scope.collapsed = true # Hide details in reduced real-estate view.
-      @scope.items = {}
-      @scope.messages = {}
       @scope.state = {expanded: false}
       @currentCardinal = parseInt params.idx, 10
       @scope.history = Histories.get id: params.id
@@ -128,13 +128,15 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
-      {scope, to, mines} = @
+      {scope, console, to, mines} = @
+      console.debug "Anybody want some #{ what }?"
       if what is 'list'
         return to -> scope.list = data
 
-      for tool in scope.nextTools when tool.handles(what) then do (tool) ->
+      for tool in scope.nextTools when tool.handles(what) then do (tool) =>
         idx = tool.ident + what + key
         if scope.messages[idx]?
+          console.debug "replacing message data: #{ data }"
           @set ['messages', idx, 'data'], data
         else
           @mines.then(atURL data.service.root)
@@ -183,14 +185,6 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       else
         (url) -> location.url url
 
-      # See: http://blog.grio.com/2012/08/where-my-docs-at-a-smattering-of-pointers-on-angularjs-one-of-which-at-least-is-difficult-if-not-impossible-to-find-on-the-internet.html
-      # lastRoute = @route.current
-      # dereg = @scope.$on '$locationChangeSuccess', (event) =>
-      #   @init()
-      #   @currentCardinal = nextCardinal
-      #   @route.current = lastRoute
-      #   dereg()
-
       history = scope.history
       if history.steps.length isnt currentCardinal
         title = "Fork of #{ history.title }"
@@ -199,7 +193,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
           console.debug "Forked history"
           appended = Histories.append {id: fork.id}, step, ->
             console.debug "Created step #{ appended.id }"
-            changeUrl "/history/#{ fork.id }/#{ nextCardinal }"
+            goTo "/history/#{ fork.id }/#{ nextCardinal }"
       else
         appended = Histories.append {id: history.id}, step, ->
           console.debug "Created step #{ appended.id }"

@@ -1,13 +1,17 @@
 define [], -> Array '$scope', (scope) ->
   
-  scope.type = type = scope.data.type
+  scope.$watch 'data', (data) ->
+    scope.type = type = data.type
 
-  if scope.data.ids?
-    scope.n = scope.data.ids.length
-    scope.query =
-      select: ['*']
-      from: type
-      where: [{path: type, op: 'IN', ids: scope.data.ids}]
+    if data.ids?
+      scope.n = data.ids.length
+      scope.query =
+        select: ['*']
+        from: type
+        where: [{path: type, op: 'IN', ids: scope.data.ids}]
+    else if data.query
+      scope.type = 'result'
+      scope.query = data.query
 
   scope.activate = ->
     scope.previousStep.$promise.then ->
@@ -16,8 +20,9 @@ define [], -> Array '$scope', (scope) ->
         title: "Exported results"
         tool: scope.tool.ident
         data:
+          query: scope.query
           service:
             root: scope.previousStep.data.service.root
-          query: scope.query
+
       scope.appendStep data: step
 
