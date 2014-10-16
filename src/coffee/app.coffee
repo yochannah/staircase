@@ -40,6 +40,7 @@ define deps, (angular, router) ->
     stepConfigProvider.configureStep 'show-table',
       IndicateOffHostLinks: false,
       CellPreviewTrigger: 'click'
+      ShowHistory: false # We manage history in the history list.
       Style:
         icons: 'fontawesome'
 
