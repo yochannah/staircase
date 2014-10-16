@@ -164,7 +164,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         else
           element.removeAttr('seamless')
 
-  Directives.directive 'iframeTool', Array '$window', 'Mines', 'stepConfig', (win, mines, conf) ->
+  Directives.directive 'iframeTool', Array '$log', '$window', 'Mines', 'stepConfig', (console, win, mines, conf) ->
     restrict: 'E'
     replace: true
     template: """
@@ -179,15 +179,23 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
       win.addEventListener 'resize', resize
 
+      console.debug 'connecting to iframe'
+
       channel = Channel.build
         window: iframe[0].contentWindow
         origin: '*'
         scope: 'CurrentStep'
         onReady: -> console.log "Channel ready"
 
-      channel.bind 'next-step', (trans, data) -> scope.nextStep {data}
+      console.debug 'binding to channel'
+      channel.bind 'next-step', (trans, step) -> scope.nextStep data: step
 
-      # TODO: don't make use register a handler for each type...
+      channel.bind 'change-state', (trans, step) ->
+        step.tool = scope.tool.ident # this message can only be handled by the same tool
+        console.log 'shhh', step.title, step
+        scope.silently data: step
+
+      # TODO: don't make users register a handler for each type...
       channel.bind 'has-items', (trans, {key, noun, categories, ids}) ->
         scope.hasItems {type: noun, key, ids}
 
@@ -213,8 +221,9 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           params: conf[ident]
           success: -> console.log "Configured #{ ident }"
 
+      initialised = false
       scope.$watch 'step', (step) ->
-        return unless step?
+        return if initialised or not step?
         step.$promise.then ->
 
           init = ->
@@ -223,7 +232,9 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
               method: 'init'
               params: step.data
               error: -> console.error "initialization failed"
-              success: -> console.log "Initialized"
+              success: ->
+                console.log "Initialized"
+                initialised = true
 
           if step.data.service?.root and not step.data.service.token
             root = step.data.service.root
@@ -255,6 +266,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       has:      '&'
       wants:    '&'
       nextStep: '&'
+      silently: '&'
     template: """
       <div class="panel-heading">
         <i class="fa pull-right"
@@ -264,13 +276,17 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     """
     link: (scope, element, attrs) ->
       element.addClass('panel panel-default')
+      console.log 'currentStep.link called'
+      compiled = false
       scope.$watch 'tool.type', (toolType) ->
-        return unless toolType?
+        return if compiled or not toolType?
 
         heading = if scope.tool.panelHeading?
           managedHeading scope.tool.panelHeading
         else
           interpolatedHeading
+
+        console.log 'Compiling current step'
 
         body = if toolType is 'IFrame'
           "<iframe-tool/>"
@@ -284,7 +300,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
         $compile(heading) scope, (cloned) -> element.children()[0].appendChild cloned[0]
 
-        $compile(body) scope, (cloned) -> element.append cloned
+        $compile(body) scope, (cloned) ->
+          element.append cloned
+          compiled = true
+
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'

@@ -18,6 +18,7 @@ require.config
     'angular-ui': ['angular']
     'angular-cookies': ['angular']
     'angular-resource': ['angular']
+    'angular-silent': ['angular']
     'angular-ui-select2':
       deps: ['angular', 'select2']
       init: -> loadCss "/vendor/select2/select2.css"
@@ -48,6 +49,7 @@ require.config
     'angular-cookies': '/vendor/angular-cookies/angular-cookies'
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
+    'angular-silent': '/vendor/angular-silent/ngSilent'
     select2:         '/vendor/select2/select2'
     text:            '/vendor/requirejs-text/text'
     imjs:            '/vendor/imjs/js/im'

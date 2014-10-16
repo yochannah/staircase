@@ -4,7 +4,9 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
     require ['controllers/' + ident], (ctrl) ->
-      injector.invoke(ctrl, this, {$scope})
+      instance = injector.instantiate(ctrl, {$scope})
+      $scope.controller = instance # Working around breakage of controllerAs
+      $scope.foo = 1
       $scope.$apply()
 
   mountController = (name, ident) -> Controllers.controller name, requiredController ident

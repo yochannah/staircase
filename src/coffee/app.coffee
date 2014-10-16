@@ -2,6 +2,7 @@ deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-animate',
         './filters', './services', './directives', './controllers']
 
 modules = [
+  'ngSilent', # Must come before ngRoute
   'ngRoute',
   'ngAnimate',
   'steps.controllers',

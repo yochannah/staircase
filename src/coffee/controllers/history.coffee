@@ -1,134 +1,207 @@
 define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
+  
+  # Run-time requirements
+  injectables = L.pairs
+    scope: '$scope'
+    route: '$route'
+    http: '$http'
+    location: '$location',
+    params: '$routeParams'
+    to: '$timeout'
+    console: '$log'
+    $modal: '$modal'
+    meetRequest: 'meetRequest'
+    Histories: 'Histories'
+    Mines: 'Mines'
+    silentLocation: '$ngSilentLocation'
 
-  injectables = [
-    '$scope',
-    '$http',
-    '$location',
-    '$routeParams',
-    '$timeout',
-    '$modal',
-    'meetRequest',
-    'Histories',
-    'Mines'
-  ]
+  #--- Functions.
+ 
+  # Connect to a service and assign it a name.
+  connectWithName = (conf) ->
+    service = imjs.Service.connect conf
+    service.name = conf.name
+    return service
 
-  Array injectables..., (scope, http, location, params, to, $modal, meetRequest, Histories, Mines) ->
+  # Test to see if two strings overlap.
+  overlaps = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
 
-    scope.nextTools = []
-    scope.nextSteps = []
-    scope.providers = []
-    scope.collapsed = true # Hide details in reduced real-estate view.
-    scope.items = {}
-    scope.messages = {}
-    scope.state = {expanded: false}
+  # Get the configured service at the given URL.
+  atURL = (url) -> (mines) -> L.find mines, (m) -> overlaps m.root, url
 
-    toolNotFound = (e) -> to -> scope.error = e
+  # Turn a configuration object into a tool.
+  # Currently just adds a handles() method.
+  toTool = (conf) ->
+    handles = conf.handles
+    if Array.isArray handles
+      conf.handles = (cat) -> handles.indexOf(cat) >= 0
+    else
+      conf.handles = (cat) -> handles is cat
+    conf
 
-    toTool = (conf) ->
-      handles = conf.handles
-      if Array.isArray handles
-        conf.handles = (cat) -> handles.indexOf(cat) >= 0
-      else
-        conf.handles = (cat) -> handles is cat
-      conf
+  #--- Controller, exported as return value
+  
+  class HistoryController
 
-    currentCardinal = parseInt params.idx, 10
-    scope.history = Histories.get id: params.id
-    scope.steps = Histories.getSteps id: params.id
-    scope.step = Histories.getStep id: params.id, idx: currentCardinal - 1
-    scope.step.$promise.then ({tool}) ->
-      http.get('/tools/' + tool)
-          .then (({data}) -> scope.tool = data), toolNotFound
-      http.get('/tools', {params: {capabilities: 'next'}}).then ({data}) ->
-        scope.nextTools = data.filter((nt) -> nt.ident isnt tool).map toTool
-    http.get('/tools', {params: {capabilities: 'provider'}}).then ({data}) -> scope.providers = data
+    currentCardinal: 0
 
-    scope.watchDeeply = (name, f) -> scope.$watch ((s) -> JSON.stringify s[name]), -> f s[name]
+    @$inject: (snd for [fst, snd] in injectables)
 
-    scope.$watchCollection 'items', ->
-      exporters = []
-      for tool in scope.nextTools when tool.handles 'items'
-        for key, data of scope.items when data.ids.length
-          exporters.push {key, data, tool}
-      otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
-      scope.nextSteps = otherSteps.concat(exporters)
+    constructor: (injected...) ->
+      for [name, _], idx in injectables
+        @[name] = injected[idx]
 
-    scope.$watchCollection 'messages', (msgs) ->
-      handlers = L.values msgs
-      otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
-      scope.nextSteps = otherSteps.concat(handlers)
+      @init()
+      @startWatching()
 
-    scope.$watch 'list', ->
-      listHandlers = []
-      for tool in scope.nextTools when tool.handles 'list'
-        listHandlers.push {tool, data: scope.list}
-      otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'list')
-      scope.nextSteps = otherSteps.concat(listHandlers)
+    startWatching: ->
+      scope = @scope
 
-    scope.saveHistory = ->
-      scope.editing = false
-      scope.history.$save()
+      scope.$watchCollection 'items', ->
+        exporters = []
+        for tool in scope.nextTools when tool.handles 'items'
+          for key, data of scope.items when data.ids.length
+            exporters.push {key, data, tool}
+        otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
+        scope.nextSteps = otherSteps.concat(exporters)
 
-    scope.updateHistory  = ->
-      scope.editing = false
-      scope.history = Histories.get id: params.id
+      scope.$watchCollection 'messages', (msgs) ->
+        handlers = L.values msgs
+        otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
+        scope.nextSteps = otherSteps.concat(handlers)
 
-    scope.setItems = (key, type, ids) -> to -> scope.items[key] = {type, ids}
+      scope.$watch 'list', ->
+        listHandlers = []
+        for tool in scope.nextTools when tool.handles 'list'
+          listHandlers.push {tool, data: scope.list}
+        otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'list')
+        scope.nextSteps = otherSteps.concat(listHandlers)
 
-    connectWithName = (conf) ->
-      service = imjs.Service.connect conf
-      service.name = conf.name
-      return service
+    init: ->
+      {Histories, Mines, params, http} = @
 
-    mines = Mines.all()
-    overlapping = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
-    atURL = (url) -> (ms) -> L.find ms, (m) -> overlapping m.root, url
+      # See below for data fetching to fill these.
+      @scope.nextTools = []
+      @scope.providers = []
 
-    scope.hasSomething = (what, data, key) ->
-      kind ='msg'
+      @scope.nextSteps = []
+      @scope.collapsed = true # Hide details in reduced real-estate view.
+      @scope.items = {}
+      @scope.messages = {}
+      @scope.state = {expanded: false}
+      @currentCardinal = parseInt params.idx, 10
+      @scope.history = Histories.get id: params.id
+      @scope.steps = Histories.getSteps id: params.id
+      @scope.step = Histories.getStep id: params.id, idx: @currentCardinal - 1
+      @mines = Mines.all()
+
+      toolNotFound = (e) => to => @scope.error = e
+
+      unless @scope.tool? # tool never changes! to do so breaks the history API.
+        @scope.step.$promise.then ({tool}) =>
+          http.get('/tools/' + tool)
+                .then (({data}) => @scope.tool = data), toolNotFound
+          http.get('/tools', params: {capabilities: 'next'})
+              .then ({data}) -> data.filter((t) -> t.ident isnt tool).map toTool
+              .then (tools) => @scope.nextTools = tools
+      http.get('/tools', params: {capabilities: 'provider'})
+          .then ({data}) => @scope.providers = data
+
+    saveHistory: ->
+      @scope.editing = false
+      @scope.history.$save()
+
+    updateHistory: ->
+      {Histories, params} = @
+      @scope.editing = false
+      @scope.history = Histories.get id: params.id
+
+    setItems: -> (key, type, ids) => @set ['items', key], {type, ids}
+
+    # Set scope values using an array of keys.
+    # eg: this.set ['foo', 'bar'], 2 == this.scope.foo.bar = 2
+    #       (but in a timeout)
+    set: ([prekeys..., key], value) -> @to =>
+      o = @scope
+      for k, i in prekeys
+        o = o[k]
+      o[key] = value
+
+    hasSomething: (what, data, key) ->
+      {scope, to, mines} = @
       if what is 'list'
-        to -> scope.list = data
-      else
-        for tool in scope.nextTools when tool.handles(what) then do (tool, what, data, key) ->
-          idx = tool.ident + what + key
-          url = data.service.root
-          if scope.messages[idx]?
-            scope.messages[idx].data = data
-          else
-            mines.then(atURL url)
-                 .then(connectWithName)
-                 .then (service) -> to -> scope.messages[idx] = {service, tool, data, kind}
+        return to -> scope.list = data
 
-    letUserChoose = (tools) ->
-      dialogue = $modal.open
+      for tool in scope.nextTools when tool.handles(what) then do (tool) ->
+        idx = tool.ident + what + key
+        if scope.messages[idx]?
+          @set ['messages', idx, 'data'], data
+        else
+          @mines.then(atURL data.service.root)
+                .then(connectWithName)
+                .then (service) =>
+                  @set ['messages', idx], {tool, data, service, kind: 'msg'}
+
+    letUserChoose: (tools) ->
+      dialogue = @$modal.open
         templateUrl: '/partials/choose-tool-dialogue.html'
         controller: ChooseDialogueCtrl
         resolve: {items: tools}
 
       return dialogue.result
 
-    scope.wantsSomething = (what, data) ->
-      console.log "Something is wanted", what, data
-      next = scope.providers.filter (t) -> t.handles is what
-      console.log "Suitable providers found", next, scope.providers
-      return unless next.length
-      meetingRequest = if next.length is 1
-        meetRequest(next[0], scope.step, data)
+    meetingRequest: (next, data) ->
+      if next.length is 1
+        @meetRequest(next[0], @scope.step, data)
       else
-        letUserChoose(next).then (provider) -> meetRequest provider, scope.step, data
-      meetingRequest.then scope.nextStep
+        @letUserChoose(next).then (provider) => @meetRequest provider, @scope.step, data
 
-    scope.nextStep = (step) ->
-      if scope.history.steps.length isnt currentCardinal
-        title = "Fork of #{ scope.history.title }"
-        console.log "Forking at #{ currentCardinal } as #{ title }"
-        history = Histories.fork {id: scope.history.id, at: currentCardinal - 1, title}, ->
-          console.log "Forked history"
-          step = Histories.append {id: history.id}, step, ->
-            console.log "Created step " + step.id
-            location.url "/history/#{ history.id }/#{ currentCardinal + 1 }"
+    wantsSomething: (what, data) ->
+      {console, meetRequest} = @
+      console.log "Something is wanted", what, data
+      next = @scope.providers.filter (t) -> t.handles is what
+      console.log "Suitable providers found", next, @scope.providers
+
+      return unless next.length
+
+      @meetingRequest(next).then @nextStep
+
+    storeHistory: (step) -> @nextStep step, true
+
+    nextStep: (step, silently = false) =>
+      {Histories, scope, currentCardinal, console, location, silentLocation} = @
+      console.log "storing - silently? #{ silently }"
+      nextCardinal = currentCardinal + 1
+      appended = null
+
+      goTo = if silently
+        (url) =>
+          @params.idx = nextCardinal
+          silentLocation.silent url
+          @currentCardinal = nextCardinal
+          @init()
       else
-        step = Histories.append {id: scope.history.id}, step, ->
-          console.log "Created step " + step.id
-          location.url "/history/#{ scope.history.id }/#{ currentCardinal + 1 }"
+        (url) -> location.url url
+
+      # See: http://blog.grio.com/2012/08/where-my-docs-at-a-smattering-of-pointers-on-angularjs-one-of-which-at-least-is-difficult-if-not-impossible-to-find-on-the-internet.html
+      # lastRoute = @route.current
+      # dereg = @scope.$on '$locationChangeSuccess', (event) =>
+      #   @init()
+      #   @currentCardinal = nextCardinal
+      #   @route.current = lastRoute
+      #   dereg()
+
+      history = scope.history
+      if history.steps.length isnt currentCardinal
+        title = "Fork of #{ history.title }"
+        console.debug "Forking at #{ currentCardinal } as #{ title }"
+        fork = Histories.fork {id: history.id, at: nextCardinal, title}, ->
+          console.debug "Forked history"
+          appended = Histories.append {id: fork.id}, step, ->
+            console.debug "Created step #{ appended.id }"
+            changeUrl "/history/#{ fork.id }/#{ nextCardinal }"
+      else
+        appended = Histories.append {id: history.id}, step, ->
+          console.debug "Created step #{ appended.id }"
+          goTo "/history/#{ history.id }/#{ nextCardinal }"
 
