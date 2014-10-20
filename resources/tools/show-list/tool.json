@@ -1,5 +1,6 @@
 {
   "capabilities": ["now", "provider", "next"],
+  "provides": "list",
   "handles": "list",
   "type": "IFrame",
   "seamless": true,

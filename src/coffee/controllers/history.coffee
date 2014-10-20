@@ -161,17 +161,18 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     wantsSomething: (what, data) ->
       {console, meetRequest} = @
       console.log "Something is wanted", what, data
-      next = @scope.providers.filter (t) -> t.handles is what
+      next = @scope.providers.filter (t) -> t.provides is what
       console.log "Suitable providers found", next, @scope.providers
 
       return unless next.length
 
-      @meetingRequest(next).then @nextStep
+      @meetingRequest(next, data).then @nextStep
 
     storeHistory: (step) -> @nextStep step, true
 
     nextStep: (step, silently = false) =>
       {Histories, scope, currentCardinal, console, location, silentLocation} = @
+      console.debug "Next step:", step
       console.log "storing - silently? #{ silently }"
       nextCardinal = currentCardinal + 1
       appended = null
