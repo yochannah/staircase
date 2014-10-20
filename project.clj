@@ -81,6 +81,7 @@
       :web-max-age ~(* 30 24 60 60)
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
+        "humanmine" "http://human.intermine.org/service"
         "flymine" "http://www.flymine.org/query/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
@@ -88,10 +89,8 @@
        :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
-                   [:choose-list {:service "flymine"}]
-                   [:choose-list {:service "mousemine"}]
-                   [:new-query {:service "flymine"}]
-                   [:new-query {:service "yeastmine"}]
+                   [:choose-list {:service "humanmine"}]
+                   [:new-query {:service "humanmine"}]
                    :upload-list
                    :region-search
                    :show-table ;; TODO: make these autoconfigure...
