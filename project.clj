@@ -76,7 +76,7 @@
       :web-gh-repository "https://github.com/alexkalderimis/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
-      :web-project-title "InterMine"
+      :web-project-title "Human Mine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
