@@ -81,7 +81,7 @@
       :web-max-age ~(* 30 24 60 60)
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
-        "humanmine" "http://human.intermine.org/service"
+        "humanmine" "http://human.intermine.org/human/service"
         "flymine" "http://www.flymine.org/query/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
