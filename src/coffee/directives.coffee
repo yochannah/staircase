@@ -203,7 +203,8 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
       channel.bind 'has-ids', (trans, data) -> scope.has {what: 'ids', data}
 
-      channel.bind 'has', (trans, {what, data}) -> scope.has {what, data}
+      # params should be an object of form {what, data}
+      channel.bind 'has', (trans, params) -> scope.has params
 
       channel.bind 'wants', (trans, {what, data}) -> scope.wants {what, data}
 
