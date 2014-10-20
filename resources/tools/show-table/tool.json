@@ -1,6 +1,6 @@
 {
   "capabilities": ["now"],
-  "handles": ["table", "query"]
+  "handles": ["table", "query"],
   "type": "IFrame",
   "seamless": false,
   "heading": "Results Table",
