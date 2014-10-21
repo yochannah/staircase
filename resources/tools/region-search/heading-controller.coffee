@@ -1,30 +1,31 @@
 define ['imjs', 'lodash'], ({Service}, L) ->
-  
-  Array '$q', '$log', '$scope', 'Mines', (Q, console, scope, mines) ->
 
-    scope.regionsets = []
+  # We need to specify the taxon-id for each segment, otherwise the results _will_ be wrong.
+  toFullRegions = (rows) -> ("#{taxon}:#{chr}:#{s}..#{e}" for [chr, s, e, taxon] in rows)
+  
+  Array '$q', '$log', '$scope', 'Mines', 'ClassUtils', (Q, console, scope, mines, ClassUtils) ->
+
+    # :: RegionSet {root :: string,
+    #               targetClass :: {name :: string, path :: Path},
+    #               summary :: string, 
+    #               fetch :: () -> Promise [[object]]}
     scope.regionset = {}
+    # :: [RegionSet]
+    scope.regionsets = []
+    # :: [{name :: string, path :: Path }]
     scope.classes = []
     name = scope.data.name
     type = scope.data.type
 
-    getSeqFeatures = (model) -> # All the Sequence Features, with their names.
-      classes = (model.makePath(c) for c in model.getSubclassesOf('SequenceFeature'))
-      namings = for cp in classes then do (cp) ->
-        cp.getDisplayName().then (name) -> {name: name, path: cp}
-
-      Q.all namings
-
     getService = mines.atURL(scope.data.root or scope.service.root)
-                    .then(Service.connect)
+                      .then(Service.connect)
 
     getModel = getService.then (service) -> service.fetchModel()
 
-    getClasses = getModel.then(getSeqFeatures)
+    getClasses = getModel.then ClassUtils.getSubTypesOf 'SequenceFeature'
 
     Q.all([getService, getModel, getClasses]).then ([service, model, classes]) ->
       [targetClass] = scope.classes = classes
-      console.debug classes.length + " suitable classes", (c.name for c in classes)
       path = model.makePath(type)
 
       if path.isa('Location')
@@ -60,14 +61,11 @@ define ['imjs', 'lodash'], ({Service}, L) ->
       scope.regionset = scope.regionsets[0]
 
 
-    # We need to specify the taxon-id for each segment, otherwise the results _will_ be wrong.
-    toFullRegions = (rows) -> ("#{taxon}:#{chr}:#{s}..#{e}" for [chr, s, e, taxon] in rows)
-    
     scope.activate = (regionset) ->
       regionset.fetch().then (rows) ->
         request =
           regions: toFullRegions rows
-          types: [regionset.targetClass.toString()]
+          types: [regionset.targetClass.path.toString()]
         nextStep =
           title: 'Search for overlapping features',
           tool: scope.tool.ident,
