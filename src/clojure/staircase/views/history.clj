@@ -49,7 +49,7 @@
              :ng-show "step.id == s.id"}]
          "{{s.title}}"]]]
 
-     [:div.panel.panel-default
+     [:div.panel.panel-default.next-steps
       [:div.panel-heading
        {:ng-click "nextStepsCollapsed = !nextStepsCollapsed"}
         [:i.fa.fa-fw {:ng-class "{'fa-caret-right': nextStepsCollapsed, 'fa-caret-down': !nextStepsCollapsed}"}]

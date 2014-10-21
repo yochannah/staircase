@@ -1,6 +1,7 @@
 {
   "capabilities": ["now", "provider"],
   "type": "IFrame",
+  "provides": "enrichment",
   "handles": "enrichment",
   "seamless": false,
   "heading": "Enrichment Results",
