@@ -171,7 +171,15 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
       return ret.promise
 
-    return {setClasses}
+    # (string) -> (Model) -> [{name :: string, path :: Path}]
+    getSubTypesOf = (topType) -> (model) -> # All the Sequence Features, with their names.
+      classes = (model.makePath(c) for c in model.getSubclassesOf(topType))
+      namings = for cp in L.sortBy(classes, String) then do (cp) ->
+        cp.getDisplayName().then (name) -> {name: name, path: cp}
+
+      Q.all namings
+
+    return {setClasses, getSubTypesOf}
 
   Services.factory 'authorizer', Array '$http', (http) -> -> http.get('/auth/session').then asData
 
