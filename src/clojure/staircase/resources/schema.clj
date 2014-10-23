@@ -40,7 +40,8 @@
   {:steps
    [ [:id :uuid :primary :key]
      [:title string]
-     [:tool string]
+     [:tool string "NOT NULL"] ;; No point in having steps with no associated tool.
+     [:stamp string] ;; Optional stamp for identifying when this tool was run - context dependent.
      [:data data] ]}) ;; The input payload for this step.
 
 (def sessions

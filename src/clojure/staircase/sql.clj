@@ -40,17 +40,39 @@
   (when-let [uuid (string->uuid id)]
     (< 0 (count-where conn tbl [:and [:= :id uuid] [:= :owner owner]]))))
 
+;; super naive stringification - relies on no funny stuff.
+;; ONLY SUITABLE FOR CONTROLLED DATA such as the schema.
+(defn as-sql [xs] 
+  (clojure.string/join " " (map #(if (keyword? %) (name %) %) xs)))
+
+(defn check-columns [conn table col-defs]
+  (let [columns (get-column-names conn table)]
+    (doseq [coldef col-defs]
+      (let [colname (name (coldef 0))]
+        ;; Only need to act if it is a real column and it is missing.
+        (when (and (not (columns colname)) (not (= "UNIQUE" colname)))
+          (if (some #(= % "NOT NULL") coldef) ;; Cannot handle this.
+            (throw (Exception. (str "Cannot add column " colname " to " table " because it is NOT NULL")))
+            (do
+              (info (str "Adding column " colname " to " table))
+              (sql/execute! conn [(str "ALTER TABLE " (name table) " ADD " (as-sql coldef))]))))))))
+
 (defn create-tables [conn table-specs]
   (let [tables (get-table-names conn)]
     (sql/with-db-connection [c conn]
       (doseq [table (keys table-specs)]
         (debug "Currently existing tables:" tables)
-        (when (not (contains? tables (name table)))
-          (debug "Creating table:" table)
-          (try
-            (sql/db-do-commands c (apply sql/create-table-ddl table (table table-specs)))
-            (catch SQLException e
-              (do (log-sql-error e) (throw (Exception. (str "Could not create table: " table) e))))))))))
+        (if (not (contains? tables (name table)))
+          (do
+            (info "Creating table:" table)
+            (try
+              (sql/db-do-commands c (apply sql/create-table-ddl table (table table-specs)))
+              (catch SQLException e
+                (do (log-sql-error e) (throw (Exception. (str "Could not create table: " table) e))))))
+          (do
+            (debug table " exists - checking columns")
+            (check-columns conn table (table table-specs)))
+          )))))
 
 (defn- kw-keys [m]
   (reduce-kv #(assoc %1 (keyword %2) %3) {} m))
