@@ -94,8 +94,9 @@
              [original (get-one histories id)
               title (or (get body "title") (str "Fork of " (:title original)))
               history (assoc (dissoc original :id :steps) :title title)
-              i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
-              inherited-steps (data/get-history-steps-of histories id (+ 1 i))
+              ;; Don't really have to nummify it - but is good to catch error here.
+              limit (try (Integer/parseInt idx) (catch NumberFormatException e nil))
+              inherited-steps (data/get-history-steps-of histories id limit)
               hid (create histories history)]
              (do
               (data/add-all-steps histories hid inherited-steps)

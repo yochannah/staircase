@@ -1,10 +1,10 @@
 {
   "capabilities": ["now", "provider", "next"],
-  "provides": "list",
-  "handles": "list",
+  "provides": "report",
+  "handles": ["item", "list", "ids"],
   "type": "IFrame",
   "seamless": true,
-  "heading": "List Details",
+  "heading": "Details",
   "src": "http://alexkalderimis.github.io/show-list-tool/tool.html"
 }
 

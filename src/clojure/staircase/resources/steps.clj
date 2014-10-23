@@ -4,6 +4,7 @@
         [clojure.tools.logging :only (info)])
   (:import java.sql.SQLException)
   (:require staircase.sql
+            clojure.string
             [cheshire.core :as json]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
@@ -16,12 +17,15 @@
 
 (defn- get-prop [m k] (get-first m [k (name k)]))
 
+;; Make sure the thing we have is a string.
 (defn ensure-string [maybe-string]
   (if (instance? String maybe-string)
     maybe-string
     (json/generate-string maybe-string)))
 
-(defn parse-data [step]
+;; Transformations can be put in here on the stored step data.
+;; At the moment we just make sure we parse the data from JSON.
+(defn parse-data [step] 
   (when step
     (update-in step [:data] json/parse-string)))
 
@@ -31,9 +35,8 @@
   component/Lifecycle 
 
   (start [component]
-    (staircase.sql/create-tables
-      (:connection db)
-      table-specs)
+    (let [conn (:connection db)]
+      (staircase.sql/create-tables conn table-specs))
     component)
 
   (stop [component] component)
