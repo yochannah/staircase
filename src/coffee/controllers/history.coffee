@@ -9,11 +9,13 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     params: '$routeParams'
     to: '$timeout'
     console: '$log'
+    Q: '$q'
     $modal: '$modal'
     meetRequest: 'meetRequest'
     Histories: 'Histories'
     Mines: 'Mines'
     silentLocation: '$ngSilentLocation'
+    serviceStamp: 'serviceStamp'
 
   #--- Functions.
  
@@ -95,7 +97,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       @scope.step = Histories.getStep id: params.id, idx: @currentCardinal - 1
       @mines = Mines.all()
 
-      toolNotFound = (e) => to => @scope.error = e
+      toolNotFound = (e) => @to => @scope.error = e
 
       unless @scope.tool? # tool never changes! to do so breaks the history API.
         @scope.step.$promise.then ({tool}) =>
@@ -141,8 +143,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
         else
           @mines.then(atURL data.service.root)
                 .then(connectWithName)
-                .then (service) =>
-                  @set ['messages', idx], {tool, data, service, kind: 'msg'}
+                .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
 
     letUserChoose: (tools) ->
       dialogue = @$modal.open
@@ -170,6 +171,13 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
 
     storeHistory: (step) -> @nextStep step, true
 
+    stampStep: (step) ->
+      {Q, serviceStamp} = @
+      if not step.data.service? # Nothing to stamp.
+        Q.when step
+      else
+        serviceStamp(step.data.service).then (stamp) -> L.assign {stamp}, step
+
     nextStep: (step, silently = false) =>
       {Histories, scope, currentCardinal, console, location, silentLocation} = @
       console.debug "Next step:", step
@@ -187,16 +195,19 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
         (url) -> location.url url
 
       history = scope.history
-      if history.steps.length isnt currentCardinal
-        title = "Fork of #{ history.title }"
-        console.debug "Forking at #{ currentCardinal } as #{ title }"
-        fork = Histories.fork {id: history.id, at: nextCardinal, title}, ->
-          console.debug "Forked history"
-          appended = Histories.append {id: fork.id}, step, ->
+
+      @stampStep(step).then (stamped) ->
+        console.log 'STAMPED', stamped
+        if history.steps.length isnt currentCardinal
+          title = "Fork of #{ history.title }"
+          console.debug "Forking at #{ currentCardinal } as #{ title }"
+          fork = Histories.fork {id: history.id, at: currentCardinal, title}, ->
+            console.debug "Forked history"
+            appended = Histories.append {id: fork.id}, stamped, ->
+              console.debug "Created step #{ appended.id }"
+              goTo "/history/#{ fork.id }/#{ nextCardinal }"
+        else
+          appended = Histories.append {id: history.id}, stamped, ->
             console.debug "Created step #{ appended.id }"
-            goTo "/history/#{ fork.id }/#{ nextCardinal }"
-      else
-        appended = Histories.append {id: history.id}, step, ->
-          console.debug "Created step #{ appended.id }"
-          goTo "/history/#{ history.id }/#{ nextCardinal }"
+            goTo "/history/#{ history.id }/#{ nextCardinal }"
 

@@ -2,6 +2,8 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   asData = ({data}) -> data
 
+  invoke = (methodName, args...) -> (callee) -> callee[methodName](args...)
+
   Services = ng.module('steps.services', ['ngResource'])
 
   Services.value('version', '0.1.0')
@@ -67,9 +69,55 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       return currentName
 
   # Provide a function for connecting to a mine by URL.
-  Services.factory 'connectTo', Array 'Mines', (mines) -> (root) -> mines.all().then (services) ->
-    conf = L.find services, (s) -> root.indexOf(s.root) is 0
-    imjs.Service.connect conf
+  Services.factory 'connectTo', Array 'Mines', (mines) -> (root) ->
+    mines.atURL(root).then (conf) -> imjs.Service.connect conf
+
+  # Provide a function that will yield a value suitable for identifying
+  # which version of a service was contacted at a particular time.
+  Services.factory 'serviceStamp', Array '$q', 'connectTo', (Q, connectTo) -> (service) ->
+    if service?.root
+      getService = connectTo service.root
+      getVersion = getService.then invoke 'fetchVersion'
+      getRelease = getService.then invoke 'fetchRelease'
+      Q.all([getService, getVersion, getRelease]).then ([{root}, version, release]) ->
+        "#{ root }@#{ version }-#{ release }"
+    else
+      Q.when null
+
+  Services.factory 'getIdQuery', Array '$q', (Q) -> (type, ids) -> (service) ->
+    getModel = service.fetchModel()
+    getCKs = service.fetchClassKeys()
+    getQuery = Q.all([getCKs, getModel]).then ([classkeys, model]) ->
+      keys = (classkeys[type] or ("#{ item.type }.#{ a }" for a of model.classes[type].attributes when a isnt 'id'))
+      query = select: keys, where: [{path: type, op: 'IN', ids: ids}]
+
+  # Provide a function of the form:
+  # :: (ConnectionArgs, {type :: string, id :: integer}) -> Promise<Object<string, string>>
+  do (name = 'identifyItem', deps = ['$q', 'connectTo', 'getIdQuery']) ->
+    Services.factory name, Array deps..., (Q, connectTo, getIdQuery) -> (service, item) ->
+      getService = connectTo service.root
+      getQuery = getService.then getIdQuery item.type, [item.id]
+
+      Q.all([getService, getQuery]).then ([service, query]) ->
+        service.rows(query).then ([row]) ->
+          fields = L.zipObject query.select, row
+          L.mapValues(L.omit(fields, (value) -> value == null), String)
+
+  # Provide a function of the form:
+  # :: (ConnectionArgs, {type :: string, ids :: [integer]}) -> Promise<Object<string, [string]>>
+  do (name = 'identifyItems', deps = ['$q', 'connectTo']) ->
+    Services.factory name, Array deps..., (Q, connectTo) -> (service, items) ->
+      getService = connectTo service.root
+      getQuery = getService.then getIdQuery items.type, items.ids
+
+      Q.all([getService, getQuery]).then ([service, query]) ->
+        service.rows(query).then (rows) ->
+          fields = L.zipObject query.select, query.select.map -> []
+          for row in rows
+            for value, i in row when cell?
+              fields[query.select[i]].push String(value)
+
+          L.mapValues fields, (values) -> L.uniq(values)
 
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}
@@ -207,7 +255,11 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
 
     atURL = (url) -> all().then (mines) ->
-      L.find mines, (m) -> (m.root.indexOf(url) >= 0) || (url && url.indexOf(m.root) >= 0)
+      conf = L.find mines, (m) -> (m.root.indexOf(url) >= 0) || (url && url.indexOf(m.root) >= 0)
+      if conf?
+        return conf
+      else
+        throw new Error("No mine configured at #{ url }")
 
     get = (ident) ->
       auth.authorize().then (headers) -> http.get("#{URL}/#{ident}", {headers}).then asData
@@ -230,18 +282,22 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       delete: {method: 'DELETE', headers: headers}
       append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
-  Services.factory 'historyListener', Array 'Histories', '$location', (Histories, location) ->
-    startHistory = ({thing, verb, tool, data}) ->
-      historyTitle = "Started by #{ verb.ing } #{ thing }"
-      history = Histories.create {title: historyTitle}, ->
-        stepTitle = "#{ verb.ed } #{ thing }"
-        step = Histories.append {id: history.id}, {title: stepTitle, tool, data}, ->
-          console.log("Created history " + history.id + " and step " + step.id)
-          location.url "/history/#{ history.id }/1"
+  do (name = 'historyListener', deps = ['Histories', '$log', '$location', 'serviceStamp']) ->
+    Services.factory name, Array deps..., (H, console, loc, stamp) ->
 
-    watch = (scope) -> scope.$on 'start-history', (evt, message) -> startHistory message
+      startHistory = ({thing, verb, tool, data}) ->
+        historyTitle = "Started by #{ verb.ing } #{ thing }"
+        history = H.create {title: historyTitle}, ->
+          stepTitle = "#{ verb.ed } #{ thing }"
+          stamp(data?.service).then (stamp) ->
+            console.debug "Stamp: #{ stamp }", data
+            step = H.append {id: history.id}, {title: stepTitle, tool, data, stamp}, ->
+              console.debug "Created history #{ history.id } and step #{ step.id }"
+              loc.url "/history/#{ history.id }/1"
 
-    return {watch, startHistory}
+      watch = (scope) -> scope.$on 'start-history', (evt, message) -> startHistory message
+
+      return {watch, startHistory}
 
   Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
     watch = request = logout = -> log.warn "Persona authentication not available."
