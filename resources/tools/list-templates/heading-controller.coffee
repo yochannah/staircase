@@ -1,30 +1,43 @@
 define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View) ->
 
-  controller = (scope, Modals, connectTo) ->
-      
-      console.log scope.data
-      scope.listName = scope.data.name
+  controller = (console, scope, Modals, connectTo) ->
+    
+    console.log scope.data
+    scope.listName = scope.data.name
+    scope.ids = scope.data.ids
+    scope.type = scope.data.type
+    scope.service = root: scope.data.root ? scope.data.service.root
 
-      scope.showTemplates = ->
-        connecting = connectTo(scope.data.root)
-        modalInstance = Modals.open
-          template: View
-          controller: Ctrl
-          size: 'lg'
-          resolve:
-            list: -> connecting.then (s) -> s.fetchList scope.listName
-            model: -> connecting.then (s) -> s.fetchModel()
-            templates: -> connecting.then (s) -> s.fetchTemplates()
+    scope.showTemplates = ->
+      console.log "showing templates at #{ scope.service.root }"
 
-        modalInstance.result.then (selectedTemplate) ->
-          step =
-            title: "Ran #{ selectedTemplate.name } over #{ scope.listName }"
-            tool: 'show-table'
-            data:
-              service:
-                root: scope.data.root
-              query: selectedTemplate
-          scope.appendStep data: step
+      connect = connectTo scope.service.root
+      injected =
+        model: -> connect.then (s) -> s.fetchModel()
+        templates: -> connect.then (s) -> s.fetchTemplates()
+        service: -> connect
+      if list = scope.listName?
+        injected.list = -> connect.then (s) -> s.fetchList list
+        injected.items = -> null
+      else if ids = scope.ids?
+        injected.list = -> null
+        injected.items = -> {ids: scope.ids, type: scope.type}
 
-  ['$scope', '$modal', 'connectTo', controller]
+      modalInstance = Modals.open
+        template: View
+        controller: Ctrl
+        size: 'lg'
+        resolve: injected
+
+      modalInstance.result.then (selectedTemplate) ->
+        step =
+          title: "Ran #{ selectedTemplate.name } over #{ scope.listName }"
+          tool: 'show-table'
+          data:
+            service:
+              root: scope.service.root
+            query: selectedTemplate
+        scope.appendStep data: step
+
+  ['$log', '$scope', '$modal', 'connectTo', controller]
 

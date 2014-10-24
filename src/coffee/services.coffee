@@ -84,19 +84,40 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     else
       Q.when null
 
+  Services.factory 'getIdQuery', Array '$q', (Q) -> (type, ids) -> (service) ->
+    getModel = service.fetchModel()
+    getCKs = service.fetchClassKeys()
+    getQuery = Q.all([getCKs, getModel]).then ([classkeys, model]) ->
+      keys = (classkeys[type] or ("#{ item.type }.#{ a }" for a of model.classes[type].attributes when a isnt 'id'))
+      query = select: keys, where: [{path: type, op: 'IN', ids: ids}]
+
   # Provide a function of the form:
-  # :: ({service :: ConnectionArgs, item :: {type :: string, id :: integer}}) -> Object<string, string>
-  Services.factory 'identifyItem', Array '$q', 'connectTo', (Q, connectTo) -> ({service, item}) ->
+  # :: (ConnectionArgs, {type :: string, id :: integer}) -> Promise<Object<string, string>>
+  do (name = 'identifyItem', deps = ['$q', 'connectTo', 'getIdQuery']) ->
+    Services.factory name, Array deps..., (Q, connectTo, getIdQuery) -> (service, item) ->
       getService = connectTo service.root
-      getModel = getService.then invoke 'fetchModel'
-      getQuery = Q.all([getService.then(invoke 'fetchClassKeys'), getModel])
-                  .then ([classkeys, model]) ->
-        type = item.type
-        keys = (classkeys[type] or ("#{ item.type }.#{ a }" for a of model.classes[type].attributes when a isnt 'id'))
-        query = select: keys, where: {id: item.id}
+      getQuery = getService.then getIdQuery item.type, [item.id]
 
       Q.all([getService, getQuery]).then ([service, query]) ->
-        service.rows(query).then ([row]) -> L.zipObject query.select, row.map(String)
+        service.rows(query).then ([row]) ->
+          fields = L.zipObject query.select, row
+          L.mapValues(L.omit(fields, (value) -> value == null), String)
+
+  # Provide a function of the form:
+  # :: (ConnectionArgs, {type :: string, ids :: [integer]}) -> Promise<Object<string, [string]>>
+  do (name = 'identifyItems', deps = ['$q', 'connectTo']) ->
+    Services.factory name, Array deps..., (Q, connectTo) -> (service, items) ->
+      getService = connectTo service.root
+      getQuery = getService.then getIdQuery items.type, items.ids
+
+      Q.all([getService, getQuery]).then ([service, query]) ->
+        service.rows(query).then (rows) ->
+          fields = L.zipObject query.select, query.select.map -> []
+          for row in rows
+            for value, i in row when cell?
+              fields[query.select[i]].push String(value)
+
+          L.mapValues fields, (values) -> L.uniq(values)
 
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}

@@ -143,8 +143,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
         else
           @mines.then(atURL data.service.root)
                 .then(connectWithName)
-                .then (service) =>
-                  @set ['messages', idx], {tool, data, service, kind: 'msg'}
+                .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
 
     letUserChoose: (tools) ->
       dialogue = @$modal.open

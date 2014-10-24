@@ -16,7 +16,7 @@ define [], ->
               service: data.service
       else if data.item?
         # data :: {service, item}
-        identifyItem(data).then (fields) ->
+        identifyItem(data.service, data.item).then (fields) ->
           d.resolve
             title: "Viewed item",
             tool: 'show-list'

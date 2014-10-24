@@ -1,6 +1,7 @@
 {
   "capabilities": ["next"],
-  "handles": "list",
+  "provides": "table",
+  "handles": ["list", "items"],
   "style": "./list-templates.css",
   "type": "native"
 }
