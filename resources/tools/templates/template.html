@@ -27,13 +27,13 @@
         <div ng-show="showConstraints">
             <form class="form" ng-submit="runQuery(template)">
                 <div class="form-group" ng-repeat="constraint in template.constraints | filter:{editable:true}">
-                    <label>{{constraint.path}} {{constraint.op}}</label>
+                    <label>{{formattedPaths[constraint.path]}} {{constraint.op}}</label>
                     <input class="form-control" ng-model="constraint.value">
                 </div>
                 <label>Returns</label>
                 <div class="well well-sm">
                     <span class="label label-primary output-column" ng-repeat="path in template.views">
-                        {{path}}
+                        {{formattedPaths[path]}}
                     </span>
                 </div>
                 <button class="btn btn-primary" type="submit">View Table</button>
