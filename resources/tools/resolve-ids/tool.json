@@ -2,6 +2,6 @@
   "capabilities": ["now"],
   "type": "IFrame",
   "seamless": false,
-  "heading": "Resolve identifiers",
+  "heading": "List Upload",
   "src": "http://alexkalderimis.github.io/resolve-ids-tool/tool.html"
 }

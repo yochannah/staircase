@@ -2,6 +2,8 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
   'use strict';
 
   var connect = im.Service.connect;
+  var nameTemplate = L.template('Upload list to <%= name %>');
+  var actionTemplate = L.template('Send <%= format(numIds) %> identifiers');
 
   return [
     '$scope', '$log', '$timeout', '$cacheFactory', '$window',
@@ -45,7 +47,7 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
             type: type,
             identifiers: identifiers,
             extra: (scope.extraValue || ''),
-            caseSensitive: false
+            caseSensitive: scope.caseSensitive
           }
         }
       });
@@ -66,14 +68,17 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.$watch('parsedIds', function (ids) {
       scope.state.disabled = !(ids && ids.length);
       if (!scope.state.disabled) {
-        scope.actions.act = "Send " + filters('number')(ids.length) + " identifiers";
+        scope.actions.act = actionTemplate({
+          format: filters('number'),
+          numIds: ids.length
+        });
       } else {
         scope.actions.act = null;
       }
     });
 
     scope.$watch('serviceName', function (name) {
-      scope.tool.heading = 'Resolve identifiers at ' + name;
+      scope.tool.heading = nameTemplate({name: name});
     });
 
     scope.$watch('ids.pasted', function (ids) {
