@@ -4,6 +4,7 @@
                      [org.marianoguerra/clj-rhino "0.2.1"]
                      [ring-mock "0.1.5"]]
       :env {
+            :web-search-placeholder "zen, diabetes, apoptosis"
             :web-project-title "FlyMine"
             :web-contact-email "alex@intermine.org"
             :web-contacts [

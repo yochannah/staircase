@@ -37,7 +37,7 @@
 
      (nav-list config)
 
-     (search-form)
+     (search-form config)
 
      ]]]])
 
