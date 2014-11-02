@@ -55,15 +55,3 @@ require.config
     imjs:            '/vendor/imjs/js/im'
   deps: ['./bootstrap']
 
-# See http://code.angularjs.org/1.2.1/docs/guide/bootstrap#overview_deferred-bootstrap
-# window.name = 'NG_DEFER_BOOTSTRAP!'
-
-# deps = ['angular', 'angular-cookies', 'angular-route', 'angular-resource',
-#        'services', 'controllers', 'directives', 'filters', 'app', 'routes']
-
-# Have to require all modules here eagerly, as they must be available before resumeBootstrap
-# is called.
-# define deps, (angular) ->
-# $html = angular.element document.getElementsByTagName('html')[0]
-# 
-# $html.ready -> angular.resumeBootstrap()
