@@ -49,6 +49,11 @@
              :ng-show "step.id == s.id"}]
          "{{s.title}}"]]]
 
+
+     (staircase.views.facets/snippet)]
+
+    [:div.sidebar.slide-right.col-xs-12.col-md-2.col-md-offset-10
+     {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded, collapsed: collapsed}"}
      [:div.panel.panel-default.next-steps
       [:div.panel-heading
        {:ng-click "nextStepsCollapsed = !nextStepsCollapsed"}
@@ -64,12 +69,10 @@
          :data "ns.data"}
         ]]
       [:div.panel-body {:ng-hide "nextSteps.length"}
-       [:em "No steps available"]]]
-
-     (staircase.views.facets/snippet)]
+       [:em "No steps available"]]]]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-10': !state.expanded,
+     {:ng-class "{'col-md-8': !state.expanded,
                   'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"} config)
      [:div.current-step
@@ -84,4 +87,6 @@
        :silently "controller.storeHistory(data)"
        :toggle "state.expanded = !state.expanded"} ]
      ]
+
+
     ]]))
