@@ -39,10 +39,10 @@
     (binding [staircase.resources/context context]
       (binding [id-a (create histories {:title "My new history A" :description "has a description"})
                 id-b (create histories {:title "My new history B" :description nil})]
-        (create steps {:title "foo" :history_id id-a})
-        (create steps {:title "bar" :history_id id-a})
-        (create steps {:title "baz" :history_id id-a})
-        (create steps {:title "can't be found"
+        (create steps {:title "foo" :tool "tool-1" :history_id id-a})
+        (create steps {:title "bar" :tool "tool-2" :history_id id-a})
+        (create steps {:title "baz" :tool "tool-3" :history_id id-a})
+        (create steps {:title "can't be found" :tool "tool-1"
                        :history_id (create histories {:title "History C"})})
         (f)))))
 
