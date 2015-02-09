@@ -6,6 +6,7 @@
             staircase.views.header
             staircase.views.footer
             staircase.views.start
+            staircase.views.projects
             [staircase.views.layout :as layout]))
 
 (def vendor-scripts ["jquery/dist/jquery.min.js"])
@@ -16,6 +17,7 @@
   [config fragment]
   (case fragment
     "about"                (staircase.views.about/snippet config)
+    "projects"             (staircase.views.projects/snippet config)
     "frontpage"            (staircase.views.start/starting-points config)
     "starting-point"       (staircase.views.start/starting-point config)
     "edit-step-data"       (staircase.views.options/edit-step-dialogue config)

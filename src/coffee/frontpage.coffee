@@ -50,6 +50,7 @@ require.config
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
     'angular-silent': '/vendor/angular-silent/ngSilent'
+    'angular-xeditable': '/vendor/angular-xeditable/dist/js/xeditable.min'
     select2:         '/vendor/select2/select2'
     text:            '/vendor/requirejs-text/text'
     imjs:            '/vendor/imjs/js/im'

@@ -27,6 +27,8 @@
     "angular-silent": "garakh/ngSilent",
     "imjs": "~3.6.1",
     "lodash": "~2.4.1",
-    "headroom.js": "~0.5.0"
+    "headroom.js": "~0.5.0",
+    "semantic-ui": "1.7.3",
+    "angular-xeditable": "~0.1.8"
   }
 }

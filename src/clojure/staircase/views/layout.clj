@@ -26,10 +26,11 @@
         [:title title]
         (pv/include-persona)
         (include-css "/css/style.css")
+        (include-css "/vendor/angular-xeditable/dist/css/xeditable.css")
         ]
        [:body {:class "staircase"}
         (staircase.views.header/snippet config)
         [:section#content.main body]
-        (staircase.views.footer/snippet config)
+        ; (staircase.views.footer/snippet config)
         (map with-utf8-charset js)]))))
 

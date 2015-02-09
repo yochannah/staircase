@@ -2,6 +2,86 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
+  Directives.directive 'notifier', Array '$rootScope', (rs) ->
+    restrict: 'E'
+    replace: 'true'
+    template: '<h1>Hello, world.</h1>'
+
+  Directives.directive 'droppable', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
+    restrict: 'A'
+    scope: droppable: "="
+    link: (scope, element) ->
+
+      angular.element(element).attr("draggable", "true")
+
+      # Give the element a unique if it does not already have one
+      id = angular.element(element).attr("id")
+      if !id
+        id = uuid.new()
+        angular.element(element).attr("id", id)
+
+      # Hacky, but works!
+      element.bind 'dragstart', (e) ->
+        setTimeout ->
+          angular.element(element).addClass "disabled"
+        , 1
+
+        e.dataTransfer.setData 'item', JSON.stringify scope.droppable
+        $rootScope.$emit "IM-DRAG-START"
+
+      element.bind 'dragend', (e) ->
+        angular.element(element).removeClass "disabled"
+        $rootScope.$emit "IM-DRAG-END"
+
+  Directives.directive 'dropzone', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
+    restrict: 'A'
+    scope:
+      onDrop: '&'
+      dropzone: "="
+    link: (scope, el, attrs) ->
+
+      counter = 0
+      el = angular.element(el)
+
+      # Give the element a unique if it does not already have one
+      id = el.attr("id")
+      if !id
+        id = uuid.new()
+        angular.element(el).attr("id", id)
+
+      el.bind 'dragover', (e) ->
+        e.stopPropagation
+        e.dataTransfer.dropEffect = 'copy'
+        return false
+
+      el.bind 'dragenter', (e) ->
+        counter++
+        angular.element(el).addClass('im-drag-over')
+        angular.element(el).removeClass('im-drag-target')
+
+      el.bind 'dragleave', (e) ->
+        counter--
+        if counter is 0
+          angular.element(el).removeClass('im-drag-over')
+          angular.element(el).addClass('im-drag-target')
+
+      el.bind 'drop', (e) ->
+        angular.element(el).removeClass('im-drag-over')
+        e.stopPropagation()
+        # The item that was dragged onto me.
+        data = e.dataTransfer.getData('item')
+        scope.onDrop({dragE1: data, dropE1: scope.dropzone})
+
+      $rootScope.$on 'IM-DRAG-START', ->
+        counter = 0
+        el = document.getElementById(id)
+        angular.element(el).addClass('im-drag-target')
+
+      $rootScope.$on 'IM-DRAG-END', ->
+        el = document.getElementById(id)
+        angular.element(el).removeClass("im-drag-target")
+        angular.element(el).removeClass("im-drag-over");
+
   Directives.directive 'blurOn', ->
     restrict: 'A'
     scope:

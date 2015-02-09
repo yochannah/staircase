@@ -1,5 +1,5 @@
 deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-animate', 'angular-ui-select2',
-        './filters', './services', './directives', './controllers']
+        './filters', './services', './directives', './controllers', 'angular-xeditable']
 
 modules = [
   'ngSilent', # Must come before ngRoute
@@ -10,7 +10,8 @@ modules = [
   'steps.filters',
   'steps.directives',
   'ui.bootstrap',
-  'ui.select2'
+  'ui.select2',
+  'xeditable'
 ]
 
 $providers = [
@@ -48,6 +49,8 @@ define deps, (angular, router) ->
 
   Steps.run Array '$rootScope', '$http', (scope, http) ->
     scope.startingPoints = []
+    editableOptions = {}
+    editableOptions.theme = 'bs3'
 
     http.get("/tools", {params: {capabilities: "initial"}})
         .then ({data}) -> scope.startingPoints = data.map (tool) -> tool.active = true; tool
