@@ -31,5 +31,5 @@
 (defn index [config]
   (layout/common config
                  [:div {:ng-view ""}]
-                 "/js/frontpage"
+                 "/js/init"
                  (map (partial str "/vendor/") vendor-scripts)))
