@@ -2,6 +2,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
+  Directives.directive 'focusMe', ($timeout, $parse) -> link: (scope, el, attrs) ->
+    model = $parse attrs.focusMe
+    scope.$watch model, (value) -> if value
+      $timeout -> el[0].focus()
+    el.bind 'blur', -> scope.$apply model.assign scope, false
+
   Directives.directive 'blurOn', ->
     restrict: 'A'
     scope:
@@ -393,10 +399,12 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
 
         require {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
 
-          injector.invoke controller, this, {'$scope': scope}
+          c = injector.instantiate controller, {'$scope': scope}
+          compileScope = scope.$new false
+          compileScope.controller = c
 
           element.html(template)
-          compile(element.contents())(scope)
+          compile(element.contents())(compileScope)
 
           scope.$apply()
 

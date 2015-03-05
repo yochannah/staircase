@@ -32,14 +32,16 @@ define deps, (angular, router) ->
     sceDelegateProvider.resourceUrlWhitelist([
       'self', # TODO: make configurable.
       'http://*.labs.intermine.org/**',
+      'http://tools.intermine.org/**',
       'http://alexkalderimis.github.io/**',
       'http://intermine.github.io/**'
     ])
     # Need to make this configurable.
     stepConfigProvider.configureStep 'show-list', activeTabs: ['enrich']
     stepConfigProvider.configureStep 'show-table',
-      IndicateOffHostLinks: false,
-      CellPreviewTrigger: 'click'
+      TableCell:
+        IndicateOffHostLinks: false,
+        PreviewTrigger: 'click'
       ShowHistory: false # We manage history in the history list.
       Style:
         icons: 'fontawesome'

@@ -191,8 +191,11 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       ret = Q.defer()
       defaults = scope.defaults or {}
       scope.model = model
-      name = (className) -> model.makePath(className).getDisplayName().then (displayName) ->
-        {className, displayName}
+      name = (className) ->
+        trimmed = className.replace /^.*\./, ''
+        model.classes[trimmed] = model.classes[className] # deal with java.lang.Object
+        model.makePath(trimmed).getDisplayName()
+             .then (displayName) -> {className, displayName}
       group = if not grouper then ((x) -> x) else (names) ->
         names.group = grouper names
         return names
