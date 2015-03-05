@@ -21,13 +21,16 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.discriminator = null;
     scope.extraValue = null;
     scope.parsedIds = [];
-    scope.navType = "pills";
     scope.sorting = '';
     scope.ids = {pasted: '', file: null};
     scope.rowCount = "counting...";
     scope.serviceName = "";
     scope.state || (scope.state = {rootClass: {}});
     scope.actions || (scope.actions = {});
+
+    this.focusTextArea = function () {
+      this.textAreaFocussed = true;
+    };
 
     scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 

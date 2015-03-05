@@ -31,9 +31,10 @@
         </div>
     </div>
     <tabset type="pills">
-        <tab heading="Enter IDs">
+        <tab heading="Enter IDs" select="controller.focusTextArea()">
             <div class="form-group full-width">
                 <textarea class="literal"
+                    focus-me="controller.textAreaFocussed"
                     ng-model="ids.pasted"
                     spellcheck="false"
                     rows="{{tool.state === 'FULL' ? 10 : 5}}"
