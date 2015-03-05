@@ -9,7 +9,14 @@
      [:ul
       [:li (link-to "/" "Home")]
       [:li (link-to "/about" "Help")]
-      [:li "Tools" [:ul.row (tool-list {:class "col-sm-6"})]]]]
+      [:li [:a
+            {:ng-click "showTools = !showTools"}
+            "Tools "
+            [:i.fa
+             {:ng-class "{'fa-caret-right': !showTools, 'fa-caret-down': showTools}"}]]
+           [:ul.row
+            {:ng-class "{hidden: !showTools}"}
+            (tool-list {:class "col-sm-4 col-md-3"})]]]]
     [:div.col-sm-4.contacts
      (unordered-list (for [[icon addr text] (:contacts config)]
                        (link-to addr [:i.fa.fa-fw.fa-2x {:class icon}] " " text)))]
