@@ -20,14 +20,14 @@
     "angular": "~1.2.16",
     "angular-route": "~1.2.16",
     "angular-cookies": "~1.2.16",
-    "angular-ui-bootstrap-bower": "~0.11.2",
+    "angular-ui-bootstrap-bower": "~0.12.1",
     "angular-resource": "~1.2.16",
     "angular-ui-select2": "~0.0.5",
     "angular-animate": "~1.2.16",
     "angular-silent": "garakh/ngSilent",
     "imjs": "~3.12.0",
     "lodash": "~2.4.1",
-    "intermine-tables": "2.0.0-beta_3",
-    "headroom.js": "~0.5.0"
+    "headroom.js": "~0.5.0",
+    "bootstrap": "~3.3.2"
   }
 }
