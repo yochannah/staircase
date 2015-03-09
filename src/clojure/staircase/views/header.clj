@@ -60,14 +60,14 @@
 
 (defn nav-list [config]
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
-   [:li.dropdown
-    [:a.dropdown-toggle
+   [:li.dropdown {:dropdown true}
+    [:a.dropdown-toggle {:dropdown-toggle true}
      "Tools " [:b.caret]] [:ul.dropdown-menu (tool-list)]]
    [:li (link-to "/about" "Help")]
    [:li {:ng-click "showOptions()"} (link-to "" "Options")]
-   [:li.dropdown
-    [:a.dropdown-toggle "Contact " [:b.caret]]
-                        (unordered-list {:class "dropdown-menu"} (contacts config))]
+   [:li.dropdown {:dropdown true}
+    [:a.dropdown-toggle {:dropdown-toggle true} "Contact " [:b.caret]]
+     (unordered-list {:class "dropdown-menu"} (contacts config))]
    [:li {:ng-show "auth.loggedIn"} [:div (btn/logout)]]
    [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]])
 

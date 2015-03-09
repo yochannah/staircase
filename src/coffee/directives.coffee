@@ -400,7 +400,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         require {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
 
           c = injector.instantiate controller, {'$scope': scope}
-          compileScope = scope.$new false
+          compileScope = scope # TODO: scope.$new false
           compileScope.controller = c
 
           element.html(template)

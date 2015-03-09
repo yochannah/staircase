@@ -1,44 +1,31 @@
-deps = ['angular', './routes', 'angular-route', 'angular-ui', 'angular-animate', 'angular-ui-select2',
-        './filters', './services', './directives', './controllers']
+define (require, exports, module) ->
 
-modules = [
-  'ngSilent', # Must come before ngRoute
-  'ngRoute',
-  'ngAnimate',
-  'steps.controllers',
-  'steps.services',
-  'steps.filters',
-  'steps.directives',
-  'ui.bootstrap',
-  'ui.select2'
-]
+  angular = require 'angular'
+  router = require './routes'
+  L = require 'lodash'
+  require 'angular-route'
+  require 'angular-ui'
+  require 'angular-animate'
+  require 'angular-ui-select2'
+  require './filters'
+  require './services'
+  require './directives'
+  require './controllers'
 
-$providers = [
-  '$routeProvider', '$controllerProvider', '$compileProvider',
-  '$filterProvider', '$provide', '$sceDelegateProvider', 'stepConfigProvider'
-]
+  # Whitelist the sources of any tools we plan on using.
+  whiteList = [
+    'self', # TODO: make configurable.
+    'http://*.labs.intermine.org/**',
+    'http://tools.intermine.org/**',
+    'http://alexkalderimis.github.io/**',
+    'http://intermine.github.io/**'
+  ]
 
-define deps, (angular, router) ->
-  Steps = angular.module('steps', modules)
-
-  # Capture references to providers.
-  Steps.config Array $providers..., (routes, controllers, directives, filters, provide, sceDelegateProvider, stepConfigProvider) ->
-    Steps.routes = routes
-    Steps.controllers = controllers
-    Steps.directives = directives
-    Steps.filters = filters
-    Steps.provide = provide
-    # Whitelist the sources of any tools we plan on using.
-    sceDelegateProvider.resourceUrlWhitelist([
-      'self', # TODO: make configurable.
-      'http://*.labs.intermine.org/**',
-      'http://tools.intermine.org/**',
-      'http://alexkalderimis.github.io/**',
-      'http://intermine.github.io/**'
-    ])
-    # Need to make this configurable.
-    stepConfigProvider.configureStep 'show-list', activeTabs: ['enrich']
-    stepConfigProvider.configureStep 'show-table',
+  # TODO: this needs to come from config
+  stepConfig =
+    'show-list':
+      activeTabs: ['enrich']
+    'show-table':
       TableCell:
         IndicateOffHostLinks: false,
         PreviewTrigger: 'click'
@@ -46,13 +33,39 @@ define deps, (angular, router) ->
       Style:
         icons: 'fontawesome'
 
+  APP_NAME = 'steps' # TODO: needs to be configurable.
+
+  module.exports = Steps = angular.module 'steps', [
+    'ngSilent', # Must come before ngRoute
+    'ngRoute',
+    'ngAnimate',
+    'steps.controllers',
+    'steps.services',
+    'steps.filters',
+    'steps.directives',
+    'ui.bootstrap',
+    'ui.select2',
+    'LocalStorageModule'
+  ]
+
+  Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes
+  Steps.config Array '$controllerProvider', (cs) -> Steps.controllers = cs
+  Steps.config Array '$compileProvider', (p) -> Steps.directives = p
+  Steps.config Array '$filterProvider', (p) -> Steps.filters = p
+  Steps.config Array '$provide', (p) -> Steps.provide = p
+  Steps.config Array '$sceDelegateProvider', (p) ->
+    p.resourceUrlWhitelist whiteList
+  Steps.config Array 'stepConfigProvider', (p) ->
+    for step, conf of stepConfig
+      p.configureStep step, conf
+  Steps.config Array 'localStorageServiceProvider', (p) -> p.setPrefix APP_NAME
+
+  # Define routes
   router Steps
 
   Steps.run Array '$rootScope', '$http', (scope, http) ->
     scope.startingPoints = []
 
-    http.get("/tools", {params: {capabilities: "initial"}})
-        .then ({data}) -> scope.startingPoints = data.map (tool) -> tool.active = true; tool
-
-  return Steps
+    http.get("/tools", {params: {capabilities: "initial"}}).then ({data}) ->
+      scope.startingPoints = data.map (tool) -> tool.active = true; tool
 

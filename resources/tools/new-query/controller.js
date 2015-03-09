@@ -4,12 +4,16 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$cacheFactory', '$q', 'Mines', 'ClassUtils', Ctrl];
+  return [
+    '$scope', '$log', '$timeout', '$q',
+    'Mines', 'ClassUtils', 'Messages', 'localCache',
+    Ctrl
+  ];
 
-  function Ctrl (scope, logger, timeout, cacheFactory, Q, mines, ClassUtils) {
+  function Ctrl (scope, logger, timeout, Q, mines, ClassUtils, messages, localCache) {
 
-    var countCache = (cacheFactory.get('query.counts') ||
-                      cacheFactory('query.counts', {capacity: 100}));
+    var countCache = localCache('query.counts');
+
     scope.defaults = {};
     scope.classes = [];
     scope.fields = [];
@@ -50,17 +54,38 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
       scope.tool.heading = 'Browse ' + name + ' by Data-Type';
     });
 
+    fetchingDefaultMine.then(setMineDetails);
+    
+    var mineInitialised = fetchingDefaultMine.then(connect).then(function (conn) {
+      scope.connection = conn;
+      conn.fetchModel()
+          .then(ClassUtils.setClasses(scope, groupOf.bind(null, scope), 'rootClass'))
+          .then(function () {
+            scope.state.rootClass = scope.rootClass;
+            L.defer(scope.$apply.bind(scope));
+          });
+      conn.fetchSummaryFields().then(setSummaryFields);
+      return conn.fetchRelease().then(function (release) {
+        scope.releaseString = release;
+      });
+    });
+
     scope.$watch(watchQuery, function (queryString) {
-      var key = mineName + queryString;
-      var cachedN = countCache.get(key);
-      if (cachedN != null) {
-        setRowCount(cachedN);
-      } else if (scope.connection) {
-        setRowCount(null);
-        scope.connection.count(getQuery(scope)).then(function (n) {
-          setRowCount(countCache.put(key, n));
-        });
-      }
+      mineInitialised.then(function () {
+        // Counts are stable within releases. We know that our queries don't
+        // have any list constraints in them, which is the exception to this
+        // rule.
+        var key = mineName + ':' + scope.releaseString + ':' + queryString;
+        var cachedN = countCache.get(key);
+        if (cachedN != null) {
+          setRowCount(cachedN);
+        } else if (scope.connection) {
+          setRowCount(null);
+          scope.connection.count(getQuery(scope)).then(function (n) {
+            setRowCount(countCache.put(key, n));
+          });
+        }
+      });
     });
 
     scope.$watch('rowCount', function (rowCount) {
@@ -86,18 +111,6 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
       });
     });
 
-    fetchingDefaultMine.then(setMineDetails);
-    
-    fetchingDefaultMine.then(connect).then(function (conn) {
-      scope.connection = conn;
-      conn.fetchModel()
-          .then(ClassUtils.setClasses(scope, groupOf.bind(null, scope), 'rootClass'))
-          .then(function () {
-            scope.state.rootClass = scope.rootClass;
-            L.defer(scope.$apply.bind(scope));
-          });
-      conn.fetchSummaryFields().then(setSummaryFields);
-    });
 
     function setRowCount (n) {
       scope.rowCount = n;

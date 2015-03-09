@@ -1,4 +1,15 @@
-require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
+# Need to capture this reference to the requirejs require function so
+# it is available to load next steps with, since it is different
+# from the require function injected into the commonjs wrapper.
+requirejs = require
+
+define (require, exports, module) ->
+
+  ng = require 'angular'
+  require 'angular-resource'
+  L = require 'lodash'
+  imjs = require 'imjs'
+  Messages = require './messages'
 
   asData = ({data}) -> data
 
@@ -10,9 +21,12 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.factory 'assign', ['$timeout', (to) -> (obj, prop) -> (x) -> to -> obj[prop] = x]
 
+  Services.factory 'Messages', -> new Messages
+
   class StepConfig
 
     constructor: ->
+
       stepConfig = {}
 
       @configureStep = (ident, conf) -> stepConfig[ident] = conf
@@ -49,11 +63,35 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.factory 'meetRequest', Array '$q', '$injector', (Q, injector) -> (tool, step, data) ->
     d = Q.defer()
-    require {baseUrl: '/'}, ['.' + tool.providerURI], (factory) ->
+    requireRelativeToBase = requirejs.config baseUrl: '/'
+    requireRelativeToBase ['.' + tool.providerURI], (factory) ->
       handleRequest = injector.invoke factory, this
       handleRequest(step, data).then d.resolve, d.reject
       
     return d.promise
+
+  do (deps = ['$cacheFactory', 'localStorageService']) ->
+    Services.factory 'localCache', Array deps..., (cacheFactory, localStorage) ->
+
+      restoreCache = (cache, name) ->
+        for k in localStorage.keys() when 0 is k.indexOf "#{ name }:"
+          cache.put k.slice(name.length + 1), localStorage.get(k)
+
+      constructCache = (name) ->
+        cache = cacheFactory name, capacity: 1000
+        restoreCache cache, name
+        origPut = cache.put
+        newPut = (k, v) ->
+          localStorage.set "#{name}:#{ k }", JSON.stringify(v)
+          origPut.call cache, k, v
+        cache.put = newPut
+        return cache
+
+      (name) ->
+        if cache = cacheFactory.get name
+          return cache
+        else
+          cache = constructCache name
 
   Services.factory 'generateListName', Array '$q', (Q) -> (conn, type, category) ->
     naming = conn.fetchModel().then (model) -> model.makePath(type).getDisplayName()

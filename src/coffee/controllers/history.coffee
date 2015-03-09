@@ -35,10 +35,18 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
   # Currently just adds a handles() method.
   toTool = (conf) ->
     handles = conf.handles
+    providers = conf.provides
+
     if Array.isArray handles
       conf.handles = (cat) -> handles.indexOf(cat) >= 0
     else
       conf.handles = (cat) -> handles is cat
+
+    if Array.isArray providers
+      conf.provides = (x) -> x in providers
+    else
+      conf.provides = (x) -> x is providers
+    
     conf
 
   #--- Controller, exported as return value
@@ -107,7 +115,8 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
               .then ({data}) -> data.filter((t) -> t.ident isnt tool).map toTool
               .then (tools) => @scope.nextTools = tools
       http.get('/tools', params: {capabilities: 'provider'})
-          .then ({data}) => @scope.providers = data
+          .then ({data}) -> data.map toTool
+          .then (providers) => @scope.providers = providers
 
     saveHistory: ->
       @scope.editing = false
@@ -162,7 +171,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     wantsSomething: (what, data) ->
       {console, meetRequest} = @
       console.log "Something is wanted", what, data
-      next = @scope.providers.filter (t) -> t.provides is what
+      next = @scope.providers.filter (t) -> t.provides what
       console.log "Suitable providers found", next, @scope.providers
 
       return unless next.length

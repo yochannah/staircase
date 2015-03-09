@@ -1,6 +1,7 @@
 define [], ->
 
   injectables = ['$q', '$log', 'makeList', 'identifyItem']
+
   factory = (Q, console, makeList, identifyItem) ->
 
     return handleRequest = (previousStep, data) ->
