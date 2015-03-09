@@ -18,25 +18,56 @@
             No templates found.
         </p>
     </div>
-    <div class="list-group-item" ng-class="{active: showConstraints}" ng-repeat="template in filteredTemplates = (suitableTemplates | filter:templateFilter)">
-        <a ng-click="showConstraints = !showConstraints"
+    <div class="list-group-item"
+         ng-controller="TemplateListRowController as row"
+         ng-repeat="template in filteredTemplates = (suitableTemplates | filter:templateFilter)"
+         ng-hide="controller.template && (controller.template !== template)">
+        <a ng-click="controller.toggleSelected(template)"
             class="list-group-item-heading">
             {{template | templateTitle}}
         </a>
         <p class="list-group-item-text">{{template.description}}</p>
-        <div ng-show="showConstraints">
+        <div ng-if="controller.template && (controller.template === template)">
             <form class="form" ng-submit="runQuery(template)">
                 <div class="form-group" ng-repeat="constraint in template.constraints | filter:{editable:true}">
                     <label>{{formattedPaths[constraint.path]}} {{constraint.op}}</label>
-                    <input class="form-control" ng-model="constraint.value">
+                    <div class="input-group">
+                        <input class="form-control"
+                               ng-disabled="constraint.switched === 'OFF'"
+                               placeholder="Value for {{formattedPaths[constraint.path]}}"
+                               ng-model="constraint.value">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default"
+                                type="button"
+                                blur-on="click"
+                                ng-disabled="!constraint.switchable"
+                                ng-click="row.switchConstraint(constraint)"
+                                >
+                                <i class="fa"
+                                  ng-class="{
+                                  'fa-toggle-on': (constraint.switchable && constraint.switched === 'ON'),
+                                  'fa-toggle-off': (constraint.switchable && constraint.switched == 'OFF'),
+                                  'fa-locked': (!constraint.switchable)
+                                  }"></i>
+                            </button>
+                        </span>
+                    </div>
                 </div>
-                <label>Returns</label>
-                <div class="well well-sm">
-                    <span class="label label-primary output-column" ng-repeat="path in template.views">
-                        {{formattedPaths[path]}}
-                    </span>
+                <div class="form-group">
+                    <label ng-click="showView = !showView">
+                    <i class="fa"
+                        ng-class="{'fa-caret-down': showView, 'fa-caret-right': !showView}"></i>
+                    Returns {{template.views.length}} columns
+                    </label>
+                    <div class="well well-sm" ng-hide="!showView">
+                        <span class="label label-primary output-column" ng-repeat="path in template.views">
+                            {{formattedPaths[path]}}
+                        </span>
+                    </div>
                 </div>
-                <button class="btn btn-primary" type="submit">View Table</button>
+                <button class="btn btn-primary" type="submit">
+                    View {{ results }} Rows in Table
+                </button>
             </form>
         </div>
     </div>
