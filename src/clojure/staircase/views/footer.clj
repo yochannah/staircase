@@ -19,7 +19,7 @@
             (tool-list {:class "col-sm-4 col-md-3"})]]]]
     [:div.col-sm-4.contacts
      (unordered-list (for [[icon addr text] (:contacts config)]
-                       (link-to addr [:i.fa.fa-fw.fa-2x {:class icon}] " " text)))]
+                       (link-to {:title text} addr [:i.fa.fa-fw.fa-2x {:class icon}])))]
     ]
    [:div#cookie-message.row.panel.panel-info {:ng-show "showCookieMessage"}
     [:div.panel-heading "Cookies"]
