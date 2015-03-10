@@ -455,5 +455,10 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
               element.html(template)
               $compile(element.contents())(scope)
 
-              # scope.$apply()
-
+  # Wrap risky actions in a confirm dialogue.
+  Directives.directive 'reallyClick', ->
+    restrict: 'A'
+    link: (scope, elem, attrs) -> elem.bind 'click', ->
+      message = attrs.reallyMessage
+      if message and confirm(message)
+        scope.$apply(attrs.reallyClick)

@@ -23,6 +23,20 @@
         </span>
         <a ng-click="viewList(list)">{{list.name}}</a>
         <p class="description list-group-item-text">{{list.description}}</p>
+
+        <div>
+            <button
+                ng-if="list.authorized"
+                really-message="Are you sure you want to delete {{ list.name }}? This cannot be undone."
+                really-click="deleteList(list)"
+                class="btn btn-sm btn-danger">
+                delete 
+            </button>
+            <button ng-if="!list.authorized" ng-click="copyList(list)" class="btn btn-sm btn-warning">
+                make a copy
+            </button>
+        </div>
+
     </li>
 </ul>
 

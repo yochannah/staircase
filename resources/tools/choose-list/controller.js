@@ -3,8 +3,8 @@ define(['angular', 'imjs'], function (ng, im) {
 
   var connect = im.Service.connect;
 
-  var ChooseListCtrl = ['$scope', '$log', '$q', '$timeout', '$cacheFactory', 'Mines',
-          function (scope, logger, Q, timeout, cacheFactory, mines) {
+  var ChooseListCtrl = ['$scope', '$log', '$q', '$timeout', '$cacheFactory', '$window', 'Mines',
+          function (scope, logger, Q, timeout, $window, cacheFactory, mines) {
 
     scope.serviceName = "";
     scope.filters = {};
@@ -23,6 +23,10 @@ define(['angular', 'imjs'], function (ng, im) {
                        .then(null, function (e) { scope.tool.error = e; });
     
     scope.viewList = viewList;
+
+    scope.deleteList = deleteList;
+
+    scope.copyList = copyList;
 
     scope.$watch('serviceName', function (name) {
       if (name) scope.tool.heading = "Lists in " + name;
@@ -61,6 +65,23 @@ define(['angular', 'imjs'], function (ng, im) {
         d.reject(new Error("List request timed out"));
       }, 30000); // 30sec is more than generous for list requests.
       return d.promise;
+    }
+
+    function deleteList (list) {
+      list.del().then(
+          function () { readLists(list.service); },
+          function (err) { console.error("Could not delete", err); }
+      );
+    }
+
+    function copyList (list) {
+      list.service
+          .query({from: list.type, select: ['id'], where: [[list.type, 'IN', list.name]]})
+          .then(function (q) { return q.saveAsList({name: "Copy of " + list.name}); })
+          .then(
+            function () { readLists(list.service); },
+            function (err) { console.error("Could not copy list", err); }
+      );
     }
 
     function setLists (lists) {
