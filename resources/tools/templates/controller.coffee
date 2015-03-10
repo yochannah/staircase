@@ -1,11 +1,22 @@
 define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
 
-  app.filters.register 'templateTitle', -> ({title}) ->
+  app.filters.register 'templateTitle', getTemplateTitle = -> ({title}) ->
     title.replace(/-->/g, '\u21E8').replace(/<--/g, '\u21E6')
 
   OTHER_SWITCH_STATE =
     ON: 'OFF'
     OFF: 'ON'
+
+  hasLookupConstraints = (q) -> q.constraints.some (c) -> c.op is "LOOKUP"
+  lookupConstraints = (q) -> q.constraints.filter (c) -> c.op is "LOOKUP"
+
+  effectiveTemplate = (q) ->
+    return q unless hasLookupConstraints q
+    r = q.clone()
+    for c, i in r.constraints when q.constraints[i].replaceWithList
+      c.op = 'IN'
+      c.value = q.constraints[i].list.name
+    return r
 
   app.controllers.register 'TemplateListRowController',
     Array '$scope', '$q', class TemplateListRowController
@@ -13,15 +24,47 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
         switchConstraint: (con) ->
           con.switched = OTHER_SWITCH_STATE[con.switched]
 
+        compatibleLists: (path) ->
+          pathInfo = @template.makePath path
+          @_lists_cache[path] ?= @lists.filter (l) -> pathInfo.isa l.type
+
+        runTemplate: ->
+          @_scope.$emit 'start-history',
+            verb:
+              ed: "ran"
+              ing: "running"
+            thing: "#{ getTemplateTitle() @template } template query"
+            tool: 'show-table',
+            data:
+              service:
+                root: @template.service.root,
+              query: (effectiveTemplate @template)
+
+        lists: []
+
         constructor: (scope, Q) ->
+
+          @_lists_cache = {}
+          @_count_cache = {}
+          @_scope = scope
 
           scope.formattedPaths = {}
 
-          updateCount = ->
-            return unless scope.template.selected
-            Q.when(scope.template.count()).then (c) => scope.results = c
+          scope.$watch 'template', => @template = scope.template
 
-          scope.$watch ((s) -> s.template.toXML()), updateCount
+          if hasLookupConstraints scope.template
+            Q.when(scope.template.service.fetchLists()).then (lists) =>
+              @lists = lists
+              @_lists_cache = {}
+              for c in lookupConstraints(scope.template)
+                c.list = @compatibleLists(c.path)[0]
+
+          updateCount = =>
+            return unless scope.template.selected
+            t = effectiveTemplate scope.template
+            Q.when(@_count_cache[t.toXML()] ?= t.count()).then (c) => scope.results = c
+
+          scope.$watch ((s) -> effectiveTemplate(s.template).toXML()), updateCount
 
           scope.$watch 'template.selected', updateCount
 
@@ -103,18 +146,6 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
         scope.outputType = scope.defaults.outputType
         scope.inputType = scope.defaults.inputType
         scope.templateFilter = null
-
-      scope.runQuery = (q) -> connecting.then (connection) ->
-        scope.$emit 'start-history',
-          verb:
-            ed: "ran"
-            ing: "running"
-          thing: "#{ filters('templateTitle')(q) } template query"
-          tool: 'show-table',
-          data:
-            service:
-              root: connection.root,
-            query: q
 
       connecting.then ({name}) -> scope.serviceName = name
 

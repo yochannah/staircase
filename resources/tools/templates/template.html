@@ -28,29 +28,42 @@
         </a>
         <p class="list-group-item-text">{{template.description}}</p>
         <div ng-if="controller.template && (controller.template === template)">
-            <form class="form" ng-submit="runQuery(template)">
-                <div class="form-group" ng-repeat="constraint in template.constraints | filter:{editable:true}">
+            <form class="form" ng-submit="row.runTemplate()">
+                <div class="form-group"
+                    ng-class="{disabled: constraint.switched === 'OFF'}"
+                    ng-repeat="constraint in template.constraints | filter:{editable:true}">
                     <label>{{formattedPaths[constraint.path]}} {{constraint.op}}</label>
                     <div class="input-group">
                         <input class="form-control"
-                               ng-disabled="constraint.switched === 'OFF'"
+                               ng-disabled="constraint.replaceWithList || (constraint.switched === 'OFF')"
                                placeholder="Value for {{formattedPaths[constraint.path]}}"
                                ng-model="constraint.value">
-                        <span class="input-group-btn">
+                        <span class="input-group-btn"
+                            title="{{ constraint.switchable ? 'Toggle constraint' : 'You must provide a value for this constraint' }}">
                             <button class="btn btn-default"
                                 type="button"
                                 blur-on="click"
                                 ng-disabled="!constraint.switchable"
-                                ng-click="row.switchConstraint(constraint)"
-                                >
+                                ng-click="row.switchConstraint(constraint)">
                                 <i class="fa"
                                   ng-class="{
                                   'fa-toggle-on': (constraint.switchable && constraint.switched === 'ON'),
                                   'fa-toggle-off': (constraint.switchable && constraint.switched == 'OFF'),
-                                  'fa-locked': (!constraint.switchable)
+                                  'fa-lock': (!constraint.switchable)
                                   }"></i>
                             </button>
                         </span>
+                    </div>
+                    <div class="input-group" ng-if="constraint.op === 'LOOKUP'">
+                        <label>
+                            <input type="checkbox" ng-model="constraint.replaceWithList">
+                            Or constrain to be in list:
+                        </label>
+                        <select class="form-control"
+                                ng-disabled="!constraint.replaceWithList || (constraint.switched === 'OFF')"
+                                ng-model="constraint.list"
+                                ng-options="list as list.name for list in row.compatibleLists(constraint.path)">
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -65,7 +78,7 @@
                         </span>
                     </div>
                 </div>
-                <button class="btn btn-primary" type="submit">
+                <button ng-disabled="!results" class="btn btn-primary" type="submit">
                     View {{ results }} Rows in Table
                 </button>
             </form>
