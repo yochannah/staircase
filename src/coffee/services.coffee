@@ -106,17 +106,19 @@ define (require, exports, module) ->
         currentName = "#{ baseName } (#{ suffix++ })"
       return currentName
 
+  createConnection = (conf) ->
+    s = imjs.Service.connect conf
+    s.name = conf.name
+    return s
+
   # Provide a function for connecting to a mine by URL.
   Services.factory 'connectTo', Array 'Mines', (mines) -> (root) ->
-    mines.atURL(root).then imjs.Service.connect conf
+    mines.atURL(root).then createConnection
 
   # Connect to a mine by name
   Services.factory 'connect', Array 'Mines', (Mines) ->
     cache = {}
-    (name) -> cache[name] ?= Mines.get(name).then (conf) ->
-      s = imjs.Service.connect conf
-      s.name = conf.name
-      return s
+    (name) -> cache[name] ?= Mines.get(name).then createConnection
 
   # Provide a function that will yield a value suitable for identifying
   # which version of a service was contacted at a particular time.
