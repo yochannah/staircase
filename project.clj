@@ -97,10 +97,11 @@
                    [:new-query {:service "yeastmine"}]
                    :upload-list
                    :region-search
-                   :show-table ;; TODO: make these autoconfigure...
+                   :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list
                    :show-enrichment
                    :resolve-ids
+                   :combine-lists
                    :convert-list
                    :list-templates
                    :export
