@@ -1,20 +1,71 @@
+.flexbox() {
+    display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+    display: -moz-box;     /* OLD - Firefox 19- (buggy but mostly works) */
+    display: -ms-flexbox;  /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+    display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
+}
+
+.flex-column() {
+    -webkit-flex-flow: column;
+    flex-flow: column;
+}
+
+.flex-wrap() {
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.flex(@opts) {
+    -webkit-box-flex: @opts;      /* OLD - iOS 6-, Safari 3.1-6 */
+    -moz-box-flex: @opts;         /* OLD - Firefox 19- */
+    -webkit-flex: @opts;          /* Chrome */
+    -ms-flex: @opts;              /* IE 10 */
+    flex: @opts;
+}
+
+.flex-grow() {
+    .flex(1);
+}
+
 .flex-row {
 
     &.guttered {
         padding: (@grid-gutter-width / 2) 0;
+        margin-left: -(@grid-gutter-width / 2);
+        margin-right: -(@grid-gutter-width / 2);
 
         .flex-box {
-            margin: 0 @grid-gutter-width / 2;
+            padding-left: (@grid-gutter-width / 2);
+            padding-right: (@grid-gutter-width / 2);
         }
     }
-    display: flex;
-    flex-wrap: wrap;
+
+    .flexbox();
+    .flex-wrap();
 
     .flex-box.fit {
-        flex: 1;
+        .flex-grow();
     }
     .flex-box.full {
-        flex: 1 0 100%;
+        .flex(1 0 100%);
+    }
+    .flex-box.flex-col-6 {
+        .flex(1 0 50%);
+    }
+    .flex-box.flex-col-3 {
+        .flex(1 0 25%);
     }
 
+    &.flex-row-4 {
+        .flex-box {
+            .flex(1 0 25%);
+        }
+    }
+    &.flex-row-3 {
+        .flex-box {
+            .flex(1 0 (100% / 3));
+        }
+    }
 }
+

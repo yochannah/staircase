@@ -1,6 +1,6 @@
 define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View) ->
 
-  controller = (console, scope, Modals, connectTo) ->
+  controller = (console, scope, Modals, Q, connectTo) ->
     
     console.log scope.data
     scope.listName = scope.data.name
@@ -39,5 +39,5 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View
             query: selectedTemplate
         scope.appendStep data: step
 
-  ['$log', '$scope', '$modal', 'connectTo', controller]
+  ['$log', '$scope', '$modal', '$q', 'connectTo', controller]
 

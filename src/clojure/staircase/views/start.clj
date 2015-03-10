@@ -36,9 +36,10 @@
 
    (staircase.views.welcome/snippet config)
 
-   [:div.row.starting-points {:ng-controller "StartingPointsController"}
+   [:div.starting-points.flex-row.flex-row-3.flex-row-sm-2.flex-row-xs-full.guttered
+    {:ng-controller "StartingPointsController"}
 
-    [:div.col-sm-4.col-md-3.starting-headline
+    [:div.flex-box.starting-headline
      {:ng-repeat "tool in startingPoints | filter:{active:true}"}
      [:a.headline-heading {:href "/starting-point/{{tool.ident}}/{{tool.args.service}}"} 
       [:div.pull-left.headline-icon [:i.fa.fa-fw.fa-4x {:ng-class "tool.icon"}]]

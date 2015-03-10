@@ -115,11 +115,21 @@ form.compact .form-group {
     }
 
     .starting-headline {
+        .flexbox();
+        .flex-column();
         margin-bottom: @grid-gutter-width / 2;
         min-height: 240px;
         .open > .dropdown-menu {
             max-height: 350px;
             overflow-y: auto;
+        }
+        starting-headline {
+            .flexbox();
+            .flex-column();
+            .flex-grow();
+            p {
+                .flex-grow();
+            }
         }
     }
 }
