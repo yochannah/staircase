@@ -12,15 +12,26 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
 
         switchConstraint: (con) ->
           con.switched = OTHER_SWITCH_STATE[con.switched]
-        
+
         constructor: (scope, Q) ->
+
+          scope.formattedPaths = {}
+
           updateCount = ->
             return unless scope.template.selected
             Q.when(scope.template.count()).then (c) => scope.results = c
 
+          scope.$watch ((s) -> s.template.toXML()), updateCount
+
           scope.$watch 'template.selected', updateCount
 
-          scope.$watch ((s) -> s.template.toXML()), updateCount
+          scope.$watch 'template.selected', (selected) -> if selected
+            setName = (path) -> (name) -> scope.formattedPaths[path] = name
+            t = scope.template
+            for p in t.views.concat(c.path for c in t.constraints)
+              getName = t.makePath(p).getDisplayName()
+              getName.then setName p
+
 
   injectables = [
     '$scope', '$log', '$timeout', '$q', '$filter', '$location',
@@ -81,14 +92,6 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
       scope.formattedPaths = {}
 
       connecting = connect 'default'
-
-      scope.$watch 'templates', (ts) ->
-        return unless ts
-        setName = (path) -> (name) -> timeout -> scope.formattedPaths[path] = name
-        for t in ts
-          for p in t.views.concat(c.path for c in t.constraints)
-            getName = t.makePath(p).getDisplayName()
-            getName.then setName p
 
       setTemplates = ({query}) => (ts) =>
         Q.all(query t for _, t of ts).then (qs) =>
