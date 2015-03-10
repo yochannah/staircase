@@ -28,8 +28,34 @@
     .flex(1);
 }
 
-.flex-row {
+.make-flex-columns(@size, @n) when (@n > 0) {
+    .flex-row-@{size}-@{n} {
+        .flex-box {
+            @media (min-width: ~"@{screen-@{size}}") {
+                .flex(0 0 (100% / @n));
+            }
+        }
+    }
+    .make-flex-columns(@size, @n - 1);
+}
 
+.make-flex-columns(@n) when (@n > 0) {
+    .flex-row-@{n} {
+        .flexbox();
+        .flex-wrap();
+        .flex-row-guttered();
+        .flex-box {
+            .flex(0 0 (100% / @n));
+        }
+    }
+    .make-flex-columns(@n - 1);
+}
+
+.make-flex-rows(@size) {
+    .make-flex-columns(@size, 12);
+}
+
+.flex-row-guttered {
     &.guttered {
         padding: (@grid-gutter-width / 2) 0;
         margin-left: -(@grid-gutter-width / 2);
@@ -40,11 +66,16 @@
             padding-right: (@grid-gutter-width / 2);
         }
     }
+}
+
+.flex-row {
+
+    .flex-row-guttered();
 
     .flexbox();
     .flex-wrap();
 
-    .flex-box.fit {
+    .flex-box {
         .flex-grow();
     }
     .flex-box.full {
@@ -56,16 +87,11 @@
     .flex-box.flex-col-3 {
         .flex(1 0 25%);
     }
-
-    &.flex-row-4 {
-        .flex-box {
-            .flex(1 0 25%);
-        }
-    }
-    &.flex-row-3 {
-        .flex-box {
-            .flex(1 0 (100% / 3));
-        }
-    }
 }
+
+.make-flex-columns(12);
+.make-flex-rows(xs);
+.make-flex-rows(sm);
+.make-flex-rows(md);
+.make-flex-rows(lg);
 

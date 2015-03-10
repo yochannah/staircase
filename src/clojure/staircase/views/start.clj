@@ -36,7 +36,7 @@
 
    (staircase.views.welcome/snippet config)
 
-   [:div.starting-points.flex-row.flex-row-3.flex-row-sm-2.flex-row-xs-full.guttered
+   [:div.starting-points.flex-row-1.flex-row-sm-2.flex-row-md-3.flex-row-lg-4.guttered
     {:ng-controller "StartingPointsController"}
 
     [:div.flex-box.starting-headline
