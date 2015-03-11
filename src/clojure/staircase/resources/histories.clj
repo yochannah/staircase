@@ -4,7 +4,9 @@
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
             staircase.resources
-            [honeysql.helpers :refer (select from where left-join group order-by)]
+            [honeysql.helpers :refer
+              (select merge-select from where merge-where
+               left-join group order-by merge-order-by)]
             [honeysql.core :as hsql]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
@@ -19,23 +21,24 @@
 
 (def table-spec (merge schema/histories schema/history-step))
 
-(defn- all-history-query []
-  (-> (select :h.id :h.title :h.created_at :h.description :h.owner [:%count.hs.* :steps])
-                    (from [:histories :h])
-                    (left-join [:history_step :hs] [:= :h.id :hs.history_id])
-                    (group :h.id :h.title :h.created_at :h.description :h.owner)
-                    (where [:= :h.owner :?user])
-                    (order-by [:h.created_at :desc])
-                    (hsql/format :params staircase.resources/context)))
-
-(defn- one-history-query [history]
-  (-> (select :h.*, :hs.step_id)
+(defn- base-history-query []
+  (-> (select :h.id :h.title :h.created_at :h.description :h.owner)
       (from [:histories :h])
       (left-join [:history_step :hs] [:= :h.id :hs.history_id])
-      (where [:and
-              [:= :h.id :?history]
-              [:= :h.owner :?user]])
-      (order-by [:hs.created_at :desc])
+      (where [:= :h.owner :?user])
+      (order-by [:h.created_at :desc])))
+
+(defn- all-history-query []
+  (-> (base-history-query)
+      (merge-select [:%count.hs.* :steps])
+      (group :h.id :h.title :h.created_at :h.description :h.owner)
+      (hsql/format :params staircase.resources/context)))
+
+(defn- one-history-query [history]
+  (-> (base-history-query)
+      (merge-select :hs.step_id)
+      (merge-where [:= :h.id :?history])
+      (merge-order-by [:hs.created_at :desc])
       (hsql/format :params (assoc staircase.resources/context :history history))))
 
 (defrecord HistoryResource [db]
