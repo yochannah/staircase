@@ -48,6 +48,25 @@
             <input class="form-control" ng-model="newListDescription" placeholder="Enter an (optional) description">
         </div>
     </div>
+
+    <div>
+        <div class="flex-row-3 vennish">
+            <div class="flex-box lefts"
+                ng-class="{active: operation.lefts}">
+                {{ counts.left }} Only in this list
+            </div>
+            <div class="flex-box common"
+                ng-class="{active: operation.common}">
+                {{ counts.common }} Common elements
+            </div>
+            <div class="flex-box rights"
+                ng-class="{active: operation.rights}">
+                {{ counts.right }} Only in other list(s)
+            </div>
+        </div>
+        <span class="help-block">Contents of the resulting list</span>
+    </div>
+
 </div>
 
 <div class="modal-footer">

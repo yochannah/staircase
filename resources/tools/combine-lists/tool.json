@@ -1,6 +1,7 @@
 {
   "capabilities": ["next"],
   "handles": "list",
-  "type": "native"
+  "type": "native",
+  "style": "./combine-lists.css"
 }
 

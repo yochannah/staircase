@@ -98,7 +98,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       @scope.items ?= {}
 
       @scope.collapsed = true # Hide details in reduced real-estate view.
-      @scope.state = {expanded: false}
+      @scope.state = {expanded: false, nextStepsCollapsed: true}
       @currentCardinal = parseInt params.idx, 10
       @scope.history = Histories.get id: params.id
       @scope.steps = Histories.getSteps id: params.id

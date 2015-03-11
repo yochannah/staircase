@@ -179,8 +179,8 @@ define (require, exports, module) ->
 
       querying = conn.query select: ['id'], from: type, where: [constraint]
       Q.all([naming, querying]).then ([name, query]) ->
-        console.log {name, tags, description}
-        query.saveAsList {name, description}
+        # TODO: add tags when we can deal with anonymous user issues.
+        query.saveAsList {name, description} # , tags}
 
     maker.fromQuery = (query, service) -> connectTo(service.root).then (conn) ->
       description = "Need a better way to pass along descriptions..."

@@ -12,18 +12,24 @@ define (require, module, exports) ->
   # The modal launcher must give use this list and the other lists.
   inject = ['$scope', '$modalInstance', '$q', 'generateListName', 'service', 'list', 'lists', 'model']
 
-  OPERATIONS = [
-    {op: 'merge', verb: 'merge with'}
-    {op: 'intersect', verb: 'intersect with'}
-    {op: 'complement', verb: 'remove elements shared with'}
-    {op: 'diff', verb: 'calculate symmetric difference with'}
+  OPERATIONS = [ # lefts, common, rights used to produce a schematic diagram.
+    {op: 'intersect', verb: 'intersect with', common: true }
+    {op: 'merge', verb: 'merge with', lefts: true, common: true, rights: true}
+    {op: 'complement', verb: 'remove elements shared with', lefts: true}
+    {op: 'complement', verb: 'remove from', rev: true, rights: true}
+    {op: 'diff', verb: 'calculate symmetric difference with', lefts: true, rights: true}
   ]
+
+  ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
   controller = (scope, modal, Q, generateListName, service, list, lists, model) ->
 
     scope.classNames = {}
     scope.operations = OPERATIONS
     scope.operation = OPERATIONS[0]
+    scope.otherLists = []
+    scope.counts = {}
+
     scope.descLimit = 120 # characters. Tweet sized is best.
 
     scope.service = service
@@ -42,21 +48,54 @@ define (require, module, exports) ->
                          .then (p) -> p.getDisplayName()
                          .then (name) -> scope.classNames[type] = name
 
+    scope.$watch 'otherLists', (others) ->
+      unless others?.length
+        return scope.counts = {}
+
+      sync = L.now()
+
+      inOthers = ({path: 'InterMineObject', op: 'IN', value: o} for o in others)
+      inThis = path: 'InterMineObject', op: 'IN', value: list.name
+
+      leftQ =
+        select: ['InterMineObject.id']
+        where: [inThis].concat(L.defaults({op: 'NOT IN'}, o) for o in inOthers)
+
+      commonQ =
+        select: ['InterMineObject.id']
+        where: [inThis].concat(inOthers)
+
+      rightQ =
+        select: ['InterMineObject.id']
+        where: [L.defaults({op: 'NOT IN'}, inThis)].concat(inOthers)
+        constraintLogic: "A and (#{ (ALPHABET[i + 1] for o, i in others).join ' OR ' })"
+
+      # Ignore the results if a more recent request has been made.
+      handler = do (mySync = sync) -> ([left, common, right]) ->
+        return if sync > mySync
+        scope.counts = {left, common, right}
+
+      Q.all(service.count q for q in [leftQ, commonQ, rightQ]).then handler
+
     scope.cancel = -> modal.dismiss 'cancel'
     scope.run = ->
+      operation = scope.operation
       opts =
         name: scope.newListName
         description: scope.description
 
       # Complement is not commutative, the others are.
-      if scope.operation.op is 'complement'
-        opts.from = [list.name]
-        opts.exclude = scope.otherLists
+      if operation.op is 'complement'
+        [them, us] = [scope.otherLists, [list.name]]
+        if operation.rev
+          [us, them] = [them, us]
+        opts.from = us
+        opts.exclude = them
       else
         opts.lists = scope.otherLists.concat([list.name])
 
       console.log opts
 
-      service[scope.operation.op](opts).then (combo) -> modal.close combo
+      service[operation.op](opts).then (combo) -> modal.close combo
   
   return [inject..., controller]

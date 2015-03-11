@@ -53,13 +53,13 @@
      (staircase.views.facets/snippet)]
 
     [:div.sidebar.slide-right.col-xs-12.col-md-2.col-md-offset-10
-     {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded, collapsed: collapsed}"}
+     {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded}"}
      [:div.panel.panel-default.next-steps
       [:div.panel-heading
-       {:ng-click "nextStepsCollapsed = !nextStepsCollapsed"}
-        [:i.fa.fa-fw {:ng-class "{'fa-caret-right': nextStepsCollapsed, 'fa-caret-down': !nextStepsCollapsed}"}]
+       {:ng-click "state.nextStepsCollapsed = !state.nextStepsCollapsed"}
+        [:i.fa.fa-fw {:ng-class "{'fa-caret-right': state.nextStepsCollapsed, 'fa-caret-down': !state.nextStepsCollapsed}"}]
         "Next steps"]
-      [:div.list-group {:ng-show "nextSteps.length && !nextStepsCollapsed"}
+      [:div.list-group {:ng-show "nextSteps.length && !state.nextStepsCollapsed"}
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"
