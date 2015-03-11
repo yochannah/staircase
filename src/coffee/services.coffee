@@ -170,11 +170,13 @@ define (require, exports, module) ->
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}
     
-    maker.fromIds = ({objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
+    maker.fromIds = ({listDetails, objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
       constraint = {path: type, op: 'IN', ids: objectIds}
-      tags = ['source:identifiers']
-      description = "Created by resolving identifiers"
-      naming = genName conn, type, category
+
+      naming = (listDetails?.name ? (genName conn, type, category))
+      tags = ['source:identifiers'].concat(listDetails?.tags ? [])
+      description = (listDetails?.description ? "Created by resolving identifiers")
+
       querying = conn.query select: ['id'], from: type, where: [constraint]
       Q.all([naming, querying]).then ([name, query]) ->
         console.log {name, tags, description}
