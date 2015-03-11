@@ -35,10 +35,22 @@ define ['lodash'], (L) ->
       code = getCode()
       L.assign newCon, {path, code}
 
+  getTargetConstraint = (q) ->
+    [first] = editables = (c for c in q.constraints when c.editable)
+    if editables.length is 1
+      return first # One editable constraint
+    else
+      # One lookup, and we switch the others off.
+      lookup = c for c in editables when c.op is 'LOOKUP'
+      others = (c for c in editables when c.op isnt 'LOOKUP')
+      for o in others
+        o.switched = 'OFF'
+      return lookup
+
   applyConstraintsToQuery = (q, cons) ->
     # Get the only editable constraint - part of the contract.
     console.log '----', q.name
-    con = c for c in q.constraints when c.editable
+    con = getTargetConstraint q
     path = q.makePath con.path
     
     conPath = if path.isAttribute() then path.getParent().toString() else con.path
