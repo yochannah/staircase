@@ -86,6 +86,7 @@
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
+        "beta-fly" "http://beta.flymine.org/beta/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
@@ -93,6 +94,7 @@
                    :histories
                    :templates
                    [:choose-list {:service "flymine"}]
+                   [:choose-list {:service "beta-fly"}]
                    [:choose-list {:service "mousemine"}]
                    [:new-query {:service "flymine"}]
                    [:new-query {:service "yeastmine"}]

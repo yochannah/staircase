@@ -52,8 +52,8 @@
 (def services
   {:services
    [[:id :uuid :primary :key ]
-    [:name string ]
-    [:root string ]
+    [:name string "NOT NULL" ]
+    [:root string "NOT NULL" ]
     [:token data ]
     owner-column
     [:UNIQUE "(owner, root)"]]})

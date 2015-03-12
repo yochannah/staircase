@@ -254,8 +254,12 @@
                                            current (first (get-where services [:= :root (:root service)]))
                                            canon (if current
                                                   (update services (:id current) {:token token})
-                                                  (get-one services (create services {:root (:root service) :token token})))]
+                                                  (get-one services (create services
+                                                                            {:name (:name service)
+                                                                             :root (:root service)
+                                                                             :token token})))]
                                        (merge service canon))))
+        ensure-valid (comp ensure-token ensure-name)
         real-id #(if (= "default" %) (:default-service config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
@@ -263,9 +267,9 @@
                   (let [user-services (get-all services)
                         configured-services (->> config :services (map (fn [[k v]] {:root v :confname k})))]
                     (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
-                    (response (vec (map (comp ensure-name ensure-token) (full-outer-join configured-services user-services :root)))))))
+                    (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
-                     (GET "/" []
+                  (GET "/" []
                           (locking services
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
@@ -274,8 +278,8 @@
                                                               user-services
                                                               :root)
                                               first)]
-                              (response (ensure-name (ensure-token service))))))
-                    (PUT "/" {doc :body}
+                              (response (ensure-valid service)))))
+                  (PUT "/" {doc :body}
                          (locking services
                             (let [uri (or (get doc "root") (get-in config [:services (real-id ident)]))
                                   current (first (get-where services [:= :root uri]))]
