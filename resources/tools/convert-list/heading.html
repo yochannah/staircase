@@ -1,6 +1,10 @@
-<div class="list-group-item" ng-if="service.meta.covers.length" ng-repeat="service in services">
+<div class="list-group-item"
+     ng-if="singleOrganism && isGene && service.meta.covers.length"
+     ng-repeat="service in services">
     <a ng-click="activate(service)" ng-disabled="service.running">
-        <i class="fa fa-fw" ng-class="{'fa-mail-forward': !service.running, 'fa-cog fa-spin': service.running}"></i>
+        <i class="fa fa-fw"
+           ng-class="{'fa-mail-forward': !service.running,
+                      'fa-cog fa-spin': service.running}"></i>
         Convert to a list in {{service.name}}.
     </a>
 </div>

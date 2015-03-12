@@ -182,9 +182,9 @@ define (require, exports, module) ->
         # TODO: add tags when we can deal with anonymous user issues.
         query.saveAsList {name, description} # , tags}
 
-    maker.fromQuery = (query, service) -> connectTo(service.root).then (conn) ->
-      description = "Need a better way to pass along descriptions..."
-      naming = genName conn, query.from
+    maker.fromQuery = (query, service, listDetails) -> connectTo(service.root).then (conn) ->
+      description = listDetails?.description
+      naming = (listDetails?.name ? (genName conn, query.from))
       querying = conn.query query
       Q.all([naming, querying]).then ([name, query]) -> query.saveAsList {name, description}
 
