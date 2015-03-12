@@ -17,24 +17,41 @@
         </p>
     </div>
     <li class="list-group-item" ng-repeat="list in filteredLists = (lists | filter:listFilter)">
-        <span class="badge">
-            {{list.size | number}}
-            <type-name service="list.service" type="list.type" count="list.size"></type-name>
-        </span>
-        <a ng-click="viewList(list)">{{list.name}}</a>
-        <p class="description list-group-item-text">{{list.description}}</p>
+        <div class="flex-row">
 
-        <div>
-            <button
-                ng-if="list.authorized"
-                really-message="Are you sure you want to delete {{ list.name }}? This cannot be undone."
-                really-click="deleteList(list)"
-                class="btn btn-sm btn-danger">
-                delete 
-            </button>
-            <button ng-if="!list.authorized" ng-click="copyList(list)" class="btn btn-sm btn-warning">
-                make a copy
-            </button>
+            <div class="flex-box flex-column">
+                <a class="list-group-item-link" ng-click="viewList(list)">{{list.name}}</a>
+
+                <p class="description list-group-item-text">{{list.description}}</p>
+                <span class="text-muted" ng-if="!list.description">
+                    <em>no description</em>
+                </span>
+            </div>
+
+            <div class="flex-column stretched">
+
+                <span class="badge">
+                    {{list.size | number}}
+                    <type-name service="list.service" type="list.type" count="list.size"></type-name>
+                </span>
+
+                <p>
+                    <em>{{ list.dateCreated | date }}</em>
+                </p>
+
+                <button
+                    ng-if="list.authorized"
+                    really-message="Are you sure you want to delete {{ list.name }}? This cannot be undone."
+                    really-click="deleteList(list)"
+                    class="btn btn-xs btn-danger">
+                    delete 
+                </button>
+
+                <button ng-if="!list.authorized" ng-click="copyList(list)" class="btn btn-xs btn-warning">
+                    make a copy
+                </button>
+            </div>
+
         </div>
 
     </li>
