@@ -265,8 +265,11 @@
             (GET "/" []
                  (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
                   (let [user-services (get-all services)
-                        configured-services (->> config :services (map (fn [[k v]] {:root v :confname k})))]
-                    (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
+                        configured-services (->> config
+                                                 :services
+                                                 (map (fn [[k v]]
+                                                        {:root v :confname k :meta (get-in config [:service-meta k])})))]
+                    ;; (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                     (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
                   (GET "/" []

@@ -17,6 +17,14 @@
             :web-max-age 300
             :web-default-service "flymine"
             :web-audience "http://localhost:3000"
+            ;; The section below should be replaced by pulling these values from branding.
+            ;; and ultimately by a template based solution.
+            :web-service-meta {
+                          "flymine" {:covers ["D. melanogaster"]}
+                          "zfin"    {:covers ["D. rerio"]}
+                          "mousemine" {:covers ["M. musculus"]}
+                          "yeastmine" {:covers ["S. cerevisiae"]}}
+
             :verifier "https://verifier.login.persona.org/verify"
             :db-subname "//localhost/staircase" }
  }

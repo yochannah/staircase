@@ -2,5 +2,6 @@
     :bower-tools [
         [keyword-search
          "https://github.com/alexkalderimis/multimine-search-tool.git"]]
+
 }
 
