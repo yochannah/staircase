@@ -52,6 +52,7 @@
   :source-paths ["src/clojure"]
   :resource-paths ["resources" "external"]
   :aliases {
+            "bower-tools" ["run" "-m" "staircase.tasks/bower-tools"]
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
             "clean-js" ["run" "-m" "staircase.tasks/clean-js"]
             "load-tools" ["run" "-m" "staircase.tasks/load-tools"]

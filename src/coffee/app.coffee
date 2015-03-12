@@ -7,6 +7,7 @@ define (require, exports, module) ->
   require 'angular-ui'
   require 'angular-animate'
   require 'angular-ui-select2'
+  require 'ng-headroom'
   require './filters'
   require './services'
   require './directives'
@@ -45,7 +46,8 @@ define (require, exports, module) ->
     'steps.directives',
     'ui.bootstrap',
     'ui.select2',
-    'LocalStorageModule'
+    'LocalStorageModule',
+    'headroom'
   ]
 
   Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes

@@ -11,15 +11,16 @@
                  ["options" "cog" {:ng-click "showOptions()"}]])
 
 (defn snippet [config]
-  [:headroom
-    {:offset 205
+  [:header.fixed
+    {:headroom true
+     :offset 70
      :tolerance 5
-     :classes "{initial:'animated',
-                pinned:'slideDown',
-                unpinned:'slideUp',
-                top:'headroom--top',
-                notTop:'headroom--not-top'}"}
-  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top
+     :classes "{initial: 'animated',
+                pinned: 'slideDown',
+                unpinned: 'slideUp',
+                top: 'headroom-top',
+                notTop: 'headroom-not-top'}"}
+  [:div.navbar.navbar-custom.navbar-default
    {:role "navigation" :ng-controller "NavCtrl"}
    [:div.container-fluid
 
