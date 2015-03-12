@@ -36,5 +36,19 @@
         &.expanded {
             display: block;
         }
+
+        next-step {
+            a[disabled] {
+                color: @gray-light;
+            }
+
+            &:hover {
+                a[disabled] {
+                    color: @gray-lighter;
+                }
+            }
+        }
     }
+
+
 }

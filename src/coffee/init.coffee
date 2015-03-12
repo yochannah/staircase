@@ -20,6 +20,9 @@ require.config
     'angular-resource': ['angular']
     'angular-silent': ['angular']
     'angular-local-storage': ['angular']
+    'angular-notify':
+      deps: ['angular']
+      init: -> loadCss '/vendor/angular-notify/dist/angular-notify.css'
     'angular-ui-select2':
       deps: ['angular', 'select2']
       init: -> loadCss "/vendor/select2/select2.css"
@@ -51,6 +54,7 @@ require.config
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
     'angular-silent': '/vendor/angular-silent/ngSilent'
+    'angular-notify': '/vendor/angular-notify/dist/angular-notify',
     'angular-local-storage':
       '/vendor/angular-local-storage/dist/angular-local-storage.min'
     select2:         '/vendor/select2/select2'

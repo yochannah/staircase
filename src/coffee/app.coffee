@@ -4,10 +4,15 @@ define (require, exports, module) ->
   router = require './routes'
   L = require 'lodash'
   require 'angular-route'
+  require 'angular-resource'
   require 'angular-ui'
   require 'angular-animate'
   require 'angular-ui-select2'
   require 'ng-headroom'
+  require 'angular-silent'
+  require 'angular-notify'
+  require 'angular-cookies'
+  require 'angular-local-storage'
   require './filters'
   require './services'
   require './directives'
@@ -47,7 +52,8 @@ define (require, exports, module) ->
     'ui.bootstrap',
     'ui.select2',
     'LocalStorageModule',
-    'headroom'
+    'headroom',
+    'cgNotify'
   ]
 
   Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes
