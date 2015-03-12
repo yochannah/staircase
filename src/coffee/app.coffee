@@ -71,8 +71,10 @@ define (require, exports, module) ->
   # Define routes
   router Steps
 
-  Steps.run Array '$rootScope', '$http', (scope, http) ->
+  Steps.run Array '$rootScope', '$http', '$window', (scope, http, $window) ->
     scope.startingPoints = []
+
+    scope.$on '$routeChangeSuccess', -> $window.scrollTo 0, 0
 
     http.get("/tools", {params: {capabilities: "initial"}}).then ({data}) ->
       scope.startingPoints = data.map (tool) -> tool.active = true; tool
