@@ -19,13 +19,19 @@
     <li class="list-group-item" ng-repeat="list in filteredLists = (lists | filter:listFilter)">
         <div class="flex-row">
 
-            <div class="flex-box flex-column">
+            <div class="flex-box flex-column stretched">
                 <a class="list-group-item-link" ng-click="viewList(list)">{{list.name}}</a>
 
                 <p class="description list-group-item-text">{{list.description}}</p>
                 <span class="text-muted" ng-if="!list.description">
                     <em>no description</em>
                 </span>
+
+                <div class="list-tags">
+                    <span class="label label-info" ng-repeat="tag in list.tags">
+                        {{ tag }}
+                    </span>
+                </div>
             </div>
 
             <div class="flex-column stretched">
