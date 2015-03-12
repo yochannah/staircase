@@ -22,18 +22,14 @@ define ['imjs', 'lodash'], ({Service}, L) ->
     getService = connectTo(origin).then (originatingService) -> scope.origin = originatingService
 
     getService.then (s) -> s.fetchModel()
-              .then (model) ->
-                scope.isGene = model.makePath(scope.type).isa 'Gene'
-                console.log 'GENE', scope.isGene
+              .then (model) -> scope.isGene = model.makePath(scope.type).isa 'Gene'
 
     getService.then (s) ->
       getOrgCount = s.count
         select: 'organism.shortName'
         from: 'Gene'
         where: [['Gene', 'IN', currentList]]
-      Q.when(getOrgCount).then (c) ->
-        scope.singleOrganism = c is 1
-        console.log 'SINGLE ORG', scope.singleOrganism, c
+      Q.when(getOrgCount).then (c) -> scope.singleOrganism = c is 1
 
     scope.activate = (service) ->
       service.running = true
@@ -46,7 +42,7 @@ define ['imjs', 'lodash'], ({Service}, L) ->
         where: [[scope.data.type, 'IN', currentList]]
 
       # Ask the other service what they know about our genes.
-      fromOther = scope.origin.rows(contentQ).then (details) ->
+      lookForHomologuesInRemote = -> scope.origin.rows(contentQ).then (details) ->
         [idents, [org]] = L.unzip details
         q =
           select: ['id']
@@ -79,10 +75,12 @@ define ['imjs', 'lodash'], ({Service}, L) ->
 
         makeList.fromQuery q, targetService, details
 
-      ret = fromOther.then (ids) ->
+      service.state = "Querying #{ service.name }"
+      ret = lookForHomologuesInRemote().then (ids) ->
         if ids.length
           makeIdListInOther ids
         else
+          service.state = "Querying #{ scope.origin.name }"
           lookForHomologuesInOrigin().then (identifiers) ->
             if identifiers.length
               makeIdentifierListInOther identifiers
@@ -90,7 +88,6 @@ define ['imjs', 'lodash'], ({Service}, L) ->
               throw new Error 'No matches found'
 
       done = (list) ->
-        console.log list
         service.running = false
         scope.appendStep data:
           title: "Converted #{ currentList } to a list in #{ service.name }"
