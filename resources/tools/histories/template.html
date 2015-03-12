@@ -23,7 +23,7 @@
                 </ul>
             </div>
             <a href="/history/{{history.id}}/{{history.steps}}" class="list-group-item-heading">
-                <span class="badge">{{history.steps}}</span>
+                <span class="badge">{{ 'step' | pluralizeWithNum:history.steps }}</span>
                 {{history.title}}
             </a>
             <p class="list-group-item-text">{{history.description}}</p>

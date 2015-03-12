@@ -55,6 +55,7 @@ require.config
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
     'angular-silent': '/vendor/angular-silent/ngSilent'
     'angular-notify': '/vendor/angular-notify/dist/angular-notify',
+    'pluralize': '/vendor/pluralize/pluralize',
     'angular-local-storage':
       '/vendor/angular-local-storage/dist/angular-local-storage.min'
     select2:         '/vendor/select2/select2'
