@@ -40,6 +40,14 @@ require.config
     }
   ]
   paths:
+    font: "/vendor/requirejs-plugins/src/font"
+    goog: "/vendor/requirejs-plugins/src/goog"
+    image: "/vendor/requirejs-plugins/src/image"
+    json: "/vendor/requirejs-plugins/src/json"
+    mdown: "/vendor/requirejs-plugins/src/mdown.js"
+    text: "/vendor/requirejs-plugins/lib/text"
+    markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"
+    analytics:       '/js/ga'
     angular:         '/vendor/angular/angular'
     headroom:        '/vendor/headroom.js/dist/headroom'
     'ng-headroom':   '/vendor/headroom.js/dist/angular.headroom'
@@ -59,7 +67,6 @@ require.config
     'angular-local-storage':
       '/vendor/angular-local-storage/dist/angular-local-storage.min'
     select2:         '/vendor/select2/select2'
-    text:            '/vendor/requirejs-text/text'
     imjs:            '/vendor/imjs/js/im'
   deps: ['./bootstrap']
 

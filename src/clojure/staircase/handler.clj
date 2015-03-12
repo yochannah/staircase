@@ -152,7 +152,10 @@
 ;; Requires session functionality.
 (defn app-auth-routes [{:keys [config secrets]}]
   (let [issue-session (partial issue-session config secrets)
-        session-resp #(-> % issue-session response (content-type "application/json-web-token"))]
+        session-resp #(-> %
+                          issue-session
+                          response
+                          (content-type "application/json-web-token"))]
     (routes
       (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
       (GET "/session"
@@ -246,6 +249,11 @@
                    (GET    "/" [] (get-resource steps id))
                    (DELETE "/" [] (delete-resource steps id)))))
 
+;; Routes delivering dynamic config to the client.
+(defn build-config-routes
+      [{:keys [config]}]
+      (routes (GET "/" [] (response (:client config)))))
+
 (defn build-service-routes [{:keys [config services]}]
   (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
         ensure-token (fn [service] (if (:token service)
@@ -301,13 +309,15 @@
       (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
-  (let [hist-routes (build-hist-routes router)
-        step-routes (build-step-routes router)
-        service-routes (build-service-routes router)
-        api-session-routes (build-api-session-routes router)]
+  (let [hist-routes        (build-hist-routes router)
+        step-routes        (build-step-routes router)
+        service-routes     (build-service-routes router)
+        api-session-routes (build-api-session-routes router)
+        config-routes      (build-config-routes router)]
     (routes ;; put them all together
-            (context "/sessions" [] api-session-routes)
-            (-> (routes 
+            (context "/sessions" [] api-session-routes) ;; Getting tokens
+            (context "/client-config" [] config-routes) ;; Getting config
+            (-> (routes ;; Protected resources.
                   (context "/histories" [] hist-routes)
                   (context "/services" [] service-routes)
                   (context "/steps" [] step-routes))

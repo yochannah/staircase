@@ -17,6 +17,7 @@ define (require, exports, module) ->
   require './services'
   require './directives'
   require './controllers'
+  ga = require 'analytics'
 
   # Whitelist the sources of any tools we plan on using.
   whiteList = [
@@ -71,10 +72,12 @@ define (require, exports, module) ->
   # Define routes
   router Steps
 
-  Steps.run Array '$rootScope', '$http', '$window', (scope, http, $window) ->
+  Steps.run Array '$rootScope', '$http', '$window', '$location', (scope, http, $window, $loc) ->
     scope.startingPoints = []
 
-    scope.$on '$routeChangeSuccess', -> $window.scrollTo 0, 0
+    scope.$on '$routeChangeSuccess', (event, route) ->
+      $window.scrollTo 0, 0
+      ga('send', 'pageview', $loc.path())
 
     http.get("/tools", {params: {capabilities: "initial"}}).then ({data}) ->
       scope.startingPoints = data.map (tool) -> tool.active = true; tool

@@ -52,7 +52,6 @@
   :source-paths ["src/clojure"]
   :resource-paths ["resources" "external"]
   :aliases {
-            "bower-tools" ["run" "-m" "staircase.tasks/bower-tools"]
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
             "clean-js" ["run" "-m" "staircase.tasks/clean-js"]
             "load-tools" ["run" "-m" "staircase.tasks/load-tools"]
@@ -61,20 +60,6 @@
                    :all (constantly true)
                    :database :database
                    :default (complement :acceptance)}
-  :bower {:directory "resources/public/vendor"}
-  :bower-dependencies [[
-    requirejs "~2.1.9",
-    requirejs-text "~2.0.10",
-    angular-route "~1.2.9",
-    angular "~1.2.9",
-    angular-ui-bootstrap-bower "~0.11.0",
-    angular-cookies "~1.2.16",
-    imjs "~3.2.2",
-    lodash "~2.4.1",
-    angular-resource "~1.2.16",
-    requirejs-domready "~2.0.1",
-    angular-ui-select2 "~0.0.5",
-    angular-animate "~1.2.16"]]
   :env {
       :web-search-placeholder "enter a search term"
       :web-gh-repository "https://github.com/alexkalderimis/staircase"
@@ -86,7 +71,6 @@
       :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
-        "beta-fly" "http://beta.flymine.org/beta/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
@@ -97,18 +81,18 @@
                     "zfin"    {:covers ["D. rerio"]}
                     "mousemine" {:covers ["M. musculus"]}
                     "yeastmine" {:covers ["S. cerevisiae"]}}
-       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
+      :client-ga-token nil ;; Supply a token to use analytics
+      :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
                    [:choose-list {:service "flymine"}]
-                   [:choose-list {:service "beta-fly"}]
                    [:choose-list {:service "mousemine"}]
                    [:new-query {:service "flymine"}]
                    [:new-query {:service "yeastmine"}]
                    :upload-list
                    :region-search
                    :show-table ;; TODO: make the tools below autoconfigure...
-                   :show-list
+                   :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
