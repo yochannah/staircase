@@ -59,7 +59,8 @@
        {:ng-click "state.nextStepsCollapsed = !state.nextStepsCollapsed"}
         [:i.fa.fa-fw {:ng-class "{'fa-caret-right': state.nextStepsCollapsed, 'fa-caret-down': !state.nextStepsCollapsed}"}]
         "Next steps"]
-      [:div.list-group {:ng-show "nextSteps.length && !state.nextStepsCollapsed"}
+      [:div.list-group.steps.animated
+       {:ng-class "{expanded: (nextSteps.length && !state.nextStepsCollapsed)}"}
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"

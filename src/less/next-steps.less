@@ -18,4 +18,23 @@
     .list-group-item {
         border: none;
     }
+
+    .panel-heading {
+        i.fa {
+            @media (min-width: @screen-md) {
+                display: none;
+            }
+
+        }
+    }
+
+    .list-group.steps {
+        display: none;
+        @media (min-width: @screen-md) {
+            display: block;
+        }
+        &.expanded {
+            display: block;
+        }
+    }
 }
