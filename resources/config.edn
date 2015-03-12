@@ -1,6 +1,6 @@
 {
     :bower-tools [
         [keyword-search
-         "git@github.com:alexkalderimis/multimine-search-tool.git"]]
+         "https://github.com/alexkalderimis/multimine-search-tool.git"]]
 }
 
