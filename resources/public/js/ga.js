@@ -1,7 +1,8 @@
 define(['json!/api/v1/client-config'], function (config) {
 
   if (!(config && config.ga_token)
-      || "localhost" == window.location.hostname) {
+      || (typeof window === 'undefined')
+      || ("localhost" === window.location.hostname)) {
     console.debug("Skipping analytics");
     return function () {}; // NO-OP function.
   }
@@ -13,6 +14,9 @@ define(['json!/api/v1/client-config'], function (config) {
 
   ga('create', config.ga_token, 'auto');
 
-  return ga;
+  return function () {
+    // Need to wrap as we cannot return a reference to the analytics.
+    ga.apply(null, arguments);
+  };
 
 });
