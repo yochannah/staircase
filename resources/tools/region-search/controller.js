@@ -2,8 +2,8 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
 
   var connect = im.Service.connect;
 
-  return ['$scope', '$log', '$timeout', '$window', 'tokenise', 'Mines', 'ClassUtils',
-          function (scope, logger, timeout, window, tokenise, mines, ClassUtils) {
+  return ['$scope', '$log', '$timeout', '$window', 'tokenise', 'Mines', 'ClassUtils', 'notify',
+          function (scope, logger, timeout, window, tokenise, mines, ClassUtils, notify) {
 
     scope.applyExtension = function (region) {
       return region.chr + ':' +
@@ -36,6 +36,10 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     };
 
     scope.sendRegions = function () {
+      if (!scope.regions.parsed.length) {
+        notify('No regions entered');
+        return;
+      }
       logger.info(scope.organism.shortName, scope.featureTypes, "in", scope.regions.parsed);
       scope.$emit('start-history', {
         thing: scope.regions.parsed.length + ' genomic intervals',
@@ -70,6 +74,12 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
         })
       );
       L.defer(scope.$apply.bind(scope));
+    });
+
+    scope.$watch('tool.sampleData', function (sampleData) {
+      if (sampleData && !scope.regions.pasted) {
+        scope.regions.pasted = sampleData;
+      }
     });
 
     scope.$watch('regions.file', function (file) {
