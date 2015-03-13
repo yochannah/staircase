@@ -249,13 +249,14 @@
           (GET  "/" [] (staircase.projects/get-all-projects))
           (POST "/" {payload :body} (staircase.projects/create-project payload))
           (context "/:id" [id]
-            (GET  "/" [] (staircase.projects/get-single-project id))
+            (GET  "/test" [] (str "test"))
             (DELETE  "/" [] (staircase.projects/delete-project id))
             (POST  "/" {payload :body} [] (staircase.projects/update-project id payload))
-            (context "/items" [id]
+            (context "/items" []
+              (DELETE "/:itemid" [itemid] (staircase.projects/delete-item itemid))
               (POST "/" {payload :body}
-                (staircase.projects/add-item-to-project id payload))
-              (POST "/remove" {payload :body} [] (staircase.projects/delete-item payload))))))
+                (staircase.projects/add-item-to-project id payload))))))
+              ; (DELETE "/post" [] (staircase.projects/delete-item))))))
 
 
 (defn build-step-routes [{:keys [steps]}]

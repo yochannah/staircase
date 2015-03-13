@@ -39,8 +39,8 @@
 (defn sql-delete-project [id]
   (sql/delete! db-spec :projects ["id = ?" id]))
 
-(defn sql-delete-item [item]
-  (sql/delete! db-spec :project_contents ["item_id = ?" (item "item_id")]))
+(defn sql-delete-item [id]
+  (sql/delete! db-spec :project_contents ["id = ?" id]))
 
 (defn sql-get-project-items []
   (sql/query db-spec [(str "select * from project_contents")]))
@@ -123,16 +123,16 @@
   (let [results (sql-delete-project (read-string id))]
     (json/generate-string results)))
 
-(defn delete-item [item]
-  (let [results (sql-delete-item (item))]
+(defn delete-item [id]
+  (let [results (sql-delete-item (java.util.UUID/fromString id))]
     (json/generate-string results)))
 
 (defn update-project [id payload]
   (let [results (sql-update-project id payload)]
     (json/generate-string results)))
 
-(defn add-item-to-project [id payload]
-  (def results (sql-add-item-to-project id payload))
+(defn add-item-to-project [pid payload]
+  (def results (sql-add-item-to-project pid (assoc payload "id" (new-id))))
   (json/generate-string {:success true} {:pretty true}))
 
 (defn create-project [payload]

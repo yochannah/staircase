@@ -152,7 +152,7 @@
       [:th "Description"]
       [:th "Kind"]
       [:th "Modified"]
-      [:th ""]]]
+      [:th.foldercontrols ""]]]
   [:tbody
 
     [:tr {:ng-repeat "project in level.child_nodes"

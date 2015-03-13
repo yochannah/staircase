@@ -330,8 +330,8 @@ define (require, exports, module) ->
       auth.authorize().then (headers) -> http.delete("#{URL}/#{id}", {headers}).then asData
 
     deleteitem = (item) ->
-      console.log "caled with item", item
-      auth.authorize().then (headers) -> http.post("#{URL}/#{item.project_id}/items/remove", item, {headers}).then asData
+      console.log "deleteitem called with item", item
+      auth.authorize().then (headers) -> http.delete("#{URL}/#{item.project_id}/items/" + item.id, {headers}).then asData
 
     get = (id) ->
       auth.authorize().then (headers) -> http.get("#{URL}/#{id}", {headers}).then asData
