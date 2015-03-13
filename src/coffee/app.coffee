@@ -82,3 +82,5 @@ define (require, exports, module) ->
     http.get("/tools", {params: {capabilities: "initial"}}).then ({data}) ->
       scope.startingPoints = data.map (tool) -> tool.active = true; tool
 
+    ga 'send', 'event', 'init', $loc.path()
+
