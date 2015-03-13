@@ -53,7 +53,7 @@
       [:item_id :text]
       [:type :text]
       [:source :text]
-      ["PRIMARY KEY (item_id, project_id, type, source)"]]})
+      [:UNIQUE "(item_id, project_id, type, source)"]]})
 
 ;; Question: should steps also reference their owner? On one hand, since steps
 ;; are immutable, it should be reasonable to share them between histories, even

@@ -173,6 +173,11 @@
                                (assoc :session (dissoc session :anon-identity))
                                (content-type "text/plain")))))))
 
+(defn- logging-verifier [assertion audience]
+  (let [ret (pk/verify-assertion assertion audience)]
+    (info "VERIFICATION RESULT" audience ret)
+    ret))
+
 ;; replacement for persona-kit version. TODO: move to different file.
 (defn persona-workflow [audience request]
   (if (and (= (:uri request) "/auth/login")
@@ -180,7 +185,7 @@
     (-> request
         :params
         (get "assertion")
-        (pk/verify-assertion audience)
+        (logging-verifier audience)
         pf/credential-fn
         (workflows/make-auth {::friend/redirect-on-auth? false
                               ::friend/workflow :mozilla-persona}))))

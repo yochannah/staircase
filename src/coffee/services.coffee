@@ -10,6 +10,7 @@ define (require, exports, module) ->
   L = require 'lodash'
   imjs = require 'imjs'
   Messages = require './messages'
+  ga = require 'analytics'
 
   asData = ({data}) -> data
 
@@ -184,8 +185,9 @@ define (require, exports, module) ->
 
     maker.fromQuery = (query, service, listDetails) -> connectTo(service.root).then (conn) ->
       description = listDetails?.description
-      naming = (listDetails?.name ? (genName conn, query.from))
+      console.log query
       querying = conn.query query
+      naming = (listDetails?.name ? (querying.then (q) -> genName conn, q.root))
       Q.all([naming, querying]).then ([name, query]) -> query.saveAsList {name, description}
 
     return maker
@@ -384,7 +386,9 @@ define (require, exports, module) ->
               console.debug "Created history #{ history.id } and step #{ step.id }"
               loc.url "/history/#{ history.id }/1"
 
-      watch = (scope) -> scope.$on 'start-history', (evt, message) -> startHistory message
+      watch = (scope) -> scope.$on 'start-history', (evt, message) ->
+        startHistory message
+        ga 'send', 'event', 'history', 'start', message.tool
 
       return {watch, startHistory}
 
@@ -410,7 +414,9 @@ define (require, exports, module) ->
       onlogin: (assertion) =>
         loggingIn = @post "/auth/login", {assertion}
         loggingIn.then ({data}) => @options.changeIdentity data.current
-        loggingIn.then (->), -> navId.logout()
+        loggingIn.then (-> ga 'send', 'event', 'auth', 'login', 'success'), ->
+          ga 'send', 'event', 'auth', 'login', 'failure'
+          navId.logout()
 
       onlogout: =>
         loggingOut = @post "/auth/logout"
