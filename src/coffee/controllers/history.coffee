@@ -1,4 +1,4 @@
-define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
+define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, ChooseDialogueCtrl) ->
   
   # Run-time requirements
   injectables = L.pairs
@@ -222,4 +222,5 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
           appended = Histories.append {id: history.id}, stamped, ->
             console.debug "Created step #{ appended.id }"
             goTo "/history/#{ history.id }/#{ nextCardinal }"
+            ga 'send', 'event', 'history', 'append', step.tool
 
