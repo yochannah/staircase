@@ -29,28 +29,16 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
           path.isa(outputType)
       ok
 
-  # Need to json-ify data for presentation.
   templateData = ({constraints, views, title, name, description, constraintLogic}) ->
     {constraints, views, title, name, description, constraintLogic}
 
   filterTemplates = ({templates, model, inputType, outputType}) ->
-    f = isBetween model, inputType, outputType
-    if templates and model then (templateData t for t in templates when f t) else []
+    if templates and model
+      f = isBetween model, inputType, outputType
+      (templateData t for t in templates when f t) # Need to json-ify data for presentation.
 
   return Array injectables..., (scope, log, timeout, Q, filters, Mines, ClassUtils) ->
     scope.defaults = {}
-
-    scope.formattedPaths = {}
-
-    scope.$watch 'templates', ->
-      setName = (path) -> (name) -> timeout -> scope.formattedPaths[path] = name
-      for t in scope.templates
-        for v in t.views
-          getName = t.makePath(v).getDisplayName()
-          getName.then setName v
-        for c in t.constraints
-          getName = t.makePath(c.path).getDisplayName()
-          getName.then setName c.path
 
     setTemplates = ({query}) -> (ts) ->
       Q.all(query t for _, t of ts).then (qs) -> timeout ->
