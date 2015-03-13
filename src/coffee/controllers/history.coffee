@@ -150,7 +150,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
           console.debug "replacing message data: #{ data }"
           @set ['messages', idx, 'data'], data
         else
-          @mines.then(atURL data.service.root)
+          @mines.then(atURL(data['service:base'] ? data.service.root))
                 .then(connectWithName)
                 .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
 
