@@ -117,8 +117,6 @@
       allitems (sql-get-project-items)]
     (json/generate-string (hash-map :title "All Projects" :child_nodes (maketree results allitems)))))
 
-
-
 (defn delete-project [id]
   (let [results (sql-delete-project (read-string id))]
     (json/generate-string results)))
