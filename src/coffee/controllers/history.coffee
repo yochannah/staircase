@@ -16,6 +16,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     Mines: 'Mines'
     silentLocation: '$ngSilentLocation'
     serviceStamp: 'serviceStamp'
+    notify: 'notify'
 
   #--- Functions.
  
@@ -169,14 +170,16 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
         @letUserChoose(next).then (provider) => @meetRequest provider, @scope.step, data
 
     wantsSomething: (what, data) ->
-      {console, meetRequest} = @
+      {notify, console, meetRequest} = @
       console.log "Something is wanted", what, data
       next = @scope.providers.filter (t) -> t.provides what
       console.log "Suitable providers found", next, @scope.providers
 
       return unless next.length
 
-      @meetingRequest(next, data).then @nextStep
+      @meetingRequest(next, data).then @nextStep, (err) ->
+        console.error err
+        notify err.message
 
     storeHistory: (step) -> @nextStep step, true
 

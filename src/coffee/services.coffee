@@ -184,8 +184,9 @@ define (require, exports, module) ->
 
     maker.fromQuery = (query, service, listDetails) -> connectTo(service.root).then (conn) ->
       description = listDetails?.description
-      naming = (listDetails?.name ? (genName conn, query.from))
+      console.log query
       querying = conn.query query
+      naming = (listDetails?.name ? (querying.then (q) -> genName conn, q.root))
       Q.all([naming, querying]).then ([name, query]) -> query.saveAsList {name, description}
 
     return maker
