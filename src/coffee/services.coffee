@@ -302,6 +302,42 @@ define (require, exports, module) ->
 
   Services.service 'WebServiceAuth', ['apiTokenPromise', '$rootScope', 'authorizer', WebServiceAuth]
 
+  Services.factory 'Projects', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
+    URL = "/api/v1/projects"
+
+    all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
+
+    put = (data) ->
+      console.log "putting data", data
+      auth.authorize().then (headers) -> http.post("#{URL}", data, {headers}).then asData
+
+    update = (pid, data) ->
+      # Move data validation to clojure / backend
+      console.log "putting data #{pid}", data
+      auth.authorize().then (headers) -> http.post("#{URL}/#{pid}", data, {headers}).then asData
+
+    addto = (pid, data) ->
+      # Move data validation to clojure / backend
+      transformed =
+        source: data.service?.root
+        type: data.type
+        item_id: data.id
+        project_id: pid
+
+      auth.authorize().then (headers) -> http.post("#{URL}/#{pid}/items", transformed, {headers}).then asData
+
+    deletefolder = (id) ->
+      auth.authorize().then (headers) -> http.delete("#{URL}/#{id}", {headers}).then asData
+
+    deleteitem = (item) ->
+      console.log "caled with item", item
+      auth.authorize().then (headers) -> http.post("#{URL}/#{item.project_id}/items/remove", item, {headers}).then asData
+
+    get = (id) ->
+      auth.authorize().then (headers) -> http.get("#{URL}/#{id}", {headers}).then asData
+
+    return {all, put, get, addto, update, deletefolder, deleteitem}
+
   Services.factory 'Mines', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
     URL = "/api/v1/services"
 
@@ -380,3 +416,15 @@ define (require, exports, module) ->
         loggingOut = @post "/auth/logout"
         loggingOut.then => @options.changeIdentity null
         loggingOut.then (->), -> log.error "Logout failure"
+
+  # Generates a random ID that can be used in cases like
+  # drag and drop
+  Services.factory 'uuid', Array ->
+    svc =
+      new: ->
+        _p8 = (s) ->
+          p = (Math.random().toString(16) + '000000000').substr(2, 8)
+          (if s then "-" + p.substr(0, 4) + "-" + p.substr(4, 4) else p)
+        _p8() + _p8(true) + _p8(true) + _p8()
+      empty: ->
+        "00000000-0000-0000-0000-000000000000"

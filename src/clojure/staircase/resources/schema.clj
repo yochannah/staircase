@@ -33,6 +33,19 @@
       [:created_at "timestamp with time zone"]
       [:step_id :uuid] ] })
 
+;; Link table, allowing many-many relationships between steps and histories (histories
+;; have many steps, steps can be part of more than one history).
+; (def projects
+;    {:projectsnewtwo
+;     [ [:title string]
+;       [:owner_id string]
+;       [:description string]
+;       [:last_modified "timestamp with time zone"]
+;       [:last_accessed "timestamp with time zone"]
+;       [:id "integer"]
+;       [:created "timestamp with time zone"]
+;       [:parent_id "integer"]] })
+
 ;; Question: should steps also reference their owner? On one hand, since steps
 ;; are immutable, it should be reasonable to share them between histories, even
 ;; those owed by different users.
@@ -72,4 +85,8 @@
      [:frontpage :boolean]
      [:data data]
      [:UNIQUE "(toolset, index)"]]})
+
+
+
+
       

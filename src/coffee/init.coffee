@@ -66,6 +66,7 @@ require.config
     'pluralize': '/vendor/pluralize/pluralize',
     'angular-local-storage':
       '/vendor/angular-local-storage/dist/angular-local-storage.min'
+    'angular-xeditable': '/vendor/angular-xeditable/dist/js/xeditable.min'
     select2:         '/vendor/select2/select2'
     imjs:            '/vendor/imjs/js/im'
   deps: ['./bootstrap']

@@ -70,5 +70,6 @@
     [:a.dropdown-toggle {:dropdown-toggle true} "Contact " [:b.caret]]
      (unordered-list {:class "dropdown-menu"} (contacts config))]
    [:li {:ng-show "auth.loggedIn"} [:div (btn/logout)]]
-   [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]])
+   [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]
+   ])
 

@@ -54,7 +54,8 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
-    'cgNotify'
+    'cgNotify',
+    'angular-xeditable'
   ]
 
   Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes
@@ -74,6 +75,8 @@ define (require, exports, module) ->
 
   Steps.run Array '$rootScope', '$http', '$window', '$location', (scope, http, $window, $loc) ->
     scope.startingPoints = []
+    editableOptions = {}
+    editableOptions.theme = 'bs3'
 
     scope.$on '$routeChangeSuccess', (event, route) ->
       $window.scrollTo 0, 0

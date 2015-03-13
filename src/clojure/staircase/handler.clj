@@ -29,7 +29,8 @@
             [staircase.tools :refer (get-tools get-tool)]
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
-            [compojure.route :as route]) ;; Standard route builders.
+            [compojure.route :as route]
+            [staircase.projects :as projects])
   )
 
 ;; TODO: this file is much too large, and in serious need of refactoring.
@@ -207,6 +208,7 @@
     (routes 
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
+      (GET "/projects" [] (serve-index))
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
@@ -241,6 +243,20 @@
                                   {body :body {idx :idx} :params}
                                   (fork-history-at histories id idx body))
                             (POST "/" {body :body} (add-step-to histories steps id body))))))
+
+(defn- build-project-routes [{:keys [projects]}]
+  (routes ;; routes that start from histories.
+          (GET  "/" [] (staircase.projects/get-all-projects))
+          (POST "/" {payload :body} (staircase.projects/create-project payload))
+          (context "/:id" [id]
+            (GET  "/" [] (staircase.projects/get-single-project id))
+            (DELETE  "/" [] (staircase.projects/delete-project id))
+            (POST  "/" {payload :body} [] (staircase.projects/update-project id payload))
+            (context "/items" [id]
+              (POST "/" {payload :body}
+                (staircase.projects/add-item-to-project id payload))
+              (POST "/remove" {payload :body} [] (staircase.projects/delete-item payload))))))
+
 
 (defn build-step-routes [{:keys [steps]}]
   (routes ;; routes for access to step data.
@@ -309,18 +325,19 @@
       (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
-  (let [hist-routes        (build-hist-routes router)
-        step-routes        (build-step-routes router)
-        service-routes     (build-service-routes router)
-        api-session-routes (build-api-session-routes router)
-        config-routes      (build-config-routes router)]
+  (let [hist-routes (build-hist-routes router)
+        step-routes (build-step-routes router)
+        project-routes (build-project-routes router)
+        service-routes (build-service-routes router)
+        api-session-routes (build-api-session-routes router)]
     (routes ;; put them all together
             (context "/sessions" [] api-session-routes) ;; Getting tokens
             (context "/client-config" [] config-routes) ;; Getting config
             (-> (routes ;; Protected resources.
                   (context "/histories" [] hist-routes)
                   (context "/services" [] service-routes)
-                  (context "/steps" [] step-routes))
+                  (context "/steps" [] step-routes)
+                  (context "/projects" [] project-routes))
                 (wrap-api-auth router))
             (route/not-found {:message "Not found"}))))
 
@@ -375,4 +392,3 @@
   (stop [this] this))
 
 (defn new-router [] (map->Router {}))
-
