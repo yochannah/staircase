@@ -84,6 +84,20 @@
                     "mousemine" {:covers ["M. musculus"]}
                     "yeastmine" {:covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
+      :client-whitelist [
+        "http://*.labs.intermine.org/**"
+        "http://tools.intermine.org/**"
+        "http://alexkalderimis.github.io/**"
+        "http://intermine.github.io/**"]
+      :client-step-config {
+        :show-list {
+                    :activeTabs [:enrich]}
+        :show-table {
+                     :TableCell {
+                                 :IndicateOffHostLinks false
+                                 :PreviewTrigger :click}
+                     :ShowHistory false
+                     :Style {:icons :fontawesome}}}
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates

@@ -17,28 +17,11 @@ define (require, exports, module) ->
   require './services'
   require './directives'
   require './controllers'
-  ga = require 'analytics'
+  config = require 'json!/api/v1/client-config'
+  ga     = require 'analytics'
 
   # Whitelist the sources of any tools we plan on using.
-  whiteList = [
-    'self', # TODO: make configurable.
-    'http://*.labs.intermine.org/**',
-    'http://tools.intermine.org/**',
-    'http://alexkalderimis.github.io/**',
-    'http://intermine.github.io/**'
-  ]
-
-  # TODO: this needs to come from config
-  stepConfig =
-    'show-list':
-      activeTabs: ['enrich']
-    'show-table':
-      TableCell:
-        IndicateOffHostLinks: false,
-        PreviewTrigger: 'click'
-      ShowHistory: false # We manage history in the history list.
-      Style:
-        icons: 'fontawesome'
+  whiteList = ['self'].concat(config.whitelist)
 
   APP_NAME = 'steps' # TODO: needs to be configurable.
 
@@ -65,7 +48,7 @@ define (require, exports, module) ->
   Steps.config Array '$sceDelegateProvider', (p) ->
     p.resourceUrlWhitelist whiteList
   Steps.config Array 'stepConfigProvider', (p) ->
-    for step, conf of stepConfig
+    for step, conf of (config.step_config ? {})
       p.configureStep step, conf
   Steps.config Array 'localStorageServiceProvider', (p) -> p.setPrefix APP_NAME
 
