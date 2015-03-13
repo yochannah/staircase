@@ -3,7 +3,7 @@
   :url "http://steps.herokuapp.org"
   :main staircase.main
   :aot [staircase.main]
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
@@ -13,6 +13,8 @@
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
                  [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
+                 [com.cemerick/drawbridge "0.0.6"] ;; remote debugging
+                 [ring-basic-authentication "1.0.5"] ;; basic auth for repl access
                  [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar

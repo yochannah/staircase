@@ -3,6 +3,10 @@
         ring.util.response
         [ring.middleware.session :only (wrap-session)]
         [ring.middleware.cookies :only (wrap-cookies)]
+        [ring.middleware.keyword-params :only (wrap-keyword-params)]
+        [ring.middleware.nested-params :only (wrap-nested-params)]
+        [ring.middleware.params :only (wrap-params)]
+        [ring.middleware.basic-authentication :only (wrap-basic-authentication)]
         ring.middleware.json
         ring.middleware.format
         ring.middleware.anti-forgery
@@ -24,6 +28,7 @@
             [persona-kit.friend :as pf]
             [persona-kit.core :as pk]
             [persona-kit.middleware :as pm]
+            [cemerick.drawbridge :as drawbridge]
             [cemerick.friend :as friend] ;; auth.
             [cemerick.friend.workflows :as workflows]
             [staircase.tools :refer (get-tools get-tool)]
@@ -172,11 +177,6 @@
                                (assoc :session (dissoc session :anon-identity))
                                (content-type "text/plain")))))))
 
-(defn- logging-verifier [assertion audience]
-  (let [ret (pk/verify-assertion assertion audience)]
-    (info "VERIFICATION RESULT" audience ret)
-    ret))
-
 ;; replacement for persona-kit version. TODO: move to different file.
 (defn persona-workflow [audience request]
   (if (and (= (:uri request) "/auth/login")
@@ -184,7 +184,7 @@
     (-> request
         :params
         (get "assertion")
-        (logging-verifier audience)
+        (pk/verify-assertion audience)
         pf/credential-fn
         (workflows/make-auth {::friend/redirect-on-auth? false
                               ::friend/workflow :mozilla-persona}))))
@@ -206,6 +206,24 @@
   [req]
   (-> (apply merge (map req [:params :form-params :multipart-params]))
       :__anti-forgery-token))
+
+(defn drawbridge-handler [session-store]
+  (-> (drawbridge/ring-handler)
+      (wrap-keyword-params)
+      (wrap-nested-params)
+      (wrap-params)
+      (wrap-session)))
+
+(defn- wrap-drawbridge [handler config session-store]
+  (let [repl (drawbridge-handler session-store)
+        repl-user-creds (map #(% config) [:repl-user :repl-pwd])
+        repl? (fn [req] (and (= "/repl" (:uri req)) (not-any? nil? repl-user-creds)))
+        authenticated? (fn [usr pwd] (= [usr pwd] repl-user-creds))]
+    (fn [req]
+      (let [h (if (repl? req)
+                      (wrap-basic-authentication repl authenticated?)
+                      handler)]
+        (h req)))))
 
 (defn- build-app-routes [{conf :config :as router}]
   (let [serve-index (partial views/index conf)]
@@ -372,10 +390,12 @@
                           (wrap-session {:store session-store})
                           (wrap-cookies)
                           asset-pipeline
-                          pm/wrap-persona-resources))]
-      (assoc this :handler (-> handler
-                               wrap-restful-format
-                               (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))))))
+                          pm/wrap-persona-resources))
+          app (-> handler
+                  wrap-restful-format
+                  (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))
+                  (wrap-drawbridge config session-store))]
+      (assoc this :handler app)))
 
   (stop [this] this))
 
