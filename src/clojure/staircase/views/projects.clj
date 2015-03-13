@@ -117,8 +117,9 @@
           ; [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
           [:button.btn.btn-primary.btn-sm {:type "submit"} "Save"]
           [:button.btn.btn-sm {:ng-click "rowform.$cancel()" :type "button"} "Cancel"]]
+
           [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
-            [:button.btn.btn-default.btn-sm.dropdown-toggle "Options"
+            [:button.btn.btn-default.btn-sm {:dropdown-toggle true} "Options"
               [:span.caret]]
             [:ul.dropdown-menu
               [:li {:ng-click "rowform.$show()"} [:a "Edit Folder"]]

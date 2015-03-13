@@ -13,6 +13,7 @@ define (require, exports, module) ->
   require 'angular-notify'
   require 'angular-cookies'
   require 'angular-local-storage'
+  require 'angular-xeditable'
   require './filters'
   require './services'
   require './directives'
@@ -54,8 +55,8 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
-    'cgNotify',
-    'angular-xeditable'
+    'xeditable'
+    'cgNotify'
   ]
 
   Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes

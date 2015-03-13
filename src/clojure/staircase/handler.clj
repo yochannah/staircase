@@ -329,7 +329,8 @@
         step-routes (build-step-routes router)
         project-routes (build-project-routes router)
         service-routes (build-service-routes router)
-        api-session-routes (build-api-session-routes router)]
+        api-session-routes (build-api-session-routes router)
+        config-routes      (build-config-routes router)]
     (routes ;; put them all together
             (context "/sessions" [] api-session-routes) ;; Getting tokens
             (context "/client-config" [] config-routes) ;; Getting config

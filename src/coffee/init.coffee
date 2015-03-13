@@ -40,6 +40,7 @@ require.config
     }
   ]
   paths:
+    
     font: "/vendor/requirejs-plugins/src/font"
     goog: "/vendor/requirejs-plugins/src/goog"
     image: "/vendor/requirejs-plugins/src/image"
@@ -62,11 +63,11 @@ require.config
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
     'angular-silent': '/vendor/angular-silent/ngSilent'
+    'angular-xeditable': '/vendor/angular-xeditable/dist/js/xeditable.min'
     'angular-notify': '/vendor/angular-notify/dist/angular-notify',
     'pluralize': '/vendor/pluralize/pluralize',
     'angular-local-storage':
       '/vendor/angular-local-storage/dist/angular-local-storage.min'
-    'angular-xeditable': '/vendor/angular-xeditable/dist/js/xeditable.min'
     select2:         '/vendor/select2/select2'
     imjs:            '/vendor/imjs/js/im'
   deps: ['./bootstrap']
