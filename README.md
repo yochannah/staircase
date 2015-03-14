@@ -7,19 +7,25 @@ The webapp that serves the step-based data-flow interface to the
 
 ## Quick Start
 
-Assuming leingingen, postgres and nodejs are installed:
+Assuming leingingen, postgres and nodejs are installed (see dependencies below):
 
 ```sh
 export PORT=3000 \
        DB_USER=YOU \
        SECRET_KEY_PHRASE="some long and unguessable phrase" \
        WEB_AUDIENCE=http://localhost:$PORT
-createdb staircase
-lein do js-deps, run
+createdb staircase  # Creates database using the default name
+npm install         # installs js dependencies
+lein run            # installs server dependencies, runs server
 ```
 
-Or deploy to heroku (will require provisioning a postgres DB and
-setting the environment variables as below):
+## Heroku Quick Start
+
+Heroku is a fantastic service for hosting webapps. You can run an instance of
+this application for free to get started with staircase.
+
+To deploy to [heroku][heroku] you will need to create a new heroku app (see heroku docs),
+provision a postgres DB and set the following environment variables:
 
 ```sh
 heroku config:set DB_PASSWORD=$YOUR_PASSWD \
@@ -30,6 +36,11 @@ heroku config:set DB_PASSWORD=$YOUR_PASSWD \
                   WEB_DEFAULT_SERVICE=flymine \
                   SECRET_KEY_PHRASE="long key phrase" \
                   WEB_MAX_AGE=300
+```
+
+With that configured, you can launch a staircase by pushing to your repo:
+
+```
 git push heroku master
 ```
 
@@ -49,7 +60,7 @@ nodejs/clojure build. This is set in the `.env` file.
 
 ## Prerequisites and Dependencies
 
-You will need [Leiningen][1] 2.0 or above installed (2.4+ to use the web-repl). This handles all
+You will need [Leiningen][lein] 2.0 or above installed (2.4+ to use the web-repl). This handles all
 dependencies. As clojure is a JVM language, this requires a JDK (1.6+) be installed;
 please see your friendly java vendor for details.
 
@@ -132,3 +143,7 @@ Copyright © 2014 Alex Kalderimis and InterMine
 [psql]: http://www.postgresql.org/
 [lein]: https://github.com/technomancy/leiningen
 [bower]: http://bower.io/
+[heroku]: https://www.heroku.com/
+[npm]: https://www.npmjs.com/
+[nodejs]: https://nodejs.org/
+
