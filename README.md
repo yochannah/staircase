@@ -22,24 +22,40 @@ Or deploy to heroku (will require provisioning a postgres DB and
 setting the environment variables as below):
 
 ```sh
-heroku config set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git \
-                  DB_PASSWORD=$YOUR_PASSWD \
+heroku config:set DB_PASSWORD=$YOUR_PASSWD \
                   DB_USER=$YOUR_USER \
                   DB_SUBNAME=//$HOST/$DBNAME \
                   DB_PORT=$DB_PORT \
-                  WEB_AUDIENCE=$URL \
+                  WEB_AUDIENCE=$URL \ 
                   WEB_DEFAULT_SERVICE=flymine \
                   SECRET_KEY_PHRASE="long key phrase" \
                   WEB_MAX_AGE=300
 git push heroku master
 ```
 
-## Prerequisites
+The key-phrase can be any string, but it should be kept secure. The audience
+must be the same as the public URL of the site, or else Persona login will not
+work. Additional setting can be provided as follows:
 
-You will need [Leiningen][1] 2.0 or above installed. This handles all
-dependencies, including runtime javascript, which are managed by
-[Bower][lein]. As clojure is a JVM language, this requires a JDK be installed;
-please see you friendly java vendor for details.
+```sh
+# activate google analytics
+heroku config:set CLIENT_GA_TOKEN=$YOUR_TOKEN
+# Enable the clojure repl for debugging access
+heroku config:set WEB_REPL_USER=$YOU WEB_REPL_PWD=$YOUR_PWD
+```
+
+We build with the buildpack-multi buildpack, since we have a two-stage
+nodejs/clojure build. This is set in the `.env` file.
+
+## Prerequisites and Dependencies
+
+You will need [Leiningen][1] 2.0 or above installed (2.4+ to use the web-repl). This handles all
+dependencies. As clojure is a JVM language, this requires a JDK (1.6+) be installed;
+please see your friendly java vendor for details.
+
+A [node-js][nodejs] environment is also required, which handles the
+installation of the javascript dependencies using [npm][npm] and
+[Bower][bower].
 
 This application also makes use of a postgres database. So you will need
 [postgres][psql] installed and configured.
@@ -65,7 +81,8 @@ a flexible configuration system. Most settings are to be found in
 
 It is recommended that DB authentication settings do not live in source
 controlled files, but should instead be configured through environment
-variables or in the user config (`~./lein/profile.clj`).
+variables or in the user config (`~./lein/profile.clj`). See the heroku section
+above for details on the use of environment variables for this purpose.
 
 The following configuration values are recognized, here presented
 as you might configure them in a `profiles.clj` file:
