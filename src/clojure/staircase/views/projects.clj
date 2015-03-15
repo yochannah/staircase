@@ -106,7 +106,7 @@
 
 (defn breadcrumb []
   (html
-  [:ol.breadcrumb.bc
+  [:ul.breadcrumb.list-inline
     ; [:li [:a {:ng-click "setlevel(allProjects)"} "Home"]]
     [:li [:a {:ng-click "setlevelbc(allProjects)"} "Home"]]
     [:li {:ng-repeat "item in breadcrumbs" :ng-click "setlevelbc(item, $index)"} [:a "{{getname(item)}}"]]]))
@@ -124,7 +124,7 @@
             [:ul.dropdown-menu
               [:li {:ng-click "rowform.$show()"} [:a "Edit Folder"]]
               [:li {:ng-click "deleteitem(item)"} [:a "Delete Item"]]
-              [:li {:ng-click "deletefolder(project)"} [:a "Delete Folder"]]
+              [:li {:ng-show "item.type == 'Project'" :ng-click "deletefolder(project)"} [:a "Delete Folder"]]
               [:li {:ng-click "talk()"} [:a "Copy Project"] ]]]))
 
 (defn navbar []
@@ -137,6 +137,8 @@
         [:div.form-group
           [:input.form-control {:ng-model "foldername" :type "text" :name "projectname" :placeholder "Folder name..."}]]
         [:button.btn.btn-default {:ng-click "createProject(foldername)"} "Create"]]]]))
+
+
 
 (defn project-table []
   
@@ -186,7 +188,7 @@
     [:tr {:ng-repeat "item in level.contents"
     :ng-mouseover "hoverIn()"
     :ng-mouseleave "hoverOut()"}
-      [:td [:a {:ng-click "setInspection(item)"} [:i {:ng-class "geticon(item)"}] "{{item.item_id}}"]]
+      [:td [:a {:href "{{gethref(item)}}" :ng-click ""} [:i {:ng-class "geticon(item)"}] "{{item.item_id}}"]]
       [:td "{{project.item_id}}"]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
@@ -208,7 +210,9 @@
     ; [:div.row-fluid
     ;     [:div.col-md-12
     ;       [:div (create)]]]
-    [:div.row-fluid
+    [:div.row-fluid {:ng-hide "auth.loggedIn"}
+      [:p "Please log in to access MyMine"]]
+    [:div.row-fluid {:ng-show "auth.loggedIn"}
       [:div.col-md-8
         [:div (project-table)]]
       [:div.col-md-4

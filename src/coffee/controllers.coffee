@@ -53,11 +53,26 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
     scope.breadcrumbs = []
 
+    mines = []
+    Mines.all().then (val) -> mines = val
+
     scope.status =
       isopen: false
 
     scope.level = []
     scope.flattened = []
+
+    scope.gethref = (item) ->
+      # console.log "-------building href for item", item
+      # console.log "looking for source", item.source
+      # console.log "mines", mines
+      src = L.findWhere mines, {root: item.source}
+      console.log "found source", src
+      switch item.type
+        when "List"
+          # "test"
+          "starting-point/choose-list/#{src.name}?name=#{item.item_id}"
+
 
     scope.getformname = (project) ->
       "folder" + project.id
@@ -168,7 +183,11 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
       .then (result) ->
         do synch
 
+
+
     Mines.all().then (values) ->
+
+      console.log "allmines", values
 
       scope.lists = []
 
@@ -189,7 +208,8 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
     # Poll this to retrieve user's projects!
     # setTimeout ->
-    #   console.log "IDENT1", scope.auth
+    #   # console.log "IDENT1", scope.auth
+    #   # scope.auth = "onetwo"
     # , 3000
 
   # Inline controller.

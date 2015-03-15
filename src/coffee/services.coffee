@@ -320,6 +320,12 @@ define (require, exports, module) ->
 
     addto = (pid, data) ->
       # Move data validation to clojure / backend
+      # Trim the last slash off the list source (to match Mines)
+      # if data.service?.root?
+      #   if data.service.root.slice(-1) is "/"
+      #     data.service.root = data.service.root.slice 0, data.service.root.length - 1
+
+      # console.log "new value is", data
       transformed =
         source: data.service?.root
         type: data.type
