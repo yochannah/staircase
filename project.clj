@@ -3,7 +3,7 @@
   :url "http://steps.herokuapp.org"
   :main staircase.main
   :aot [staircase.main]
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
@@ -13,6 +13,8 @@
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
                  [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
+                 [com.cemerick/drawbridge "0.0.6"] ;; remote debugging
+                 [ring-basic-authentication "1.0.5"] ;; basic auth for repl access
                  [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar
@@ -29,8 +31,10 @@
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
                  [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT" :exclusions [com.google.javascript/closure-compiler]]
+                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"
+                    :exclusions [com.google.javascript/closure-compiler]]
                  [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
+                 [jdbc-ring-session "0.2"]
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
                  ;; see: https://github.com/LightTable/LightTable/issues/794
@@ -58,21 +62,8 @@
                    :all (constantly true)
                    :database :database
                    :default (complement :acceptance)}
-  :bower {:directory "resources/public/vendor"}
-  :bower-dependencies [[
-    requirejs "~2.1.9",
-    requirejs-text "~2.0.10",
-    angular-route "~1.2.9",
-    angular "~1.2.9",
-    angular-ui-bootstrap-bower "~0.11.0",
-    angular-cookies "~1.2.16",
-    imjs "~3.2.2",
-    lodash "~2.4.1",
-    angular-resource "~1.2.16",
-    requirejs-domready "~2.0.1",
-    angular-ui-select2 "~0.0.5",
-    angular-animate "~1.2.16"]]
   :env {
+      :web-search-placeholder "enter a search term"
       :web-gh-repository "https://github.com/alexkalderimis/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
@@ -86,7 +77,29 @@
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
-       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
+      ;; The section below should be replaced by pulling these values from branding.
+      ;; and ultimately by a template based solution.
+      :web-service-meta {
+                    "flymine" {:covers ["D. melanogaster"]}
+                    "zfin"    {:covers ["D. rerio"]}
+                    "mousemine" {:covers ["M. musculus"]}
+                    "yeastmine" {:covers ["S. cerevisiae"]}}
+      :client-ga-token nil ;; Supply a token to use analytics
+      :client-whitelist [
+        "http://*.labs.intermine.org/**"
+        "http://tools.intermine.org/**"
+        "http://alexkalderimis.github.io/**"
+        "http://intermine.github.io/**"]
+      :client-step-config {
+        :show-list {
+                    :activeTabs [:enrich]}
+        :show-table {
+                     :TableCell {
+                                 :IndicateOffHostLinks false
+                                 :PreviewTrigger :click}
+                     :ShowHistory false
+                     :Style {:icons :fontawesome}}}
+      :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
                    [:choose-list {:service "humanmine"}]
@@ -97,6 +110,7 @@
                    :show-list
                    :show-enrichment
                    :resolve-ids
+                   :combine-lists
                    :convert-list
                    :list-templates
                    :export

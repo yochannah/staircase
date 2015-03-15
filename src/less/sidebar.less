@@ -55,7 +55,7 @@
         }
     }
 
-    .next-steps.slide-right {
+    .sidebar.slide-right {
         position: relative;
         @media (min-width: @screen-md-min) {
             position: absolute;
@@ -63,15 +63,15 @@
 
         &.offscreen {
             right: -100%;
-            display: none;
+            // display: none;
             @media (min-width: @screen-md-min) {
                 display: block;
-                right: -16%;
+                left: 15%;
             }
         }
 
         &.onscreen {
-            right: 0%;
+            left: 0%;
             display: block;
             @media (min-width: @screen-md-min) {
                 right: 1%;

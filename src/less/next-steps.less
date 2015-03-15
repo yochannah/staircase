@@ -1,4 +1,16 @@
 .next-steps {
+    .list-group-item:hover {
+        background: @brand-primary;
+        color: @brand-primary-inverse;
+        a {
+            color: @brand-primary-inverse;
+            text-decoration: none;
+        }
+    }
+    a {
+        color: @text-color;
+        text-decoration: none;
+    }
     a:hover > i.fa {
         font-size: 1.1em;
     }
@@ -6,4 +18,37 @@
     .list-group-item {
         border: none;
     }
+
+    .panel-heading {
+        i.fa {
+            @media (min-width: @screen-md) {
+                display: none;
+            }
+
+        }
+    }
+
+    .list-group.steps {
+        display: none;
+        @media (min-width: @screen-md) {
+            display: block;
+        }
+        &.expanded {
+            display: block;
+        }
+
+        next-step {
+            a[disabled] {
+                color: @gray-light;
+            }
+
+            &:hover {
+                a[disabled] {
+                    color: @gray-lighter;
+                }
+            }
+        }
+    }
+
+
 }

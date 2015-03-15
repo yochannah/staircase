@@ -7,8 +7,8 @@
             </label>
             <select
                     class="form-control"
-                    ng-model="rootClass"
-                    ng-options="cld.displayName for cld in classes">
+                    ng-model="state.rootClass"
+                    ng-options="cld as cld.displayName for cld in classes">
             </select>
         </div>
         <div class="form-group col-sm-5" ng-hide="!discriminator">
@@ -31,9 +31,10 @@
         </div>
     </div>
     <tabset type="pills">
-        <tab heading="Enter IDs">
+        <tab heading="Enter IDs" select="controller.focusTextArea()">
             <div class="form-group full-width">
                 <textarea class="literal"
+                    focus-me="controller.textAreaFocussed"
                     ng-model="ids.pasted"
                     spellcheck="false"
                     rows="{{tool.state === 'FULL' ? 10 : 5}}"

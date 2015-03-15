@@ -5,5 +5,5 @@
   "type": "IFrame",
   "seamless": false,
   "heading": "Results Table",
-  "src": "http://alexkalderimis.github.io/show-table-tool/tool.html"
+  "src": "http://alexkalderimis.github.io/show-table-tool/app/tool.html"
 }

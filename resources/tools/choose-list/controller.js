@@ -1,11 +1,17 @@
-define(['angular', 'imjs'], function (ng, im) {
+define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
   "use strict";
 
   var connect = im.Service.connect;
 
-  var ChooseListCtrl = ['$scope', '$log', '$q', '$timeout', '$cacheFactory', 'Mines',
-          function (scope, logger, Q, timeout, cacheFactory, mines) {
+  var $inject = [
+    '$scope',        '$log',    '$q',        '$timeout',
+    '$cacheFactory', '$window', '$location', 'Mines'
+  ];
 
+  var ChooseListCtrl = $inject.concat([
+    function (scope, logger, Q, timeout, cacheFactory, $window, location, mines) {
+
+    var searchParams = location.search();
     scope.serviceName = "";
     scope.filters = {};
 
@@ -23,6 +29,10 @@ define(['angular', 'imjs'], function (ng, im) {
                        .then(null, function (e) { scope.tool.error = e; });
     
     scope.viewList = viewList;
+
+    scope.deleteList = deleteList;
+
+    scope.copyList = copyList;
 
     scope.$watch('serviceName', function (name) {
       if (name) scope.tool.heading = "Lists in " + name;
@@ -63,9 +73,36 @@ define(['angular', 'imjs'], function (ng, im) {
       return d.promise;
     }
 
+    function deleteList (list) {
+      list.del().then(
+          function () { readLists(list.service); },
+          function (err) { console.error("Could not delete", err); }
+      );
+    }
+
+    function copyList (list) {
+      list.service
+          .query({from: list.type, select: ['id'], where: [[list.type, 'IN', list.name]]})
+          .then(function (q) { return q.saveAsList({name: "Copy of " + list.name}); })
+          .then(
+            function () { readLists(list.service); },
+            function (err) { console.error("Could not copy list", err); }
+      );
+    }
+
     function setLists (lists) {
+      if (searchParams && searchParams.name) {
+        var found = L.where(lists, {name: searchParams.name});
+        if (found.length === 1) {
+          return viewList(found[0]);
+        } else {
+          // Keep in sync?
+          scope.listFilter = searchParams.name;
+        }
+      }
       scope.$apply(function () {
         scope.lists = scope.allLists = lists.filter(listFilter);
+
         var n = scope.lists.length;
         if (n < 5) {
           scope.tool.tall = false;
@@ -95,7 +132,7 @@ define(['angular', 'imjs'], function (ng, im) {
       timeout(function () { scope.serviceName = mine.name; });
     }
 
-  }];
+  }]);
 
   function listFilter (list) {
     return list.size && list.status === "CURRENT";
@@ -107,7 +144,7 @@ define(['angular', 'imjs'], function (ng, im) {
       vals.push(obj[key]);
     }
     return vals;
-  }
+  };
 
   function Category(name, size) {
     this.size = 0;

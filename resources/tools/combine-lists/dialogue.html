@@ -1,0 +1,76 @@
+<div class="modal-header">
+    <a class="btn btn-warning pull-right" ng-click="cancel()">
+        close
+    </a>
+    <h3 class="modal-title">Combine {{list.name}} with one or more other lists</h3>
+</div>
+
+<div class="modal-body list-templates-chooser">
+    <div class="form-group flex-row-1 flex-row-sm-2 guttered"
+        ng-class="{'has-error': !otherLists.length}">
+        <div class="flex-box">
+            <select class="form-control"
+                    ng-model="operation"
+                    ng-options="op as op.verb for op in operations">
+            </select>
+        </div>
+        <div class="flex-box">
+            <select multiple
+                    data-placeholder="Choose another list"
+                    style="width:100%"
+                    ui-select2="{tokenSeparators: ','}"
+                    ng-model="otherLists">
+                    <option value="__DUMMY__"></option>
+                    <option ng-repeat="list in lists" value="{{list.name}}">
+                        {{list.name}} ({{list.size}} {{classNames[list.type]}}s)
+                    </option>
+            </select>
+            <span class="help-block" ng-hide="otherLists.length">
+                You must select at least one other list
+            </span>
+        </div>
+    </div>
+    <div class="form-group flex-row-1 flex-row-sm-2 guttered"
+        ng-class="{'has-error': !newListName}">
+        <div class="flex-box">
+            <label>Name</label>
+        </div>
+        <div class="flex-box">
+            <input class="form-control" required ng-model="newListName" placeholder="Enter a list name">
+            <span class="help-block" ng-hide="newListName">You must provide a name for the list</span>
+        </div>
+    </div>
+    <div class="form-group flex-row-1 flex-row-sm-2 guttered">
+        <div class="flex-box">
+            <label>Description</label>
+        </div>
+        <div class="flex-box">
+            <input class="form-control" ng-model="newListDescription" placeholder="Enter an (optional) description">
+        </div>
+    </div>
+
+    <div>
+        <div class="flex-row-3 vennish">
+            <div class="flex-box lefts"
+                ng-class="{active: operation.lefts}">
+                {{ counts.left }} Only in this list
+            </div>
+            <div class="flex-box common"
+                ng-class="{active: operation.common}">
+                {{ counts.common }} Common elements
+            </div>
+            <div class="flex-box rights"
+                ng-class="{active: operation.rights}">
+                {{ counts.right }} Only in other list(s)
+            </div>
+        </div>
+        <span class="help-block">Contents of the resulting list</span>
+    </div>
+
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary" ng-click="run()">Combine</button>
+</div>
+

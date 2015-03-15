@@ -56,7 +56,7 @@
     (let [histories (component/start (new-history-resource :db {:connection db-spec}))
           new-id (create histories {:title "My new history" :description "A testing history"})
           got (get-one histories new-id)
-          hists (get-all histories)]
+          hists (into [] (get-all histories))]
       (testing "Return value of create"
         (is (instance? java.util.UUID new-id))
         (is (instance? java.util.Date (:created_at got))))
@@ -76,7 +76,7 @@
         (is (exists? histories new-id)))
       (let [updated (update histories new-id {:title "changed the title" :created_at "sneaky attempt to change the past"})
             retrieved (get-one histories new-id)
-            hists (get-all histories)]
+            hists (into [] (get-all histories))]
         (testing "Changed the title"
           (is (= "changed the title" (:title updated)))
           (is (= (:created_at got) (:created_at updated)))

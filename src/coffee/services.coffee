@@ -1,4 +1,16 @@
-require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
+# Need to capture this reference to the requirejs require function so
+# it is available to load next steps with, since it is different
+# from the require function injected into the commonjs wrapper.
+requirejs = require
+
+define (require, exports, module) ->
+
+  ng = require 'angular'
+  require 'angular-resource'
+  L = require 'lodash'
+  imjs = require 'imjs'
+  Messages = require './messages'
+  ga = require 'analytics'
 
   asData = ({data}) -> data
 
@@ -10,9 +22,12 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.factory 'assign', ['$timeout', (to) -> (obj, prop) -> (x) -> to -> obj[prop] = x]
 
+  Services.factory 'Messages', -> new Messages
+
   class StepConfig
 
     constructor: ->
+
       stepConfig = {}
 
       @configureStep = (ident, conf) -> stepConfig[ident] = conf
@@ -49,11 +64,35 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
 
   Services.factory 'meetRequest', Array '$q', '$injector', (Q, injector) -> (tool, step, data) ->
     d = Q.defer()
-    require {baseUrl: '/'}, ['.' + tool.providerURI], (factory) ->
+    requireRelativeToBase = requirejs.config baseUrl: '/'
+    requireRelativeToBase ['.' + tool.providerURI], (factory) ->
       handleRequest = injector.invoke factory, this
       handleRequest(step, data).then d.resolve, d.reject
       
     return d.promise
+
+  do (deps = ['$cacheFactory', 'localStorageService']) ->
+    Services.factory 'localCache', Array deps..., (cacheFactory, localStorage) ->
+
+      restoreCache = (cache, name) ->
+        for k in localStorage.keys() when 0 is k.indexOf "#{ name }:"
+          cache.put k.slice(name.length + 1), localStorage.get(k)
+
+      constructCache = (name) ->
+        cache = cacheFactory name, capacity: 1000
+        restoreCache cache, name
+        origPut = cache.put
+        newPut = (k, v) ->
+          localStorage.set "#{name}:#{ k }", JSON.stringify(v)
+          origPut.call cache, k, v
+        cache.put = newPut
+        return cache
+
+      (name) ->
+        if cache = cacheFactory.get name
+          return cache
+        else
+          cache = constructCache name
 
   Services.factory 'generateListName', Array '$q', (Q) -> (conn, type, category) ->
     naming = conn.fetchModel().then (model) -> model.makePath(type).getDisplayName()
@@ -68,9 +107,19 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
         currentName = "#{ baseName } (#{ suffix++ })"
       return currentName
 
+  createConnection = (conf) ->
+    s = imjs.Service.connect conf
+    s.name = conf.name
+    return s
+
   # Provide a function for connecting to a mine by URL.
   Services.factory 'connectTo', Array 'Mines', (mines) -> (root) ->
-    mines.atURL(root).then (conf) -> imjs.Service.connect conf
+    mines.atURL(root).then createConnection
+
+  # Connect to a mine by name
+  Services.factory 'connect', Array 'Mines', (Mines) ->
+    cache = {}
+    (name) -> cache[name] ?= Mines.get(name).then createConnection
 
   # Provide a function that will yield a value suitable for identifying
   # which version of a service was contacted at a particular time.
@@ -122,20 +171,23 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}
     
-    maker.fromIds = ({objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
+    maker.fromIds = ({listDetails, objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
       constraint = {path: type, op: 'IN', ids: objectIds}
-      tags = ['source:identifiers']
-      description = "Created by resolving identifiers"
-      naming = genName conn, type, category
+
+      naming = (listDetails?.name ? (genName conn, type, category))
+      tags = ['source:identifiers'].concat(listDetails?.tags ? [])
+      description = (listDetails?.description ? "Created by resolving identifiers")
+
       querying = conn.query select: ['id'], from: type, where: [constraint]
       Q.all([naming, querying]).then ([name, query]) ->
-        console.log {name, tags, description}
-        query.saveAsList {name, description}
+        # TODO: add tags when we can deal with anonymous user issues.
+        query.saveAsList {name, description} # , tags}
 
-    maker.fromQuery = (query, service) -> connectTo(service.root).then (conn) ->
-      description = "Need a better way to pass along descriptions..."
-      naming = genName conn, query.from
+    maker.fromQuery = (query, service, listDetails) -> connectTo(service.root).then (conn) ->
+      description = listDetails?.description
+      console.log query
       querying = conn.query query
+      naming = (listDetails?.name ? (querying.then (q) -> genName conn, q.root))
       Q.all([naming, querying]).then ([name, query]) -> query.saveAsList {name, description}
 
     return maker
@@ -191,8 +243,11 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       ret = Q.defer()
       defaults = scope.defaults or {}
       scope.model = model
-      name = (className) -> model.makePath(className).getDisplayName().then (displayName) ->
-        {className, displayName}
+      name = (className) ->
+        trimmed = className.replace /^.*\./, ''
+        model.classes[trimmed] = model.classes[className] # deal with java.lang.Object
+        model.makePath(trimmed).getDisplayName()
+             .then (displayName) -> {className, displayName}
       group = if not grouper then ((x) -> x) else (names) ->
         names.group = grouper names
         return names
@@ -267,7 +322,10 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
     put = (ident, data) ->
       auth.authorize().then (headers) -> http.put("#{URL}/#{ident}", data, {headers}).then asData
 
-    return {all, get, atURL, put}
+    del = (ident) ->
+      auth.authorize().then (headers) -> http.delete("#{URL}/#{ident}", {headers})
+
+    return {all, get, atURL, put, delete: del}
 
   Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
     headers = auth.headers
@@ -295,7 +353,9 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
               console.debug "Created history #{ history.id } and step #{ step.id }"
               loc.url "/history/#{ history.id }/1"
 
-      watch = (scope) -> scope.$on 'start-history', (evt, message) -> startHistory message
+      watch = (scope) -> scope.$on 'start-history', (evt, message) ->
+        startHistory message
+        ga 'send', 'event', 'history', 'start', message.tool
 
       return {watch, startHistory}
 
@@ -321,9 +381,13 @@ require ['angular', 'angular-resource', 'lodash', 'imjs'], (ng, _, L, imjs) ->
       onlogin: (assertion) =>
         loggingIn = @post "/auth/login", {assertion}
         loggingIn.then ({data}) => @options.changeIdentity data.current
-        loggingIn.then (->), -> navId.logout()
+        loggingIn.then (-> ga 'send', 'event', 'auth', 'login', 'success'), ->
+          ga 'send', 'event', 'auth', 'login', 'failure'
+          navId.logout()
 
       onlogout: =>
         loggingOut = @post "/auth/logout"
         loggingOut.then => @options.changeIdentity null
-        loggingOut.then (->), -> log.error "Logout failure"
+        loggingOut.then (-> ga 'send', 'event', 'auth', 'logout', 'success'), ->
+          ga 'send', 'event', 'auth', 'logout', 'failure'
+          log.error "Logout failure"

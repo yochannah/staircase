@@ -57,6 +57,9 @@ define ['imjs'], (imjs) ->
     scope.resetService = ({name, root}) ->
       http.get(root + "/session").then ({data: {token}}) -> Mines.put(name, {token}).then init
 
+    scope.deleteService = ({name}) ->
+      Mines.delete(name).then init
+
     scope.linkService = (service) ->
       service.editing = true
 

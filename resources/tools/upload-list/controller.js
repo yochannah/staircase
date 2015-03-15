@@ -2,6 +2,8 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
   'use strict';
 
   var connect = im.Service.connect;
+  var nameTemplate = L.template('Upload list to <%= name %>');
+  var actionTemplate = L.template('Send <%= format(numIds) %> <%= type %> identifiers');
 
   return [
     '$scope', '$log', '$timeout', '$cacheFactory', '$window',
@@ -19,13 +21,23 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     scope.discriminator = null;
     scope.extraValue = null;
     scope.parsedIds = [];
-    scope.navType = "pills";
     scope.sorting = '';
     scope.ids = {pasted: '', file: null};
     scope.rowCount = "counting...";
     scope.serviceName = "";
     scope.state || (scope.state = {rootClass: {}});
     scope.actions || (scope.actions = {});
+
+    this.focusTextArea = function () {
+      this.textAreaFocussed = true;
+    };
+
+    var mineName = 'default';
+    console.log(scope.tool);
+    if (scope.tool.args && scope.tool.args.service) {
+      mineName = scope.tool.args.service;
+    }
+    var fetchingDefaultMine = mines.get(mineName);
 
     scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 
@@ -45,15 +57,13 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
             type: type,
             identifiers: identifiers,
             extra: (scope.extraValue || ''),
-            caseSensitive: false
+            caseSensitive: scope.caseSensitive
           }
         }
       });
     };
 
     scope.$on('act', scope.sendIdentifiers);
-
-    var fetchingDefaultMine = mines.get('default');
 
     scope.removeToken = function (token) {
       scope.parsedIds = L.without(scope.parsedIds, token);
@@ -63,17 +73,25 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       scope.parsedIds.push({token: '', editing: true});
     };
 
-    scope.$watch('parsedIds', function (ids) {
+    scope.$watch('parsedIds', updateActionButton);
+    scope.$watch('state.rootClass.displayName', updateActionButton);
+
+    function updateActionButton () {
+      var ids = scope.parsedIds;
       scope.state.disabled = !(ids && ids.length);
       if (!scope.state.disabled) {
-        scope.actions.act = "Send " + filters('number')(ids.length) + " identifiers";
+        scope.actions.act = actionTemplate({
+          format: filters('number'),
+          numIds: ids.length,
+          type: (scope.state.rootClass.displayName)
+        });
       } else {
         scope.actions.act = null;
       }
-    });
+    }
 
     scope.$watch('serviceName', function (name) {
-      scope.tool.heading = 'Resolve identifiers at ' + name;
+      scope.tool.heading = nameTemplate({name: name});
     });
 
     scope.$watch('ids.pasted', function (ids) {
@@ -82,29 +100,28 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       });
     });
 
+    /** TODO! Find a way to automatically work out the extra value **/
     scope.$watch('state.rootClass.className', function (className) {
       if (!className) return;
       scope.extraValues = [];
       scope.discriminator = null;
       scope.extraValue = null;
-      scope.connection.fetchSummaryFields().then(function withSummaryFields(fields) {
-        var fieldsForType = fields[className];
-        var joinedFields = fieldsForType.filter(function (f) { return f.split('.').length > 2; });
-        console.log(fieldsForType, joinedFields);
-        if (joinedFields.length === 1) {
-          scope.connection.fetchModel().then(function (model) {
-            return model.makePath(joinedFields[0]).getDisplayName();
-          }).then(function (name) {
-            timeout(function () {
-              scope.discriminator = name;
-            });
-          });
-          scope.connection.values({select: joinedFields}).then(function (values) {
-            timeout(function () {
-              scope.extraValues = values;
-            });
-          });
+      scope.connection.fetchModel().then(function (model) {
+        if (!model.classes[className].fields.organism) {
+          return;
         }
+        var path = model.makePath('Organism.shortName');
+        path.getDisplayName().then(function (name) {
+          timeout(function () {
+            scope.discriminator = name;
+          });
+        });
+        scope.connection
+             .values({select: ['Organism.shortName']})
+             .then(function (values) { timeout(function () {
+                scope.extraValues = values;
+              });
+            });
       });
     });
 

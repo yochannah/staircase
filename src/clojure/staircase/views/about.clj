@@ -3,14 +3,14 @@
         [hiccup.element :only (link-to)])
   (:require [staircase.views.forms :refer (search-input)]))
 
-(defn about-header [{:keys [project-title]}]
+(defn about-header [config]
   [:div.about-header
    [:div.container
     [:div.row
      [:div.col-md-8.col-md-offset-2
-      [:h1 project-title]]]
+      [:h1 (:project-title config)]]]
     [:div.row
-     [:form.search-form.col-sm-6.col-sm-offset-3 search-input]]
+     [:form.search-form.col-sm-6.col-sm-offset-3 (search-input config)]]
     [:div.row
      [:p "The data-flow interface to InterMine data-warehouses,
          providing an extensible, programmable work-bench for

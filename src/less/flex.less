@@ -1,0 +1,108 @@
+.flexbox() {
+    display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+    display: -moz-box;     /* OLD - Firefox 19- (buggy but mostly works) */
+    display: -ms-flexbox;  /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+    display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
+}
+
+.flex-column() {
+    -webkit-flex-flow: column;
+    flex-flow: column;
+}
+
+.flex-wrap() {
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.flex(@opts) {
+    -webkit-box-flex: @opts;      /* OLD - iOS 6-, Safari 3.1-6 */
+    -moz-box-flex: @opts;         /* OLD - Firefox 19- */
+    -webkit-flex: @opts;          /* Chrome */
+    -ms-flex: @opts;              /* IE 10 */
+    flex: @opts;
+}
+
+.flex-grow {
+    .flex(1);
+}
+
+.make-flex-columns(@size, @n) when (@n > 0) {
+    .flex-row-@{size}-@{n} {
+        .flex-box {
+            @media (min-width: ~"@{screen-@{size}}") {
+                .flex(0 0 (100% / @n));
+            }
+        }
+    }
+    .make-flex-columns(@size, @n - 1);
+}
+
+.make-flex-columns(@n) when (@n > 0) {
+    .flex-row-@{n} {
+        .flexbox();
+        .flex-wrap();
+        .flex-row-guttered();
+        .flex-box {
+            .flex(0 0 (100% / @n));
+        }
+    }
+    .make-flex-columns(@n - 1);
+}
+
+.make-flex-rows(@size) {
+    .make-flex-columns(@size, 12);
+}
+
+.flex-row-guttered {
+    &.guttered {
+        padding: (@grid-gutter-width / 2) 0;
+        margin-left: -(@grid-gutter-width / 2);
+        margin-right: -(@grid-gutter-width / 2);
+
+        .flex-box {
+            padding-left: (@grid-gutter-width / 2);
+            padding-right: (@grid-gutter-width / 2);
+        }
+    }
+}
+
+.flex-column {
+    .flexbox();
+    flex-direction: column;
+}
+
+.flex-row, .flex-column {
+    &.stretched {
+        justify-content: space-around;
+    }
+}
+
+.flex-row {
+
+    .flex-row-guttered();
+
+    .flexbox();
+    .flex-wrap();
+
+    .flex-box {
+        .flex-grow();
+    }
+    .flex-box.full {
+        .flex(1 0 100%);
+    }
+    .flex-box.flex-col-6 {
+        .flex(1 0 50%);
+    }
+    .flex-box.flex-col-3 {
+        .flex(1 0 25%);
+    }
+}
+
+.make-flex-columns(12);
+.make-flex-rows(xs);
+.make-flex-rows(sm);
+.make-flex-rows(md);
+.make-flex-rows(lg);
+

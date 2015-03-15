@@ -15,6 +15,11 @@
      :ng-hide "service.editing"}
     [:i.fa.fa-undo]]
    [:button.btn.btn-default.btn-sm
+    {:title "Remove this service"
+     :ng-click "deleteService(service)"
+     :ng-hide "service.editing"}
+    [:i.fa.fa-times]]
+   [:button.btn.btn-default.btn-sm
     {:tooltip "link this service to {{service.user.username ? 'a different' : 'an existing'}} account"
      :tooltip-placement "right"
      :ng-hide "service.editing"

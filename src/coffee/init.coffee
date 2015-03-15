@@ -19,6 +19,10 @@ require.config
     'angular-cookies': ['angular']
     'angular-resource': ['angular']
     'angular-silent': ['angular']
+    'angular-local-storage': ['angular']
+    'angular-notify':
+      deps: ['angular']
+      init: -> loadCss '/vendor/angular-notify/dist/angular-notify.css'
     'angular-ui-select2':
       deps: ['angular', 'select2']
       init: -> loadCss "/vendor/select2/select2.css"
@@ -36,6 +40,14 @@ require.config
     }
   ]
   paths:
+    font: "/vendor/requirejs-plugins/src/font"
+    goog: "/vendor/requirejs-plugins/src/goog"
+    image: "/vendor/requirejs-plugins/src/image"
+    json: "/vendor/requirejs-plugins/src/json"
+    mdown: "/vendor/requirejs-plugins/src/mdown.js"
+    text: "/vendor/requirejs-plugins/lib/text"
+    markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"
+    analytics:       '/js/ga'
     angular:         '/vendor/angular/angular'
     headroom:        '/vendor/headroom.js/dist/headroom'
     'ng-headroom':   '/vendor/headroom.js/dist/angular.headroom'
@@ -50,20 +62,11 @@ require.config
     'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
     'angular-silent': '/vendor/angular-silent/ngSilent'
+    'angular-notify': '/vendor/angular-notify/dist/angular-notify',
+    'pluralize': '/vendor/pluralize/pluralize',
+    'angular-local-storage':
+      '/vendor/angular-local-storage/dist/angular-local-storage.min'
     select2:         '/vendor/select2/select2'
-    text:            '/vendor/requirejs-text/text'
     imjs:            '/vendor/imjs/js/im'
   deps: ['./bootstrap']
 
-# See http://code.angularjs.org/1.2.1/docs/guide/bootstrap#overview_deferred-bootstrap
-# window.name = 'NG_DEFER_BOOTSTRAP!'
-
-# deps = ['angular', 'angular-cookies', 'angular-route', 'angular-resource',
-#        'services', 'controllers', 'directives', 'filters', 'app', 'routes']
-
-# Have to require all modules here eagerly, as they must be available before resumeBootstrap
-# is called.
-# define deps, (angular) ->
-# $html = angular.element document.getElementsByTagName('html')[0]
-# 
-# $html.ready -> angular.resumeBootstrap()

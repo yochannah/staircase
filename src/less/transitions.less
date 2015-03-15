@@ -4,8 +4,8 @@
 }
 
 .slide-right {
-    right: 0;
-    transition: right 0.3s ease-in,width 0.3s ease-in;
+    left: 0;
+    transition: left 0.3s ease-in,width 0.3s ease-in;
 }
 
 .slide-up {
@@ -26,120 +26,21 @@
     opacity: 0;
 }
 
+.transform (@arg) {
+    -webkit-transform: @arg;
+    transform: @arg;
+}
+
 /* For headroom */
-.animated{
-    -webkit-animation-duration:.5s;
-    -moz-animation-duration:.5s;
-    -o-animation-duration:.5s;
-    animation-duration:.5s;
-    -webkit-animation-fill-mode:both;
-    -moz-animation-fill-mode:both;
-    -o-animation-fill-mode:both;
-    animation-fill-mode:both
+.animated {
+    transition: transform 200ms linear;
 }
 
-@-webkit-keyframes slideDown{
-    0%{
-        -webkit-transform:translateY(-100%)
-    }
-
-    100%{
-        -webkit-transform:translateY(0)
-    }
-
+.animated.slideUp {
+    .transform(translateY(-100%));
 }
 
-@-moz-keyframes slideDown{
-    0%{
-        -moz-transform:translateY(-100%)
-    }
-
-    100%{
-        -moz-transform:translateY(0)
-    }
-
+.animated.slideDown {
+    .transform(translateY(0%));
 }
 
-@-o-keyframes slideDown{
-    0%{
-        -o-transform:translateY(-100%)
-    }
-
-    100%{
-        -o-transform:translateY(0)
-    }
-
-}
-
-@keyframes slideDown{
-    0%{
-        transform:translateY(-100%)
-    }
-
-    100%{
-        transform:translateY(0)
-    }
-
-}
-
-.animated.slideDown{
-    -webkit-animation-name:slideDown;
-    -moz-animation-name:slideDown;
-    -o-animation-name:slideDown;
-    animation-name:slideDown
-}
-
-@-webkit-keyframes slideUp{
-    0%{
-        -webkit-transform:translateY(0)
-    }
-
-    100%{
-        -webkit-transform:translateY(-100%)
-    }
-
-}
-
-@-moz-keyframes slideUp{
-    0%{
-        -moz-transform:translateY(0)
-    }
-
-    100%{
-        -moz-transform:translateY(-100%)
-    }
-
-}
-
-@-o-keyframes slideUp{
-    0%{
-        -o-transform:translateY(0)
-    }
-
-    100%{
-        -o-transform:translateY(-100%)
-    }
-
-}
-
-@keyframes slideUp{
-    0%{
-        transform:translateY(0)
-    }
-
-    100%{
-        transform:translateY(-100%)
-    }
-
-}
-
-.animated.slideUp{
-    -webkit-animation-name:slideUp;
-    -moz-animation-name:slideUp;
-    -o-animation-name:slideUp;
-    animation-name:slideUp;
-
-    .navbar-fixed-top {
-        position: absolute;
-    }
-}

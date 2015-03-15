@@ -49,12 +49,18 @@
              :ng-show "step.id == s.id"}]
          "{{s.title}}"]]]
 
+
+     (staircase.views.facets/snippet)]
+
+    [:div.sidebar.slide-right.col-xs-12.col-md-2.col-md-offset-10
+     {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded}"}
      [:div.panel.panel-default.next-steps
       [:div.panel-heading
-       {:ng-click "nextStepsCollapsed = !nextStepsCollapsed"}
-        [:i.fa.fa-fw {:ng-class "{'fa-caret-right': nextStepsCollapsed, 'fa-caret-down': !nextStepsCollapsed}"}]
+       {:ng-click "state.nextStepsCollapsed = !state.nextStepsCollapsed"}
+        [:i.fa.fa-fw {:ng-class "{'fa-caret-right': state.nextStepsCollapsed, 'fa-caret-down': !state.nextStepsCollapsed}"}]
         "Next steps"]
-      [:div.list-group {:ng-show "nextSteps.length && !nextStepsCollapsed"}
+      [:div.list-group.steps.animated
+       {:ng-class "{expanded: (nextSteps.length && !state.nextStepsCollapsed)}"}
        [:next-step
         {:ng-repeat "ns in nextSteps"
          :previous-step "step"
@@ -64,12 +70,10 @@
          :data "ns.data"}
         ]]
       [:div.panel-body {:ng-hide "nextSteps.length"}
-       [:em "No steps available"]]]
-
-     (staircase.views.facets/snippet)]
+       [:em "No steps available"]]]]
 
     [:div.col-xs-12.slide-left
-     {:ng-class "{'col-md-10': !state.expanded,
+     {:ng-class "{'col-md-8': !state.expanded,
                   'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"} config)
      [:div.current-step
@@ -84,4 +88,6 @@
        :silently "controller.storeHistory(data)"
        :toggle "state.expanded = !state.expanded"} ]
      ]
+
+
     ]]))

@@ -3,6 +3,10 @@
         ring.util.response
         [ring.middleware.session :only (wrap-session)]
         [ring.middleware.cookies :only (wrap-cookies)]
+        [ring.middleware.keyword-params :only (wrap-keyword-params)]
+        [ring.middleware.nested-params :only (wrap-nested-params)]
+        [ring.middleware.params :only (wrap-params)]
+        [ring.middleware.basic-authentication :only (wrap-basic-authentication)]
         ring.middleware.json
         ring.middleware.format
         ring.middleware.anti-forgery
@@ -24,6 +28,7 @@
             [persona-kit.friend :as pf]
             [persona-kit.core :as pk]
             [persona-kit.middleware :as pm]
+            [cemerick.drawbridge :as drawbridge]
             [cemerick.friend :as friend] ;; auth.
             [cemerick.friend.workflows :as workflows]
             [staircase.tools :refer (get-tools get-tool)]
@@ -152,7 +157,10 @@
 ;; Requires session functionality.
 (defn app-auth-routes [{:keys [config secrets]}]
   (let [issue-session (partial issue-session config secrets)
-        session-resp #(-> % issue-session response (content-type "application/json-web-token"))]
+        session-resp #(-> %
+                          issue-session
+                          response
+                          (content-type "application/json-web-token"))]
     (routes
       (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
       (GET "/session"
@@ -198,6 +206,24 @@
   [req]
   (-> (apply merge (map req [:params :form-params :multipart-params]))
       :__anti-forgery-token))
+
+(defn drawbridge-handler [session-store]
+  (-> (drawbridge/ring-handler)
+      (wrap-keyword-params)
+      (wrap-nested-params)
+      (wrap-params)
+      (wrap-session)))
+
+(defn- wrap-drawbridge [handler config session-store]
+  (let [repl (drawbridge-handler session-store)
+        repl-user-creds (map #(% config) [:repl-user :repl-pwd])
+        repl? (fn [req] (and (= "/repl" (:uri req)) (not-any? nil? repl-user-creds)))
+        authenticated? (fn [usr pwd] (= [usr pwd] repl-user-creds))]
+    (fn [req]
+      (let [h (if (repl? req)
+                      (wrap-basic-authentication repl authenticated?)
+                      handler)]
+        (h req)))))
 
 (defn- build-app-routes [{conf :config :as router}]
   (let [serve-index (partial views/index conf)]
@@ -246,6 +272,11 @@
                    (GET    "/" [] (get-resource steps id))
                    (DELETE "/" [] (delete-resource steps id)))))
 
+;; Routes delivering dynamic config to the client.
+(defn build-config-routes
+      [{:keys [config]}]
+      (routes (GET "/" [] (response (:client config)))))
+
 (defn build-service-routes [{:keys [config services]}]
   (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
         ensure-token (fn [service] (if (:token service)
@@ -254,18 +285,32 @@
                                            current (first (get-where services [:= :root (:root service)]))
                                            canon (if current
                                                   (update services (:id current) {:token token})
-                                                  (get-one services (create services {:root (:root service) :token token})))]
+                                                  (get-one services (create services
+                                                                            {:name (:name service)
+                                                                             :root (:root service)
+                                                                             :token token})))]
                                        (merge service canon))))
+        ensure-valid (comp ensure-token ensure-name)
         real-id #(if (= "default" %) (:default-service config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
                  (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
                   (let [user-services (get-all services)
-                        configured-services (->> config :services (map (fn [[k v]] {:root v :confname k})))]
-                    (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
-                    (response (vec (map (comp ensure-name ensure-token) (full-outer-join configured-services user-services :root)))))))
+                        configured-services (->> config
+                                                 :services
+                                                 (map (fn [[k v]]
+                                                        {:root v :confname k :meta (get-in config [:service-meta k])})))]
+                    ;; (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
+                    (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
-                     (GET "/" []
+                  (DELETE "/" []
+                          (let [ident (real-id ident)
+                                id (-> services (get-where [:= :name ident]) first :id)]
+                            (if id
+                              (do (delete services id)
+                                  {:status 200})
+                              {:status 404})))
+                  (GET "/" []
                           (locking services
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
@@ -274,8 +319,8 @@
                                                               user-services
                                                               :root)
                                               first)]
-                              (response (ensure-name (ensure-token service))))))
-                    (PUT "/" {doc :body}
+                              (response (ensure-valid service)))))
+                  (PUT "/" {doc :body}
                          (locking services
                             (let [uri (or (get doc "root") (get-in config [:services (real-id ident)]))
                                   current (first (get-where services [:= :root uri]))]
@@ -294,13 +339,15 @@
       (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
-  (let [hist-routes (build-hist-routes router)
-        step-routes (build-step-routes router)
-        service-routes (build-service-routes router)
-        api-session-routes (build-api-session-routes router)]
+  (let [hist-routes        (build-hist-routes router)
+        step-routes        (build-step-routes router)
+        service-routes     (build-service-routes router)
+        api-session-routes (build-api-session-routes router)
+        config-routes      (build-config-routes router)]
     (routes ;; put them all together
-            (context "/sessions" [] api-session-routes)
-            (-> (routes 
+            (context "/sessions" [] api-session-routes) ;; Getting tokens
+            (context "/client-config" [] config-routes) ;; Getting config
+            (-> (routes ;; Protected resources.
                   (context "/histories" [] hist-routes)
                   (context "/services" [] service-routes)
                   (context "/steps" [] step-routes))
@@ -350,10 +397,12 @@
                           (wrap-session {:store session-store})
                           (wrap-cookies)
                           asset-pipeline
-                          pm/wrap-persona-resources))]
-      (assoc this :handler (-> handler
-                               wrap-restful-format
-                               (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))))))
+                          pm/wrap-persona-resources))
+          app (-> handler
+                  wrap-restful-format
+                  (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))
+                  (wrap-drawbridge config session-store))]
+      (assoc this :handler app)))
 
   (stop [this] this))
 

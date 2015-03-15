@@ -11,8 +11,35 @@
         padding-left: 15px;
         padding-start: 15px;
     }
+
+    .contacts, .site-map {
+        & > ul > li {
+            display: inline-block;
+            margin: 0 1em;
+        }
+    }
+    .contacts {
+        li {
+            float: right;
+        }
+    }
+    .site-map {
+        li {
+            float: left;
+        }
+    }
+
 }
 
 .footer .panel {
     margin-bottom: 0;
+}
+
+#cookie-message {
+    position: fixed;
+    bottom: 0;
+
+    p {
+        color: @text-color;
+    }
 }

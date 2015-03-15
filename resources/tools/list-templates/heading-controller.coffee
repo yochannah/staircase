@@ -1,6 +1,6 @@
 define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View) ->
 
-  controller = (console, scope, Modals, connectTo) ->
+  controller = (console, scope, Modals, Q, connectTo) ->
     
     console.log scope.data
     scope.listName = scope.data.name
@@ -16,10 +16,10 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View
         model: -> connect.then (s) -> s.fetchModel()
         templates: -> connect.then (s) -> s.fetchTemplates()
         service: -> connect
-      if list = scope.listName?
-        injected.list = -> connect.then (s) -> s.fetchList list
+      if scope.listName?
+        injected.list = -> connect.then (s) -> s.fetchList scope.listName
         injected.items = -> null
-      else if ids = scope.ids?
+      else if scope.ids?
         injected.list = -> null
         injected.items = -> {ids: scope.ids, type: scope.type}
 
@@ -39,5 +39,5 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html'], (L, Ctrl, View
             query: selectedTemplate
         scope.appendStep data: step
 
-  ['$log', '$scope', '$modal', 'connectTo', controller]
+  ['$log', '$scope', '$modal', '$q', 'connectTo', controller]
 

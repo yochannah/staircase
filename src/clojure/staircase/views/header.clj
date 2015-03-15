@@ -11,15 +11,16 @@
                  ["options" "cog" {:ng-click "showOptions()"}]])
 
 (defn snippet [config]
-  [:headroom
-    {:offset 205
+  [:header.fixed
+    {:headroom true
+     :offset 70
      :tolerance 5
-     :classes "{initial:'animated',
-                pinned:'slideDown',
-                unpinned:'slideUp',
-                top:'headroom--top',
-                notTop:'headroom--not-top'}"}
-  [:div.navbar.navbar-custom.navbar-default.navbar-fixed-top
+     :classes "{initial: 'animated',
+                pinned: 'slideDown',
+                unpinned: 'slideUp',
+                top: 'headroom-top',
+                notTop: 'headroom-not-top'}"}
+  [:div.navbar.navbar-custom.navbar-default
    {:role "navigation" :ng-controller "NavCtrl"}
    [:div.container-fluid
 
@@ -37,7 +38,7 @@
 
      (nav-list config)
 
-     (search-form)
+     (search-form config)
 
      ]]]])
 
@@ -60,14 +61,14 @@
 
 (defn nav-list [config]
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
-   [:li.dropdown
-    [:a.dropdown-toggle
+   [:li.dropdown {:dropdown true}
+    [:a.dropdown-toggle {:dropdown-toggle true}
      "Tools " [:b.caret]] [:ul.dropdown-menu (tool-list)]]
    [:li (link-to "/about" "Help")]
    [:li {:ng-click "showOptions()"} (link-to "" "Options")]
-   [:li.dropdown
-    [:a.dropdown-toggle "Contact " [:b.caret]]
-                        (unordered-list {:class "dropdown-menu"} (contacts config))]
+   [:li.dropdown {:dropdown true}
+    [:a.dropdown-toggle {:dropdown-toggle true} "Contact " [:b.caret]]
+     (unordered-list {:class "dropdown-menu"} (contacts config))]
    [:li {:ng-show "auth.loggedIn"} [:div (btn/logout)]]
    [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]])
 

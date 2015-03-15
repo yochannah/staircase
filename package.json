@@ -6,13 +6,18 @@
   "directories": {
     "test": "test/steps"
   },
-  "engines": { "node": "0.10.22", "npm": "1.4.6" },
+  "engines": {
+    "node": "0.10.22",
+    "npm": "2.7.x"
+  },
   "scripts": {
     "test": "sh script/test.sh",
-    "postinstall":  "./node_modules/bower/bin/bower install --allow-root"
+    "install-bower-tools": "node ./script/install-bower-tools.js",
+    "postinstall": "bower install --allow-root && npm run install-bower-tools"
   },
   "dependencies": {
-    "bower": "1.3.8"
+    "bower": "1.3.8",
+    "jsedn": "^0.3.5"
   },
   "devDependencies": {
     "coffee-script": "1.7.1",

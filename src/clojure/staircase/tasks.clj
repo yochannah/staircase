@@ -25,6 +25,11 @@
 
 (def git-tools "external/tools/")
 
+(defn bower-tools []
+  (when-let [tools (config :bower-tools)]
+    (doseq [[ident uri] tools]
+      (println (str (name ident) "=" uri)))))
+
 ;; Pull in all the configured tools.
 (defn load-tools [& names] 
   (let [[settings names] (process-args names)]

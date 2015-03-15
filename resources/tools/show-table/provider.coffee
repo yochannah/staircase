@@ -2,14 +2,12 @@ define [], ->
 
   Array '$q', '$log', (Q, console) -> handleRequest = (previousStep, data) ->
 
-    {request, service} = data
-
     step =
-      title: "Ran query"
+      title: (data.title ? "Ran query")
       tool: "show-table"
       data:
-        query: request.query
-        service: service
+        query: (data.query or data.request.query)
+        service: data.service
 
     console.debug step, data
 

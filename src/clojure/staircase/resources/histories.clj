@@ -4,7 +4,9 @@
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
             staircase.resources
-            [honeysql.helpers :refer (select from where left-join group)]
+            [honeysql.helpers :refer
+              (select merge-select from where merge-where
+               left-join group order-by merge-order-by)]
             [honeysql.core :as hsql]
             [staircase.resources.schema :as schema]
             [com.stuartsierra.component :as component]
@@ -18,6 +20,26 @@
     (reduce f init rows)))
 
 (def table-spec (merge schema/histories schema/history-step))
+
+(defn- base-history-query []
+  (-> (select :h.id :h.title :h.created_at :h.description :h.owner)
+      (from [:histories :h])
+      (left-join [:history_step :hs] [:= :h.id :hs.history_id])
+      (where [:= :h.owner :?user])
+      (order-by [:h.created_at :desc])))
+
+(defn- all-history-query []
+  (-> (base-history-query)
+      (merge-select [:%count.hs.* :steps])
+      (group :h.id :h.title :h.created_at :h.description :h.owner)
+      (hsql/format :params staircase.resources/context)))
+
+(defn- one-history-query [history]
+  (-> (base-history-query)
+      (merge-select :hs.step_id)
+      (merge-where [:= :h.id :?history])
+      (merge-order-by [:hs.created_at :desc])
+      (hsql/format :params (assoc staircase.resources/context :history history))))
 
 (defrecord HistoryResource [db]
   component/Lifecycle
@@ -33,13 +55,7 @@
   Resource
 
   (get-all [histories]
-    (into [] (sql/query (:connection db)
-                        (-> (select :h.id :h.title :h.created_at :h.description :h.owner [:%count.hs.* :steps])
-                            (from [:histories :h])
-                            (left-join [:history_step :hs] [:= :h.id :hs.history_id])
-                            (group :h.id :h.title :h.created_at :h.description :h.owner)
-                            (where [:= :h.owner :?user])
-                            (hsql/format :params staircase.resources/context)))))
+    (sql/query (:connection db) (all-history-query)))
 
   (exists? [_ id] (staircase.sql/exists-with-owner (:connection db) :histories id (:user staircase.resources/context)))
 
@@ -47,11 +63,7 @@
     (when-let [uuid (string->uuid id)]
       (sql/query
         (:connection db)
-        [" select h.*, hs.step_id
-           from histories as h
-           left join history_step as hs on h.id = hs.history_id
-           where h.id = ? and h.owner = ?
-           order by hs.created_at desc " uuid (:user staircase.resources/context)] 
+        (one-history-query uuid)
         :result-set-fn #(if (empty? %) nil (apply build-history %)))))
 
   (update [_ id doc] (staircase.sql/update-owned-entity

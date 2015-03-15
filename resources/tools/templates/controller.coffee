@@ -1,9 +1,85 @@
-define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
+define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
 
-  filters.register 'templateTitle', -> ({title}) ->
+  app.filters.register 'templateTitle', getTemplateTitle = -> ({title}) ->
     title.replace(/-->/g, '\u21E8').replace(/<--/g, '\u21E6')
 
-  injectables = ['$scope', '$log', '$timeout', '$q', '$filter', 'Mines', 'ClassUtils']
+  OTHER_SWITCH_STATE =
+    ON: 'OFF'
+    OFF: 'ON'
+
+  hasLookupConstraints = (q) -> q.constraints.some (c) -> c.op is "LOOKUP"
+  lookupConstraints = (q) -> q.constraints.filter (c) -> c.op is "LOOKUP"
+
+  effectiveTemplate = (q) ->
+    return q unless hasLookupConstraints q
+    r = q.clone()
+    for c, i in r.constraints when q.constraints[i].replaceWithList
+      c.op = 'IN'
+      c.value = q.constraints[i].list.name
+    return r
+
+  app.controllers.register 'TemplateListRowController',
+    Array '$scope', '$q', class TemplateListRowController
+
+        switchConstraint: (con) ->
+          con.switched = OTHER_SWITCH_STATE[con.switched]
+
+        compatibleLists: (path) ->
+          pathInfo = @template.makePath path
+          @_lists_cache[path] ?= @lists.filter (l) -> pathInfo.isa l.type
+
+        runTemplate: ->
+          @_scope.$emit 'start-history',
+            verb:
+              ed: "ran"
+              ing: "running"
+            thing: "#{ getTemplateTitle() @template } template query"
+            tool: 'show-table',
+            data:
+              service:
+                root: @template.service.root,
+              query: (effectiveTemplate @template)
+
+        lists: []
+
+        constructor: (scope, Q) ->
+
+          @_lists_cache = {}
+          @_count_cache = {}
+          @_scope = scope
+
+          scope.formattedPaths = {}
+
+          scope.$watch 'template', => @template = scope.template
+
+          if hasLookupConstraints scope.template
+            Q.when(scope.template.service.fetchLists()).then (lists) =>
+              @lists = lists
+              @_lists_cache = {}
+              for c in lookupConstraints(scope.template)
+                c.list = @compatibleLists(c.path)[0]
+
+          updateCount = =>
+            return unless scope.template.selected
+            t = effectiveTemplate scope.template
+            Q.when(@_count_cache[t.toXML()] ?= t.count()).then (c) => scope.results = c
+
+          scope.$watch ((s) -> effectiveTemplate(s.template).toXML()), updateCount
+
+          scope.$watch 'template.selected', updateCount
+
+          scope.$watch 'template.selected', (selected) -> if selected
+            setName = (path) -> (name) -> scope.formattedPaths[path] = name
+            t = scope.template
+            for p in t.views.concat(c.path for c in t.constraints)
+              getName = t.makePath(p).getDisplayName()
+              getName.then setName p
+
+
+  injectables = [
+    '$scope', '$log', '$timeout', '$q', '$filter', '$location',
+    'connect', 'ClassUtils'
+  ]
 
   validPath = (model, path) ->
     try
@@ -29,58 +105,64 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, {filters}, {Service}) ->
           path.isa(outputType)
       ok
 
-  templateData = ({constraints, views, title, name, description, constraintLogic}) ->
-    {constraints, views, title, name, description, constraintLogic}
+  # Need to json-ify data for presentation.
+  # templateData = ({constraints, views, title, name, description, constraintLogic}) ->
+  #  {constraints, views, title, name, description, constraintLogic}
 
   filterTemplates = ({templates, model, inputType, outputType}) ->
-    if templates and model
-      f = isBetween model, inputType, outputType
-      (templateData t for t in templates when f t) # Need to json-ify data for presentation.
+    f = isBetween model, inputType, outputType
+    # if templates and model then (templateData t for t in templates when f t) else []
+    if templates and model then (t for t in templates when f t) else []
 
-  return Array injectables..., (scope, log, timeout, Q, filters, Mines, ClassUtils) ->
-    scope.defaults = {}
+  class TemplatesList
 
-    setTemplates = ({query}) -> (ts) ->
-      Q.all(query t for _, t of ts).then (qs) -> timeout ->
-        scope.templates = qs
-        scope.suitableTemplates = filterTemplates scope
+    toggleSelected: (template) ->
+      if template.title is @template?.title
+        @location.search 'title', null
+      else
+        @location.search 'title', template.title
 
-    scope.$on 'reset', (evt) ->
-      scope.outputType = scope.defaults.outputType
-      scope.inputType = scope.defaults.inputType
-      scope.templateFilter = null
+    restoreSelectedTemplate: (qs, searchParams) ->
+      @template = L.findWhere qs, L.pick searchParams, 'title', 'name'
+      @template.selected = true if @template?
 
-    scope.runQuery = (q) ->
-      scope.$emit 'start-history',
-        verb:
-          ed: "ran"
-          ing: "running"
-        thing: "#{ filters('templateTitle')(q) } template query"
-        tool: 'show-table',
-        data:
-          service:
-            root: scope.connection.root,
-          query: q
+    constructor: (scope, @log, timeout, Q, filters, @location, connect, ClassUtils) ->
+      searchParams = @location.search()
+      scope.defaults = {}
+      scope.classes = []
+      scope.inputType = scope.outputType = scope.serviceName = ''
 
-    scope.classes = []
-    scope.inputType = scope.outputType = scope.serviceName = ''
+      scope.formattedPaths = {}
 
-    fetchingDefaultMine = Mines.get 'default'
+      connecting = connect 'default'
 
-    fetchingDefaultMine.then ({name}) -> timeout -> scope.serviceName = name
+      setTemplates = ({query}) => (ts) =>
+        Q.all(query t for _, t of ts).then (qs) =>
+          scope.templates = qs
+          scope.suitableTemplates = filterTemplates scope
+          @restoreSelectedTemplate qs, searchParams
 
-    connecting = fetchingDefaultMine.then Service.connect
+      scope.$on 'reset', (evt) ->
+        scope.outputType = scope.defaults.outputType
+        scope.inputType = scope.defaults.inputType
+        scope.templateFilter = null
 
-    connecting.then (connection) -> scope.connection = connection
+      connecting.then ({name}) -> scope.serviceName = name
 
-    connecting.then (connection) -> connection.fetchModel().then ClassUtils.setClasses scope
+      connecting.then (connection) ->
+        connection.fetchModel().then ClassUtils.setClasses scope
 
-    connecting.then (connection) -> connection.fetchTemplates().then setTemplates connection
+      connecting.then (connection) ->
+        connection.fetchTemplates().then setTemplates connection
 
-    updateTemplates = -> scope.suitableTemplates = filterTemplates scope
-    typeWatcher = ({inputType, outputType}) -> inputType?.className + outputType?.className
+      updateTemplates = -> scope.suitableTemplates = filterTemplates scope
 
-    scope.$watch typeWatcher, updateTemplates
+      typeWatcher = ({inputType, outputType}) -> inputType?.className + outputType?.className
 
-    scope.$watch 'serviceName', (name) -> scope.tool.heading += " in #{ name }" if name
+      scope.$watch typeWatcher, updateTemplates
+
+      scope.$watch 'serviceName', (name) ->
+        scope.tool.heading += " in #{ name }" if name
+
+  return Array injectables..., TemplatesList
 

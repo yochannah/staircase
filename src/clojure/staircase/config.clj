@@ -41,6 +41,12 @@
       (merge db-opts {:connection-uri (parse-url url)})
       db-opts)))
 
+;; Client options will have string keys and underscores for hyphens
+;; This is because these are intended to be sent as JSON to the client.
+(defn client-options [opts]
+  (letfn [(json-keys [[k v]] [(.replaceAll (name k) "-" "_") v])]
+    (into {} (map json-keys (options opts "client-")))))
+
 (defn app-options [opts]
   (options opts "web-"))
 

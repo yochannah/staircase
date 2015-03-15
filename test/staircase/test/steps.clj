@@ -52,8 +52,8 @@
           steps (component/start (new-steps-resource :db db))
           histories (component/start (new-history-resource :db db))
           my-history (create histories {:title "test history"})
-          doc-1 {"history_id" my-history :title "step 1" :tool "http://tools.intermine.org/quicksearch"}
-          doc-2 {"history_id" my-history :title "step 2" :tool "http://tools.intermine.org/resultstable"}
+          doc-1 {"history_id" my-history :title "step 1" :tool "http://tools.intermine.org/quicksearch" :stamp nil}
+          doc-2 {"history_id" my-history :title "step 2" :tool "http://tools.intermine.org/resultstable" :stamp nil}
           id-1 (create steps doc-1)
           id-2 (create steps doc-2)
           got (get-one steps id-1)

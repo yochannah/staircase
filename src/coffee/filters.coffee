@@ -1,8 +1,12 @@
-define ['angular', 'services'], (ng, services) ->
+define ['angular', 'services', 'pluralize'], (ng, services, pluralize) ->
 
   Filters = ng.module('steps.filters', ['steps.services'])
 
   Filters.filter('interpolate', ['version', (v) -> (t) -> String(t).replace(/\%VERSION\%/mg, v)])
+
+  Filters.filter 'pluralize', -> (thing, n) -> pluralize thing, n
+
+  Filters.filter 'pluralizeWithNum', -> (thing, n) -> pluralize thing, n, true
 
   Filters.filter 'mappingToArray', -> (obj) ->
     return obj unless obj instanceof Object

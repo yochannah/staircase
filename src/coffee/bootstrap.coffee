@@ -1,6 +1,4 @@
-deps = ['require', 'angular', 'angular-cookies', 'angular-route', 'angular-resource',
-        'angular-animate', 'angular-silent'
-        'app']
+deps = ['require', 'angular', 'app']
 
 define deps, (require, ng) ->
   # The call to setTimeout is here as it makes loading the app considerably more reliable.

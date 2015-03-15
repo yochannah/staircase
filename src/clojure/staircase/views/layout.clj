@@ -28,8 +28,8 @@
         (include-css "/css/style.css")
         ]
        [:body {:class "staircase"}
-        (staircase.views.header/snippet config)
         [:section#content.main body]
+        (staircase.views.header/snippet config)
         (staircase.views.footer/snippet config)
         (map with-utf8-charset js)]))))
 

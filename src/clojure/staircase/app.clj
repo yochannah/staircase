@@ -1,7 +1,7 @@
 (ns staircase.app
   (:use [clojure.tools.logging :only (debug info error)]
         [environ.core :only (env)]
-        [staircase.config :only (db-options app-options secrets)]
+        [staircase.config :only (db-options client-options app-options secrets)]
         staircase.resources.services
         staircase.resources.histories
         staircase.resources.steps)
@@ -28,7 +28,8 @@
                                              :coffee "src/coffee"
                                              :ls     "src/ls"
                                              :less   "src/less")
-            :config (app-options options)
+            :config (assoc (app-options options)
+                           :client (client-options options))
             :secrets (secrets options)
             :session-store (sessions/new-pg-session-store)
             :db (data/new-pooled-db db)

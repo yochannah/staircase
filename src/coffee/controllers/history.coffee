@@ -1,4 +1,4 @@
-define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
+define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, ChooseDialogueCtrl) ->
   
   # Run-time requirements
   injectables = L.pairs
@@ -16,6 +16,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
     Mines: 'Mines'
     silentLocation: '$ngSilentLocation'
     serviceStamp: 'serviceStamp'
+    notify: 'notify'
 
   #--- Functions.
  
@@ -35,10 +36,18 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
   # Currently just adds a handles() method.
   toTool = (conf) ->
     handles = conf.handles
+    providers = conf.provides
+
     if Array.isArray handles
       conf.handles = (cat) -> handles.indexOf(cat) >= 0
     else
       conf.handles = (cat) -> handles is cat
+
+    if Array.isArray providers
+      conf.provides = (x) -> x in providers
+    else
+      conf.provides = (x) -> x is providers
+    
     conf
 
   #--- Controller, exported as return value
@@ -90,7 +99,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
       @scope.items ?= {}
 
       @scope.collapsed = true # Hide details in reduced real-estate view.
-      @scope.state = {expanded: false}
+      @scope.state = {expanded: false, nextStepsCollapsed: true}
       @currentCardinal = parseInt params.idx, 10
       @scope.history = Histories.get id: params.id
       @scope.steps = Histories.getSteps id: params.id
@@ -107,7 +116,8 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
               .then ({data}) -> data.filter((t) -> t.ident isnt tool).map toTool
               .then (tools) => @scope.nextTools = tools
       http.get('/tools', params: {capabilities: 'provider'})
-          .then ({data}) => @scope.providers = data
+          .then ({data}) -> data.map toTool
+          .then (providers) => @scope.providers = providers
 
     saveHistory: ->
       @scope.editing = false
@@ -141,7 +151,7 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
           console.debug "replacing message data: #{ data }"
           @set ['messages', idx, 'data'], data
         else
-          @mines.then(atURL data.service.root)
+          @mines.then(atURL(data['service:base'] ? data.service.root))
                 .then(connectWithName)
                 .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
 
@@ -160,14 +170,16 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
         @letUserChoose(next).then (provider) => @meetRequest provider, @scope.step, data
 
     wantsSomething: (what, data) ->
-      {console, meetRequest} = @
+      {notify, console, meetRequest} = @
       console.log "Something is wanted", what, data
-      next = @scope.providers.filter (t) -> t.provides is what
+      next = @scope.providers.filter (t) -> t.provides what
       console.log "Suitable providers found", next, @scope.providers
 
       return unless next.length
 
-      @meetingRequest(next, data).then @nextStep
+      @meetingRequest(next, data).then @nextStep, (err) ->
+        console.error err
+        notify err.message
 
     storeHistory: (step) -> @nextStep step, true
 
@@ -210,4 +222,5 @@ define ['lodash', 'imjs', './choose-dialogue'], (L, imjs, ChooseDialogueCtrl) ->
           appended = Histories.append {id: history.id}, stamped, ->
             console.debug "Created step #{ appended.id }"
             goTo "/history/#{ history.id }/#{ nextCardinal }"
+            ga 'send', 'event', 'history', 'append', step.tool
 

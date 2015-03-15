@@ -1,6 +1,7 @@
 {
-	:tools {
-		:keyword-search {:uri "https://github.com/alexkalderimis/multimine-search-tool.git"
-			         :options {:branch-name "master"}}}
+    :bower-tools [
+        [keyword-search
+         "https://github.com/alexkalderimis/multimine-search-tool.git"]]
+
 }
 

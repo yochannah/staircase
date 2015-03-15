@@ -1,3 +1,14 @@
+header.fixed {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+
+    .navbar {
+        width: 100%;
+    }
+}
+
 .navbar-custom .navbar-nav > li > a.persona-button {
     color: #fefefe;
     font-size: 0.85em;
@@ -44,6 +55,7 @@
         display: none;
         @media screen and (min-width: @screen-sm-max) {
             display: inline-block;
+            margin: 0 0.25em;
         }
     }
 }
