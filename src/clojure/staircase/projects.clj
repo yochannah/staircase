@@ -114,7 +114,6 @@
 (defn get-all-projects []
   (let [results (sql-get-all-projects)
       allitems (sql-get-project-items)]
-    (info "HELLO YOU")
     (json/generate-string (hash-map :title "All Projects" :child_nodes (maketree results allitems)))))
 
 (defn get-single-project [id]
