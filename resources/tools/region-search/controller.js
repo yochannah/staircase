@@ -61,7 +61,12 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
 
     scope.$on('act', scope.sendRegions);
 
-    var fetchingDefaultMine = mines.get('default');
+    var mineName = 'default';
+    console.log(scope.tool);
+    if (scope.tool.args && scope.tool.args.service) {
+      mineName = scope.tool.args.service;
+    }
+    var fetchingDefaultMine = mines.get(mineName);
 
     scope.$watch('serviceName', function (name) {
       scope.tool.heading = 'Search ' + name + ' by chromosome location';

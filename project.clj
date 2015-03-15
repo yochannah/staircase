@@ -75,7 +75,8 @@
         "flymine" "http://www.flymine.org/query/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
-        "mousemine" "http://www.mousemine.org/mousemine/service"}
+        "mousemine" "http://www.mousemine.org/mousemine/service"
+        "thalemine" "https://apps.araport.org:443/thalemine/service"}
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
@@ -103,10 +104,14 @@
                    :templates
                    [:choose-list {:service "flymine"}]
                    [:choose-list {:service "mousemine"}]
+                   [:choose-list {:service "thalemine"}]
                    [:new-query {:service "flymine"}]
                    [:new-query {:service "yeastmine"}]
-                   :upload-list
-                   :region-search
+                   [:new-query {:service "thalemine"}]
+                   [:upload-list {:service "flymine"}]
+                   [:upload-list {:service "thalemine"}]
+                   [:region-search {:service "flymine"}]
+                   [:region-search {:service "thalemine"}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
