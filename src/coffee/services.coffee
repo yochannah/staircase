@@ -322,7 +322,10 @@ define (require, exports, module) ->
     put = (ident, data) ->
       auth.authorize().then (headers) -> http.put("#{URL}/#{ident}", data, {headers}).then asData
 
-    return {all, get, atURL, put}
+    del = (ident) ->
+      auth.authorize().then (headers) -> http.delete("#{URL}/#{ident}", {headers})
+
+    return {all, get, atURL, put, delete: del}
 
   Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
     headers = auth.headers

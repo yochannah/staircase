@@ -303,6 +303,13 @@
                     ;; (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                     (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
+                  (DELETE "/" []
+                          (let [ident (real-id ident)
+                                id (-> services (get-where [:= :name ident]) first :id)]
+                            (if id
+                              (do (delete services id)
+                                  {:status 200})
+                              {:status 404})))
                   (GET "/" []
                           (locking services
                             (let [ident (real-id ident)
