@@ -7,20 +7,18 @@
     :ng-show "state.facets"}
    [:div.panel-heading "Facets"]
    [:div.panel-body
-    [:div.row
+    [:div
      {:ng-repeat "(name, facetSet) in state.facets"}
      [:h4 
       {:ng-click "closed = !closed"}
       [:i.fa {:ng-class "{'fa-caret-right': closed, 'fa-caret-down': !closed}"}]
-      [:ng-pluralize
-       {:count "countFacets(facetSet)"
-        :when "{'one': 'One {{name}}', 'other': '{} {{name}}s'}"}]]
-     [:div.slide-up {:ng-class "{closed: closed}"}
-      [:button.col-xs-12.facet.btn.btn-default.clearfix
+      "{{ name | pluralizeWithNum:countFacets(facetSet) }}"]
+     [:div.list-group
+      [:a.list-group-item
        {:blur-on "click"
-        :ng-class "{active: info.selected}"
+        :ng-class "{closed: closed, active: info.selected}"
         :ng-repeat "info in facetSet | mappingToArray | orderBy:'count':true"
         :ng-click "info.selected = !info.selected"}
-       [:span.pull-right.badge "{{info.count}}"]
-       [:span.pull-left        "{{info.$key}}"]]
+       [:span.badge "{{info.count}}"]
+       [:span       "{{info.$key}}"]]
       ]]]])

@@ -1,11 +1,7 @@
-<div class="list-group-item" ng-show="data.request.ids.length">
+<div class="list-group-item" ng-if="data.request.ids.length">
     <p>
     <strong>
-        <ng-pluralize count="data.request.ids.length"
-                      when="{'0': 'No {{typeName}}s',
-                            'one': 'One {{typeName}}',
-                            'other': '{} {{typeName}}s'}">
-        </ng-pluralize>
+        {{ typeName | pluralizeWithNum:data.request.ids.length }}
     </strong>
     at {{mineName}}
     </p>

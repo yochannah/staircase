@@ -3,7 +3,7 @@
   :url "http://steps.herokuapp.org"
   :main staircase.main
   :aot [staircase.main]
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
@@ -13,6 +13,8 @@
                  [clj-jwt "0.0.6"] ;; Generate signed json web-tokens.
                  [persona-kit "0.1.1-SNAPSHOT"] ;; Authentication - Persona.
                  [com.cemerick/friend "0.2.0"] ;; Authentication.
+                 [com.cemerick/drawbridge "0.0.6"] ;; remote debugging
+                 [ring-basic-authentication "1.0.5"] ;; basic auth for repl access
                  [clj-time "0.6.0"] ;; deal with time.
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar
@@ -82,6 +84,20 @@
                     "mousemine" {:covers ["M. musculus"]}
                     "yeastmine" {:covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
+      :client-whitelist [
+        "http://*.labs.intermine.org/**"
+        "http://tools.intermine.org/**"
+        "http://alexkalderimis.github.io/**"
+        "http://intermine.github.io/**"]
+      :client-step-config {
+        :show-list {
+                    :activeTabs [:enrich]}
+        :show-table {
+                     :TableCell {
+                                 :IndicateOffHostLinks false
+                                 :PreviewTrigger :click}
+                     :ShowHistory false
+                     :Style {:icons :fontawesome}}}
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
@@ -89,8 +105,9 @@
                    [:choose-list {:service "mousemine"}]
                    [:new-query {:service "flymine"}]
                    [:new-query {:service "yeastmine"}]
-                   :upload-list
-                   :region-search
+                   [:upload-list {:service "flymine"}]
+                   [:region-search {:service "flymine"}]
+                   [:region-search {:service "mousemine"}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment

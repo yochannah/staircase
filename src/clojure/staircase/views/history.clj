@@ -26,7 +26,7 @@
 
     [:div.sidebar.slide-left.col-xs-12.col-md-2
      {:ng-class "{minimised: state.expanded, collapsed: collapsed}"}
-     [:div.panel.panel-default
+     [:div.current-history.panel.panel-default
       (apply vector
              :div.panel-heading
              (btn/collapse-button)
@@ -38,7 +38,7 @@
              :div.panel-body
              [:p [:small [:em "{{history.created_at | roughDate }}"]]]
              (staircase.views.forms/label-input-pair "history.description"))
-      [:div.list-group
+      [:div.list-group.history-steps
         [:a.list-group-item {:ng-repeat "s in steps"
                              :ng-controller "HistoryStepCtrl" 
                              :ng-class "{active: step.id == s.id}"

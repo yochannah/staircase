@@ -32,6 +32,13 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
       this.textAreaFocussed = true;
     };
 
+    var mineName = 'default';
+    console.log(scope.tool);
+    if (scope.tool.args && scope.tool.args.service) {
+      mineName = scope.tool.args.service;
+    }
+    var fetchingDefaultMine = mines.get(mineName);
+
     scope.filesAreSupported = window.File && window.FileReader && window.FileList;
 
     scope.sendIdentifiers = function (evt) {
@@ -57,8 +64,6 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     };
 
     scope.$on('act', scope.sendIdentifiers);
-
-    var fetchingDefaultMine = mines.get('default');
 
     scope.removeToken = function (token) {
       scope.parsedIds = L.without(scope.parsedIds, token);
