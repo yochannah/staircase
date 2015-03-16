@@ -284,7 +284,7 @@
 
 (defn build-service-routes [{:keys [config services]}]
   (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
-        ensure-token (fn [service] (if (and (:token service) (:valid_until service) (.after (now) (:valid_until service)))
+        ensure-token (fn [service] (if (and (:token service) (:valid_until service) (.before (now) (:valid_until service)))
                                      service
                                      (let [token (register-for service)
                                            current (first (get-where services [:= :root (:root service)]))
@@ -294,6 +294,7 @@
                                                                             {:name (:name service)
                                                                              :root (:root service)
                                                                              :token token})))]
+                                       (info "Got new token for" (:name service) (:valid_until service))
                                        (merge service canon))))
         ensure-valid (comp ensure-token ensure-name)
         real-id #(if (= "default" %) (:default-service config) %)]
