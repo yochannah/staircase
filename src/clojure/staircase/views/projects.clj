@@ -30,13 +30,25 @@
       [:div.form-group
       [:div.btn {:ng-click "createProject"} ]]]]])
 
-(defn items []
-  (html
-      ; [:notifier]
-      [:ul.list-group.cap
-        [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-          "{{list.title}} ({{list.short}})"
-        ]]))
+
+(def list-group
+  [:ul.list-group.cap
+   [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
+    [:span.badge.origin {:title "{{list.short}}"} "{{ list.short | limitTo:1 }}"]
+    [:h4 "{{list.title}}"
+         [:i.fa.fa-ellipsis-h
+          {:ng-show "list.description" :ng-click "showDescription = !showDescription"}]]
+    [:p.text-muted.list-group-item-text {:ng-show "showDescription"} "{{list.description }}"]
+    ]])
+
+(def templates-group
+  [:ul.list-group.cap
+   [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}
+    [:span.badge.origin {:title "{{template.short}}"} "{{ template.short | limitTo:1 }}"]
+    [:h4 "{{template.title}}"]
+    ]])
+
+(defn items [] (html list-group))
 
 (defn project []
   (html [:div.panel.panel-primary.panel-project
@@ -214,16 +226,9 @@
 (defn explorer []
   (html
       [:tabset
-        [:tab {:heading "Lists"}
-          [:ul.list-group.cap
-            [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-              "{{list.title}} ({{list.short}})"
-                ]]]
-        [:tab {:heading "Templates"}
-          [:ul.list-group.cap
-            [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}
-              "{{template.title}} ({{template.short}})"
-                ]]]]))
+        [:tab {:heading "Lists"} list-group]
+        [:tab {:heading "Templates"} templates-group]
+        ]))
 
 (defn snippet [config]
   (html [:div.container-fluid

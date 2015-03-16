@@ -62,7 +62,28 @@ pre.projects {
     margin-bottom: 0;
 
     .list-group-item {
-        min-height: 2.4em;
+        min-height: 3.4em;
+        min-height: -webkit-min-content;
+        min-height: min-content;
+        padding: 0;
+
+        h4 {
+            font-size: 12px;
+            i.fa {
+                margin-left: 1em;
+                position: relative;
+                top: 4px;
+            }
+        }
+        h4, p {
+            margin-left: 1em;
+            margin-bottom: 1em;
+        }
+
+        .badge.origin {
+            margin: 1em;
+            font-variant: small-caps;
+        }
     }
 }
 
