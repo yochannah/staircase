@@ -39,6 +39,13 @@
     .make-flex-columns(@size, @n - 1);
 }
 
+.make-sized-flex-columns(@n) when (@n > 0) {
+    .flex-box.flex-col-@{n} {
+        .flex(0 0 (@n / 12 * 100%));
+    }
+    .make-sized-flex-columns(@n - 1);
+}
+
 .make-flex-columns(@n) when (@n > 0) {
     .flex-row-@{n} {
         .flexbox();
@@ -92,12 +99,7 @@
     .flex-box.full {
         .flex(1 0 100%);
     }
-    .flex-box.flex-col-6 {
-        .flex(1 0 50%);
-    }
-    .flex-box.flex-col-3 {
-        .flex(1 0 25%);
-    }
+    .make-sized-flex-columns(12);
 }
 
 .make-flex-columns(12);

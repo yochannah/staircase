@@ -30,13 +30,25 @@
       [:div.form-group
       [:div.btn {:ng-click "createProject"} ]]]]])
 
-(defn items []
-  (html
-      ; [:notifier]
-      [:ul.list-group.cap
-        [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-          "{{list.title}} ({{list.short}})"
-        ]]))
+
+(def list-group
+  [:ul.list-group.cap
+   [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
+    [:span.badge.origin {:title "{{list.short}}"} "{{ list.short | limitTo:1 }}"]
+    [:h4 "{{list.title}}"
+         [:i.fa.fa-ellipsis-h
+          {:ng-show "list.description" :ng-click "showDescription = !showDescription"}]]
+    [:p.text-muted.list-group-item-text {:ng-show "showDescription"} "{{list.description }}"]
+    ]])
+
+(def templates-group
+  [:ul.list-group.cap
+   [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}
+    [:span.badge.origin {:title "{{template.short}}"} "{{ template.short | limitTo:1 }}"]
+    [:h4 "{{template.title}}"]
+    ]])
+
+(defn items [] (html list-group))
 
 (defn project []
   (html [:div.panel.panel-primary.panel-project
@@ -217,30 +229,18 @@
 (defn explorer []
   (html
       [:tabset
-        [:tab {:heading "Lists"}
-        ; [:table.project-table
-        ;   [:tr {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-        ;     [:td "{{list.title}}"]
-        ;     [:td "{{list.short}}"]]]
-          [:ul.list-group.cap
-            [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-              "{{list.title}} ({{list.short}})"
-                ]]
-                ]
-        [:tab {:heading "Templates"}
-          [:ul.list-group.cap
-            [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}
-              "{{template.title}} ({{template.short}})"
-                ]]]]))
+        [:tab {:heading "Lists"} list-group]
+        [:tab {:heading "Templates"} templates-group]
+        ]))
 
 (defn snippet [config]
   (html [:div.container-fluid
     [:div.row-fluid {:ng-hide "auth.loggedIn"}
       [:p "Please log in to access MyMine"]]
-    [:div.row-fluid {:ng-show "auth.loggedIn"}
-      [:div.col-md-8
+    [:div.flex-row.guttered {:ng-show "auth.loggedIn"}
+      [:div.flex-box
         [:div (project-table)]]
-      [:div.col-md-4
+      [:div.flex-box.flex-col-4
         [:div (explorer)]]]
     ; [:div.row-fluid
     ;   [:div.col-md-12 (items)]]
@@ -251,7 +251,3 @@
     ;     [:div.panel-body
     ;       [:pre.projects "{{inspection}}"]]]]]
           ]))
-
-
-
-; <span class="glyphicon glyphicon-folder-open"></span>
