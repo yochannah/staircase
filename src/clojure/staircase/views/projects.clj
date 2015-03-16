@@ -164,6 +164,7 @@
       [:th "Name"]
       [:th "Description"]
       [:th "Kind"]
+      [:th "Source"]
       [:th "Modified"]
       [:th.foldercontrols ""]]]
   [:tbody
@@ -189,6 +190,7 @@
             :buttons "no"}
             "{{project.description}}"]]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
+      [:td ""]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonproject)]]
 
@@ -200,6 +202,7 @@
       [:td [:a {:href "{{gethref(item)}}" :ng-click ""} [:i {:ng-class "geticon(item)"}] "{{item.item_id}}"]]
       [:td "{{project.item_id}}"]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
+      [:td "{{item.source}}"]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonitem)]]
 
@@ -215,10 +218,15 @@
   (html
       [:tabset
         [:tab {:heading "Lists"}
+        ; [:table.project-table
+        ;   [:tr {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
+        ;     [:td "{{list.title}}"]
+        ;     [:td "{{list.short}}"]]]
           [:ul.list-group.cap
             [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
               "{{list.title}} ({{list.short}})"
-                ]]]
+                ]]
+                ]
         [:tab {:heading "Templates"}
           [:ul.list-group.cap
             [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}

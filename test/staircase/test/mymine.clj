@@ -2,29 +2,18 @@
   (:import java.sql.SQLException)
   (:use clojure.test
         staircase.resources
-        staircase.resources.steps
-        staircase.resources.histories
+        staircase.resources.mymine
         staircase.protocols
         staircase.helpers
-        staircase.projects
         [clojure.tools.logging :only (info warn debug)]
         [staircase.config :only (db-options)]
         [com.stuartsierra.component :as component]
         [environ.core :only (env)])
   (:require [clojure.java.jdbc :as sql]
-            [cheshire.core :as json]))
+    [staircase.projects :as projects]
+    [cheshire.core :as json]))
 
-
-(deftest write-to-projects
-  (let [folder {"title" "My Title" "owner_id" "nil@nil"}
-        folderresults (first (staircase.projects/create-project folder))]
-    (testing "Inserting a new folder"
-      (is (number? (:id folderresults))))
-    (testing "Adding item to folder"
-      (let [item {"project_id" (:id folderresults) "item_id" "A List" "type" "List" "source" "NoMine"}
-            itemresults (first (json/parse-string (staircase.projects/add-item-to-project (:id folderresults) item)))]
-        (is (not (nil? (itemresults "id"))))))))
-
+(def db-spec (db-options env))
 
 (defn ignore-errors [f]
   (try (f) (catch SQLException e nil)))
@@ -39,8 +28,18 @@
   (drop-tables)
   (f))
 
-
 (defn clean-up [f]
   (try (f) (finally (drop-tables))))
 
-; (use-fixtures :each clean-slate clean-up)
+(use-fixtures :each clean-slate clean-up)
+
+(deftest write-to-projects
+  (let [resource (component/start (new-mymine-resource :db {:connection db-spec}))
+        folder {"title" "My Title" "owner_id" "nil@nil"}
+        folderresults (first (projects/create-project folder))]
+    (testing "Inserting a new folder"
+      (is (number? (:id folderresults))))
+    (testing "Adding item to folder"
+      (let [item {"project_id" (:id folderresults) "item_id" "A List" "type" "List" "source" "NoMine"}
+            itemresults (first (json/parse-string (projects/add-item-to-project (:id folderresults) item)))]
+        (is (not (nil? (itemresults "id"))))))))
