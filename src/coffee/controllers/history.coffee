@@ -76,7 +76,7 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
         otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
         scope.nextSteps = otherSteps.concat(exporters)
 
-      scope.$watchCollection 'messages', (msgs) ->
+      scope.$watch 'messages', (msgs) ->
         handlers = L.values msgs
         otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
         scope.nextSteps = otherSteps.concat(handlers)
@@ -140,20 +140,30 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
       o[key] = value
 
     hasSomething: (what, data, key) ->
-      {scope, console, to, mines} = @
-      console.debug "Anybody want some #{ what }?"
+      {scope, console, to, Q, mines} = @
       if what is 'list'
         return to -> scope.list = data
 
-      for tool in scope.nextTools when tool.handles(what) then do (tool) =>
+      triggerUpdate = -> to -> scope.messages = L.assign {}, scope.messages
+
+      handlers = (tool for tool in scope.nextTools when tool.handles(what))
+
+      for tool in handlers then do (tool) =>
         idx = tool.ident + what + key
-        if scope.messages[idx]?
-          console.debug "replacing message data: #{ data }"
-          @set ['messages', idx, 'data'], data
-        else
-          @mines.then(atURL(data['service:base'] ? data.service.root))
-                .then(connectWithName)
-                .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
+        if data # set or update
+          if scope.messages[idx]?
+            @set ['messages', idx, 'data'], data
+          else
+            @mines.then(atURL(data['service:base'] ? data.service.root))
+                  .then(connectWithName)
+                  .then (service) =>
+                    @set ['messages', idx], {tool, data, service, kind: 'msg'}
+                    triggerUpdate()
+        else # delete
+          delete scope.messages[idx]
+
+      # trigger the update.
+      triggerUpdate() if handlers.length
 
     letUserChoose: (tools) ->
       dialogue = @$modal.open

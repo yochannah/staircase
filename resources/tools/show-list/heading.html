@@ -1,5 +1,3 @@
-<div class="list-group-item">
-    <a ng-click="activate()">
-        View {{list.name}}.
-    </a>
+<div class="list-group-item show-list" ng-if="list.name">
+    <a ng-click="activate()">View {{list.name}}.</a>
 </div>
