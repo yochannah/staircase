@@ -160,16 +160,16 @@
 
 ;; Requires session functionality.
 (defn app-auth-routes [{:keys [config secrets]}]
-  (let [issue-session (partial issue-session config secrets)
+  (let [get-session (partial issue-session config secrets)
         session-resp #(-> %
-                          issue-session
+                          get-session
                           response
                           (content-type "application/json-web-token"))]
     (routes
       (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
       (GET "/session"
            {session :session :as r}
-           (session-resp (:current (friend/identity r))))
+           (assoc (session-resp (:current (friend/identity r))) :session session))
       (POST "/login"
             {session :session :as r}
             (if (:email (friend/current-authentication r))
@@ -178,7 +178,7 @@
       (friend/logout (POST "/logout"
                            {session :session :as r}
                            (-> (response "ok")
-                               (assoc :session (dissoc session :anon-identity))
+                               (assoc :session nil)
                                (content-type "text/plain")))))))
 
 ;; replacement for persona-kit version. TODO: move to different file.
@@ -311,7 +311,6 @@
                                                                             {:name (:name service)
                                                                              :root (:root service)
                                                                              :token token})))]
-                                       (info "Got new token for" (:name service) (:valid_until service))
                                        (merge service canon))))
         ensure-valid (comp ensure-token ensure-name)
         real-id #(if (= "default" %) (:default-service config) %)]
@@ -323,7 +322,6 @@
                                                  :services
                                                  (map (fn [[k v]]
                                                         {:root v :confname k :meta (get-in config [:service-meta k])})))]
-                    ;; (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                     (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
                   (DELETE "/" []
@@ -338,9 +336,8 @@
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
                                   user-services (get-where services [:= :root uri])
-                                  service (-> (full-outer-join [{:root uri :confname ident}]
-                                                              user-services
-                                                              :root)
+                                  service (-> [{:root uri :name ident}]
+                                              (full-outer-join user-services :root)
                                               first)]
                               (response (ensure-valid service)))))
                   (PUT "/" {doc :body}
@@ -384,7 +381,6 @@
   [handler]
   (fn [request]
     (let [user (:identity (friend/current-authentication request))]
-      (info "for" (:uri request) "user =" user)
       (binding [staircase.resources/context {:user user}]
         (handler request)))))
 

@@ -66,7 +66,7 @@
   (create [_ doc]
     (let [id (new-id)
           owner (:user staircase.resources/context)
-          service (-> doc (dissoc :id "id" :owner)
+          service (-> doc (dissoc :id "id" :owner "valid_until" :valid_until)
                           (assoc "id" id
                                  "valid_until" (one-day-from-now)
                                  "owner" owner))]
