@@ -1,4 +1,5 @@
 <div class="list-group-item"
+     ng-if="!previousStep.tool.args || (origin === previousStep.tool.args.service)"
      ng-repeat="regionset in regionsets">
     <a ng-click="activate(regionset)">
          <i class="fa fa-fw fa-map-marker"></i>

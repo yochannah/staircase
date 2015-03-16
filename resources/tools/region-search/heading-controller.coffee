@@ -17,7 +17,9 @@ define ['imjs', 'lodash'], ({Service}, L) ->
     name = scope.data.name
     type = scope.data.type
 
-    getService = mines.atURL(scope.data.root or scope.service.root)
+    step = scope.previousStep
+    scope.origin = (step.data.url or step.data.root or step.data.service.root)
+    getService = mines.atURL(scope.origin)
                       .then(Service.connect)
 
     getModel = getService.then (service) -> service.fetchModel()
