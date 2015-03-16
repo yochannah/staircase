@@ -5,7 +5,6 @@
   )
 
 (defn projects-header [config]
-  ; [:div.about-header
    [:div.container
     [:div.row
      [:div.col-md-8.col-md-offset-2
@@ -60,14 +59,6 @@
     [:ul [:li {:ng-repeat "item in project.contents"} "{{item.item_id}}"]]
     [:div.panel-footer "{{project.last_modified | date:'d MMM, yyyy'}}"]]))
 
-(defn project-card []
-  (html
-    ; [:div.card {:dropzone "project" :on-drop "dropped(dragE1, dropE1)"}
-      [:div.header [:div.padme "{{project.title}}"]]
-      [:div.contents [:div.padme "{{project.description}}"]]
-      [:div.footer
-        [:div.footer-item.padme "{{project.contents.length}} items"]
-    ]))
 
 (defn project []
   (html [:div.panel.panel-primary.panel-project
@@ -88,13 +79,7 @@
      (project)]]]))
 
 
-(defn projects-flex []
-  (html [:div.card
-      {:ng-repeat "project in allProjects"
-      :dropzone "project"
-      :on-drop "dropped(dragE1, dropE1)"
-      :ng-click "setInspection(project)"}
-     (project-card)]))
+
 
 (defn project-details []
   (html [:div.panel.panel-primary 
@@ -102,7 +87,6 @@
         [:div.panel-body
           [:h2 "{{inspection.title}}"]
           [:p "{{inspection.description}}"]
-          ; "{{inspection.contents}}"]]))
           [:table.table
             [:thead
               [:tr
@@ -115,18 +99,14 @@
                 [:td "{{item.item_id}}"]
                 [:td "{{item.source}}"]]]]]]))
 
-
 (defn breadcrumb []
   (html
   [:ul.breadcrumb.list-inline
-    ; [:li [:a {:ng-click "setlevel(allProjects)"} "Home"]]
     [:li [:a {:ng-click "setlevelbc(allProjects)"} "Home"]]
     [:li {:ng-repeat "item in breadcrumbs" :ng-click "setlevelbc(item, $index)"} [:a "{{getname(item)}}"]]]))
 
-
 (defn ctrlbuttonproject []
   (html [:form {:editable-form "" :ng-show "rowform.$visible" :name "rowform" :onaftersave "updatefolder(project)"}
-          ; [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
           [:button.btn.btn-primary.btn-sm {:type "submit"} "Save"]
           [:button.btn.btn-sm {:ng-click "rowform.$cancel()" :type "button"} "Cancel"]]
 
@@ -135,11 +115,10 @@
               [:span.caret]]
             [:ul.dropdown-menu
               [:li {:ng-click "rowform.$show()"} [:a "Edit Folder"]]
-              [:li {:ng-click "deletefolder(project)"} [:a "Delete Folder"]]]]))
+              [:li {:ng-click "deletefolder(project)"} [:a "Remove Folder"]]]]))
 
 (defn ctrlbuttonitem []
   (html [:form {:editable-form "" :ng-show "rowform.$visible" :name "rowform" :onaftersave "updatefolder(project)"}
-          ; [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
           [:button.btn.btn-primary.btn-sm {:type "submit"} "Save"]
           [:button.btn.btn-sm {:ng-click "rowform.$cancel()" :type "button"} "Cancel"]]
 
@@ -147,24 +126,18 @@
             [:button.btn.btn-default.btn-sm {:dropdown-toggle true} "Options"
               [:span.caret]]
             [:ul.dropdown-menu
-              [:li {:ng-click "deleteitem(item)"} [:a "Delete Item"]]]]))
-
+              [:li {:ng-click "deleteitem(item)"} [:a "Remove Item"]]]]))
 
 (defn navbar []
   (html [:div.navbar.navbar-custom.navbar-default
     (breadcrumb)
     [:div.collapse.navbar-collapse
-      ; [:ul.nav.navbar-nav.navbar-right
-      ;   [:li [:a {:href "#"} [:span.fa.fa-plus " New Folder"]]]]
       [:form.navbar-form.navbar-right
         [:div.form-group
           [:input.form-control {:ng-model "foldername" :type "text" :name "projectname" :placeholder "Folder name..."}]]
         [:button.btn.btn-default {:ng-click "createProject(foldername)"} "Create"]]]]))
 
-
-
 (defn project-table []
-  
   (html
     (navbar)
     [:table.table.table-hover.project-table.ng-hide
@@ -188,14 +161,16 @@
     :on-drop "dropped(dragE1, dropE1)"}
 
 
-      [:td [:i {:ng-class "geticon(project)"}]
+      [:td [:i.testtest {:ng-class "geticon(project)"}
+      [:span.badge.badge-notify "{{getContentCount(project)}}"]]
         [:a {:ng-click "setlevel(project)"
                 :editable-text "project.title"
                 :e-name "name"
                 :e-form "rowform"
                 :buttons "no"
                 :onbeforesave "checkempty($data)"}
-        "{{project.title}}"]]
+        "{{project.title}} "]]
+
       [:td [:span {:editable-text "project.description"
             :e-name "description"
             :e-form "rowform"
@@ -205,8 +180,6 @@
       [:td ""]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonproject)]]
-
-    
 
     [:tr {:ng-repeat "item in level.contents"
     :ng-mouseover "hoverIn()"
@@ -219,19 +192,16 @@
       [:td.controls (ctrlbuttonitem)]]
 
     [:tr {:ng-show "(!level.contents || !level.child_nodes) && breadcrumbs.length > 0"}
-      [:td {:colspan 5} "Empty folder. {{level.contents.length}}"]]
+      [:td {:colspan 6} "Empty folder. {{level.contents.length}}"]]
 
     [:tr.ng-hide {:ng-show "breadcrumbs.length < 1 && level.child_nodes < 1"}
-      [:td {:colspan 5} "Please begin by creating a folder. {{level.contents.length}}"]]]]))
-
-
+      [:td {:colspan 6} "Please begin by creating a folder. {{level.contents.length}}"]]]]))
 
 (defn explorer []
   (html
       [:tabset
         [:tab {:heading "Lists"} list-group]
-        [:tab {:heading "Templates"} templates-group]
-        ]))
+        [:tab {:heading "Templates"} templates-group]]))
 
 (defn snippet [config]
   (html [:div.container-fluid

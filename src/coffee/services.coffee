@@ -310,12 +310,10 @@ define (require, exports, module) ->
     all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
 
     put = (data) ->
-      console.log "putting data", data
       auth.authorize().then (headers) -> http.post("#{URL}", data, {headers}).then asData
 
     update = (pid, data) ->
       # Move data validation to clojure / backend
-      console.log "putting data #{pid}", data
       auth.authorize().then (headers) -> http.post("#{URL}/#{pid}", data, {headers}).then asData
 
     addto = (pid, data) ->
