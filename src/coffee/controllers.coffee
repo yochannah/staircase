@@ -105,6 +105,19 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
       .then (results) ->
         do synch
 
+    scope.getContentCount = (project) ->
+      count = 0
+
+      flatten = (item) ->
+        if item.contents? then count += item.contents.length
+        if item.child_nodes.length > 0
+          for folder in item.child_nodes
+            flatten folder
+
+      flatten project
+
+      return count
+
     synch = ->
 
       look = (item) ->
