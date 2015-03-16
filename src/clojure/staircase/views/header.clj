@@ -69,7 +69,7 @@
    [:li.dropdown {:dropdown true}
     [:a.dropdown-toggle {:dropdown-toggle true} "Contact " [:b.caret]]
      (unordered-list {:class "dropdown-menu"} (contacts config))]
-   [:li (link-to "/projects" "MyMine")]
+   [:li {:ng-show "auth.loggedIn"} (link-to "/projects" "MyMine")]
    [:li {:ng-show "auth.loggedIn"} [:div (btn/logout)]]
    [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]
    ])

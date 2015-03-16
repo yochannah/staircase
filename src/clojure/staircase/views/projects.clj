@@ -112,7 +112,7 @@
     [:li {:ng-repeat "item in breadcrumbs" :ng-click "setlevelbc(item, $index)"} [:a "{{getname(item)}}"]]]))
 
 
-(defn ctrlbutton []
+(defn ctrlbuttonproject []
   (html [:form {:editable-form "" :ng-show "rowform.$visible" :name "rowform" :onaftersave "updatefolder(project)"}
           ; [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
           [:button.btn.btn-primary.btn-sm {:type "submit"} "Save"]
@@ -123,9 +123,20 @@
               [:span.caret]]
             [:ul.dropdown-menu
               [:li {:ng-click "rowform.$show()"} [:a "Edit Folder"]]
-              [:li {:ng-click "deleteitem(item)"} [:a "Delete Item"]]
-              [:li {:ng-show "item.type == 'Project'" :ng-click "deletefolder(project)"} [:a "Delete Folder"]]
-              [:li {:ng-click "talk()"} [:a "Copy Project"] ]]]))
+              [:li {:ng-click "deletefolder(project)"} [:a "Delete Folder"]]]]))
+
+(defn ctrlbuttonitem []
+  (html [:form {:editable-form "" :ng-show "rowform.$visible" :name "rowform" :onaftersave "updatefolder(project)"}
+          ; [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
+          [:button.btn.btn-primary.btn-sm {:type "submit"} "Save"]
+          [:button.btn.btn-sm {:ng-click "rowform.$cancel()" :type "button"} "Cancel"]]
+
+          [:div.drpdwn {:ng-show "hoverEdit && !rowform.$visible" :dropdown true}
+            [:button.btn.btn-default.btn-sm {:dropdown-toggle true} "Options"
+              [:span.caret]]
+            [:ul.dropdown-menu
+              [:li {:ng-click "deleteitem(item)"} [:a "Delete Item"]]]]))
+
 
 (defn navbar []
   (html [:div.navbar.navbar-custom.navbar-default
@@ -179,9 +190,7 @@
             "{{project.description}}"]]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
-      [:td.controls (ctrlbutton)]
-      
-      ]
+      [:td.controls (ctrlbuttonproject)]]
 
     
 
@@ -192,7 +201,7 @@
       [:td "{{project.item_id}}"]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
-      [:td.controls (ctrlbutton)]]
+      [:td.controls (ctrlbuttonitem)]]
 
     [:tr.ng-hide {:ng-hide "level.contents.length > 0 || level.child_nodes.length > 0"}
       [:td {:colspan 5} "Empty folder."]]]]))
@@ -219,12 +228,13 @@
         [:div (explorer)]]]
     ; [:div.row-fluid
     ;   [:div.col-md-12 (items)]]
-    [:div.row-fluid
-      [:div.col-md-12 
-      [:div.panel.panel-warning 
-        [:div.panel-heading "Inspection"]
-        [:div.panel-body
-          [:pre.projects "{{inspection}}"]]]]]]))
+    ; [:div.row-fluid
+    ;   [:div.col-md-12 
+    ;   [:div.panel.panel-warning 
+    ;     [:div.panel-heading "Inspection"]
+    ;     [:div.panel-body
+    ;       [:pre.projects "{{inspection}}"]]]]]
+          ]))
 
 
 

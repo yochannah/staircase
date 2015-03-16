@@ -60,8 +60,9 @@
   (sql/query db-spec ["select * from projects where id = ?" id]))
 
 (defn sql-create-project [data]
+  (info (type data))
   (sql/insert! db-spec :projects
-    {:parent_id (data "parent_id") :title (data "title") :owner_id (:user staircase.resources/context) :description "Generic Description" :last_modified (staircase.helpers/sql-now) :last_accessed (staircase.helpers/sql-now) :created (staircase.helpers/sql-now) }))
+    {:parent_id (data "parent_id") :title (data "title") :owner_id (:user staircase.resources/context) :last_modified (staircase.helpers/sql-now) :last_accessed (staircase.helpers/sql-now) :created (staircase.helpers/sql-now) }))
 
 (defn sql-add-item-to-project [pid item]
   (sql/insert! db-spec :project_contents item))
@@ -114,7 +115,6 @@
 (defn get-all-projects []
   (let [results (sql-get-all-projects)
       allitems (sql-get-project-items)]
-    (info "HELLO YOU")
     (json/generate-string (hash-map :title "All Projects" :child_nodes (maketree results allitems)))))
 
 (defn get-single-project [id]
@@ -136,7 +136,7 @@
 
 (defn add-item-to-project [pid payload]
   (def results (sql-add-item-to-project pid (assoc payload "id" (new-id))))
-  (json/generate-string {:success true} {:pretty true}))
+  (json/generate-string results))
 
 (defn create-project [payload]
   (sql-create-project payload))
