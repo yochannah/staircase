@@ -13,6 +13,7 @@ define (require, exports, module) ->
   require 'angular-notify'
   require 'angular-cookies'
   require 'angular-local-storage'
+  require 'angular-xeditable'
   require './filters'
   require './services'
   require './directives'
@@ -37,6 +38,7 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
+    'xeditable'
     'cgNotify'
   ]
 
@@ -57,6 +59,8 @@ define (require, exports, module) ->
 
   Steps.run Array '$rootScope', '$http', '$window', '$location', (scope, http, $window, $loc) ->
     scope.startingPoints = []
+    editableOptions = {}
+    editableOptions.theme = 'bs3'
 
     scope.$on '$routeChangeSuccess', (event, route) ->
       $window.scrollTo 0, 0

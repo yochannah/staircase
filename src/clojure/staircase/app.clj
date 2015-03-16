@@ -4,7 +4,8 @@
         [staircase.config :only (db-options client-options app-options secrets)]
         staircase.resources.services
         staircase.resources.histories
-        staircase.resources.steps)
+        staircase.resources.steps
+        [staircase.resources.mymine :only (new-mymine-resource)])
   (:require [staircase.assets :as assets]
             [staircase.handler :as routing]
             [com.stuartsierra.component :as component]
@@ -36,12 +37,14 @@
             :histories (new-history-resource)
             :services (new-services-resource)
             :steps (new-steps-resource)
+            :projects (new-mymine-resource)
             :router (routing/new-router))
           (component/system-using
             {:router [:config :secrets :session-store :services :histories :steps :asset-pipeline]
              :session-store [:db :config]
              :services [:db]
              :steps [:db]
+             :projects [:db]
              :histories [:db]})))))
 
 ;; Todo - should be possible to have multiple instances.
