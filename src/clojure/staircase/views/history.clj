@@ -72,7 +72,7 @@
       [:div.panel-body {:ng-hide "nextSteps.length"}
        [:em "No steps available"]]]]
 
-    [:div.col-xs-12.slide-left
+    [:div.col-xs-12.slide-left.central-panel
      {:ng-class "{'col-md-8': !state.expanded,
                   'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"} config)

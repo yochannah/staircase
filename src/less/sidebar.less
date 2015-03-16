@@ -1,7 +1,7 @@
 .history-view {
     .sidebar {
         @media (min-width: @screen-md-min) {
-            position: absolute;
+            position: fixed;
             left: 1%;
         }
 
@@ -32,8 +32,8 @@
                     pointer-events: none;
                     border-color: rgba(136, 183, 213, 0);
                     border-left-color: @list-group-active-bg;
-                    border-width: 19px;
-                    margin-top: -20px;
+                    border-width: 11px;
+                    margin-top: -12px;
                 }
             }
         }
@@ -45,7 +45,7 @@
     }
 
     .sidebar.minimised {
-        left: -15%;
+        left: -16%;
     }
 
     .sidebar.collapsed {
@@ -68,11 +68,12 @@
             // display: none;
             @media (min-width: @screen-md-min) {
                 display: block;
-                left: 15%;
+                left: 16%;
             }
         }
 
         &.onscreen {
+            position: fixed;
             left: 0%;
             display: block;
             @media (min-width: @screen-md-min) {
