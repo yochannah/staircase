@@ -229,10 +229,10 @@
   (html [:div.container-fluid
     [:div.row-fluid {:ng-hide "auth.loggedIn"}
       [:p "Please log in to access MyMine"]]
-    [:div.row-fluid {:ng-show "auth.loggedIn"}
-      [:div.col-md-8
+    [:div.flex-row.guttered {:ng-show "auth.loggedIn"}
+      [:div.flex-box
         [:div (project-table)]]
-      [:div.col-md-4
+      [:div.flex-box.flex-col-4
         [:div (explorer)]]]
     ; [:div.row-fluid
     ;   [:div.col-md-12 (items)]]

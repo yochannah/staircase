@@ -55,9 +55,15 @@ pre.projects {
 
 
 .cap {
-	max-height: 500px;
-	overflow: scroll;
+    .flexbox();
+    .flex-column();
+    height: 75vh;
+	overflow: auto;
+    margin-bottom: 0;
 
+    .list-group-item {
+        min-height: 2.4em;
+    }
 }
 
 .padme {
