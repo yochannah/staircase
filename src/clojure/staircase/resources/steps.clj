@@ -10,7 +10,7 @@
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
-(def table-specs (merge schema/history-step schema/steps schema/projects schema/project-contents))
+(def table-specs (merge schema/history-step schema/steps schema/project-contents schema/projects))
 
 (defn- get-first [m ks]
   (get m (first (filter (set (keys m)) ks))))
