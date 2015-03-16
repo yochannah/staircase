@@ -68,9 +68,12 @@
 
 (defn register-for ;; currently gets anon session. Needs api hf to be applied.
   [service]
-  (let [session-url (str (:root service) "/session")
-        resp (client/get session-url {:as :json :throw-exceptions false})]
-    (get-in resp [:body :token])))
+  (let [http-conf {:as :json :throw-exceptions false}
+        token-coords [:body :token]
+        session-url  (str (:root service) "/session")]
+    (-> session-url
+        (client/get http-conf)
+        (get-in token-coords))))
 
 (defn get-end-of-history [histories id]
   (or
@@ -277,9 +280,11 @@
       [{:keys [config]}]
       (routes (GET "/" [] (response (:client config)))))
 
+(defn- now [] (java.util.Date.))
+
 (defn build-service-routes [{:keys [config services]}]
   (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
-        ensure-token (fn [service] (if (:token service)
+        ensure-token (fn [service] (if (and (:token service) (:valid_until service) (.after (now) (:valid_until service)))
                                      service
                                      (let [token (register-for service)
                                            current (first (get-where services [:= :root (:root service)]))
@@ -327,7 +332,8 @@
                               (if current
                                 (update services (:id current) doc)
                                 (try
-                                  (let [token (or (get doc "token") (register-for {:root uri}))] ;; New record. Ensure valid.
+                                  (let [token (or (get doc "token")
+                                                  (register-for {:root uri}))] ;; New record. Ensure valid.
                                     (create-new services (-> doc (assoc :root uri :token token) (dissoc "root" "token"))))
                                   (catch Exception e {:status 400 :body {:message (str "bad service definition: " e)}}))))))))))
 

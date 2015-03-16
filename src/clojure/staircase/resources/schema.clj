@@ -54,9 +54,12 @@
    [[:id :uuid :primary :key ]
     [:name string "NOT NULL" ]
     [:root string "NOT NULL" ]
-    [:token data ]
+    [:token data ]                            ;; Use this token to access data.
+    [:valid_until "timestamp with time zone"] ;; must refresh access token after this time
+    [:refresh_token data]                     ;; Use this token to get a new access token.
     owner-column
-    [:UNIQUE "(owner, root)"]]})
+    [:UNIQUE "(owner, root)"]
+    [:UNIQUE "(owner, name)"]]})
 
 (def toolsets
   {:toolsets
