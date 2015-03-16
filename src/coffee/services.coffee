@@ -327,7 +327,7 @@ define (require, exports, module) ->
 
       # console.log "new value is", data
       transformed =
-        source: data.service?.root
+        source: data.short
         type: data.type
         item_id: data.id
         project_id: pid

@@ -52,6 +52,7 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
     # Does an initial synch at the bottom of the controller.
 
     scope.breadcrumbs = []
+    scope.templates = []
 
     mines = []
     Mines.all().then (val) -> mines = val
@@ -66,13 +67,11 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
       # console.log "-------building href for item", item
       # console.log "looking for source", item.source
       # console.log "mines", mines
-      src = L.findWhere mines, {root: item.source}
-      console.log "found source", src
+      src = L.findWhere mines, {name: item.source}
       switch item.type
         when "List"
           # "test"
           "starting-point/choose-list/#{src.name}?name=#{item.item_id}"
-
 
     scope.getformname = (project) ->
       "folder" + project.id
@@ -93,7 +92,7 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
       switch obj.type
         when "Project" then return "fa fa-folder"
         when "List" then return "fa fa-list"
-        when "Query" then return "fa fa-search"
+        when "Template" then return "fa fa-search"
 
     scope.deletefolder = (proj) ->
       console.log "delete the folder", proj
@@ -149,6 +148,11 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
           .then (result) ->         
               do synch
 
+      if pkg.type is "Template" and dest.type is "Project"
+        Projects.addto dest.id, pkg
+          .then (result) ->         
+              do synch
+
     scope.setlevelbc = (id, index) ->
       if !items? and !index?
         scope.level = scope.allProjects
@@ -187,8 +191,6 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
     Mines.all().then (values) ->
 
-      console.log "allmines", values
-
       scope.lists = []
 
       values.forEach (amine) ->
@@ -203,6 +205,31 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
           scope.lists = scope.lists.concat lists
           scope.$digest()
+
+        service.fetchTemplates().then (templates) =>
+
+
+
+          tosave = []
+
+          for key, value of templates
+            value.id = value.title
+            value.short = amine.name
+            value.type = "Template"
+            tosave.push value
+
+          # # console.log "templates", templates
+          # for template in templates
+          #     template.type = "Template"
+          #     template.id = template.title
+          #     template.short = amine.name
+
+          # scope.templates = "HELLO WORLD"
+
+          scope.templates = scope.templates.concat tosave
+          scope.$digest()
+
+
 
     do synch
 

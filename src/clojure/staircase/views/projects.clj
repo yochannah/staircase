@@ -203,22 +203,30 @@
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonitem)]]
 
-    [:tr.ng-hide {:ng-hide "level.contents.length > 0 || level.child_nodes.length > 0"}
-      [:td {:colspan 5} "Empty folder."]]]]))
+    [:tr {:ng-show "(!level.contents || !level.child_nodes) && breadcrumbs.length > 0"}
+      [:td {:colspan 5} "Empty folder. {{level.contents.length}}"]]
+
+    [:tr.ng-hide {:ng-show "breadcrumbs.length < 1 && level.child_nodes < 1"}
+      [:td {:colspan 5} "Please begin by creating a folder. {{level.contents.length}}"]]]]))
+
+
 
 (defn explorer []
   (html
-      ; [:notifier]
-      [:ul.list-group.cap
-        [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-          "{{list.title}} ({{list.short}})"
-        ]]))
+      [:tabset
+        [:tab {:heading "Lists"}
+          [:ul.list-group.cap
+            [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
+              "{{list.title}} ({{list.short}})"
+                ]]]
+        [:tab {:heading "Templates"}
+          [:ul.list-group.cap
+            [:li.list-group-item {:ng-repeat "template in templates" :droppable "template" :ng-click "setInspection(list)"}
+              "{{template.title}} ({{template.short}})"
+                ]]]]))
 
 (defn snippet [config]
   (html [:div.container-fluid
-    ; [:div.row-fluid
-    ;     [:div.col-md-12
-    ;       [:div (create)]]]
     [:div.row-fluid {:ng-hide "auth.loggedIn"}
       [:p "Please log in to access MyMine"]]
     [:div.row-fluid {:ng-show "auth.loggedIn"}
