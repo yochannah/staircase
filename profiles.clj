@@ -19,9 +19,7 @@
             :web-audience "http://localhost:3000"
 
             :verifier "https://verifier.login.persona.org/verify"
-            :db-subname "//localhost/staircase" 
-            :db-user "postgres"
-            :db-password "password"}
+            :db-subname "//localhost/staircase"
  }
  :test {
         :bower-dependencies [[angular-scenario "~1.2.9"]
