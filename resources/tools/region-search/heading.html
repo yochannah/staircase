@@ -1,5 +1,5 @@
 <div class="list-group-item"
-     ng-if="!previousStep.tool.args || (origin === previousStep.tool.args.service)"
+     ng-if="enabled"
      ng-repeat="regionset in regionsets">
     <a ng-click="activate(regionset)">
          <i class="fa fa-fw fa-map-marker"></i>
@@ -7,7 +7,8 @@
     </a>
     <select class="form-control"
         ng-model="regionset.targetClass"
-        ng-options="c.name for c in classes">
+        ng-options="c as c.name for c in classes">
     </select>
     overlapping {{regionset.summary}}
+    in {{orgName}}
  </div>
