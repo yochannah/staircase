@@ -10,11 +10,14 @@
 
 .slide-up {
     height: initial;
-    transition: height 0.3s ease-in;
+    transition: height 0.3s ease-in,padding 0.3s ease-in;
 }
 
 .slide-up.closed {
-    height: 0;
+    height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
 }
 
 .fade-out.ng-leave {

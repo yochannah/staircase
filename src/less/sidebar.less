@@ -14,25 +14,27 @@
 
         font-size: 1.1em;
 
-        .list-group-item.active {
-            position: relative;
-        }
-        .list-group-item.active:after {
-            display: none;
-            @media (min-width: @screen-md-min) {
-                display: block;
-                left: 99%;
-                top: 51%;
-                border: solid transparent;
-                content: " ";
-                height: 0;
-                width: 0;
-                position: absolute;
-                pointer-events: none;
-                border-color: rgba(136, 183, 213, 0);
-                border-left-color: @list-group-active-bg;
-                border-width: 19px;
-                margin-top: -20px;
+        .current-history {
+            .list-group-item.active {
+                position: relative;
+            }
+            .list-group-item.active:after {
+                display: none;
+                @media (min-width: @screen-md-min) {
+                    display: block;
+                    left: 99%;
+                    top: 51%;
+                    border: solid transparent;
+                    content: " ";
+                    height: 0;
+                    width: 0;
+                    position: absolute;
+                    pointer-events: none;
+                    border-color: rgba(136, 183, 213, 0);
+                    border-left-color: @list-group-active-bg;
+                    border-width: 19px;
+                    margin-top: -20px;
+                }
             }
         }
 
@@ -82,35 +84,30 @@
 
     .facets {
         .panel-body {
-            padding-right: 10px; /* fixed value bad. TODO: calculate */
+            padding: 0;
         }
 
         h4 {
+            font-size: 14px;
             margin-left: 1em;
 
             .fa {
                 margin-right: 0.5em;
             }
         }
-        .closed .facet {
-            display: none;
-        }
-        .facet.btn {
-            border-right: none;
-            border-left: none;
-            border-bottom-width: 0;
-        }
-        .facet.btn.active .badge {
-            background: @label-primary-bg;
-        }
-        .facet + .facet.active {
-            box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.125) inset;
-        }
-        .facet.active + .facet.active {
-            box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.125) inset;
-        }
-        .facet.btn:last-child {
-            border-bottom-width: 1px;
+        .list-group {
+            margin-bottom: 0.2em;
+            max-height: 300px;
+            overflow-y: auto;
+            .list-group-item {
+                padding: 0.2em 0.5em;
+                font-size: 0.9em;
+                border-left: none;
+                border-right: none;
+                &.closed {
+                    display: none;
+                }
+            }
         }
     }
 
