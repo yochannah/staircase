@@ -74,6 +74,9 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
     scope.getformname = (project) ->
       "folder" + project.id
 
+    scope.emptymessage = (item) ->
+      if scope.level.child_nodes?.length < 1 and !scope.level.contents? then true
+
     scope.updatefolder = (folderdata) ->
       Projects.update folderdata.id, folderdata
       .then (results) ->
