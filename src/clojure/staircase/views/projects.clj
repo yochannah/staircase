@@ -36,8 +36,10 @@
 
 (def list-group
   [:ul.list-group.cap
-   [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-    [:span.badge.origin {:title "{{list.short}}"} "{{ list.short | limitTo:1 }}"]
+   [:li.list-group-item {:ng-repeat "list in lists | orderBy:'title'" :droppable "list" :ng-click "setInspection(list)"}
+    [:span.badge.origin
+     {:title "{{list.short}}" :ng-class "list._mine.meta.color"}
+     "{{ list.short | limitTo:1 }}"]
     [:span.badge.origin {:ng-show "list.authorized"} [:i.fa.fa-user]]
     [:h4 "{{list.title}}"
          [:i.fa.fa-ellipsis-h
@@ -138,7 +140,8 @@
       [:form.navbar-form.navbar-right
         [:div.form-group
           [:input.form-control {:ng-model "foldername" :type "text" :name "projectname" :placeholder "Folder name..."}]]
-        [:button.btn.btn-default {:ng-click "createProject(foldername)"} "Create"]]]]))
+        [:button.btn.btn-default {:ng-click "createProject(foldername)"} [:i.fa.fa-folder " Create Folder"]]
+        [:button.btn.btn-default.pushleft {:ng-click "showexplorer = !showexplorer" :ng-class "{'active': showexplorer}"} [:i.fa.fa-plus " Add Item"]]]]]))
 
 (defn project-table []
   (html
@@ -162,8 +165,6 @@
     :ng-mouseleave "hoverOut()"
     :dropzone "project"
     :on-drop "dropped(dragE1, dropE1)"}
-
-
       [:td [:i.testtest {:ng-class "geticon(project)"}
       [:span.badge.badge-notify "{{getContentCount(project)}}"]]
         [:a {:ng-click "setlevel(project)"
@@ -213,8 +214,9 @@
     [:div.flex-row.guttered {:ng-show "auth.loggedIn"}
       [:div.flex-box
         [:div (project-table)]]
-      [:div.flex-box.flex-col-4
+      [:div.flex-box.flex-col-4 {:ng-show "showexplorer"}
         [:div (explorer)]]]
+      
     ; [:div.row-fluid
     ;   [:div.col-md-12 (items)]]
     ; [:div.row-fluid

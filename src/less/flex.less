@@ -39,7 +39,7 @@
     .make-flex-columns(@size, @n - 1);
 }
 
-.make-sized-flex-columns(@n) when (@n > 0) {
+.make-sized-flex-columns(@n) when (@n >= 0) {
     .flex-box.flex-col-@{n} {
         .flex(0 0 (@n / 12 * 100%));
     }

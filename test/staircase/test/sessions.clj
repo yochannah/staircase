@@ -38,6 +38,8 @@
 
 (def thirty-years-from-now (t/plus (t/now) (t/years 30)))
 
+(def session-conf (atom {:max-session-age 60}))
+
 (def dummy-data
   (map #(assoc %1 :id (new-id))
        [
@@ -58,7 +60,7 @@
 
 (deftest test-empty-session-store
   (let [store (-> (s/new-pg-session-store
-                    {:max-session-age 60} {:connection db-spec})
+                    session-conf {:connection db-spec})
                   component/start)]
     (testing "bad keys"
       (testing "read"
@@ -100,7 +102,7 @@
 
 (deftest test-pre-existing-sessions
   (let [store (-> (s/new-pg-session-store
-                    {:max-session-age 60} {:connection db-spec})
+                    session-conf {:connection db-spec})
                   component/start)]
     ;; Use the first store to bootstrap the db.
     (insert-dummy-data store)

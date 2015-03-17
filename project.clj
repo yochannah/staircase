@@ -79,10 +79,10 @@
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
-                    "flymine" {:covers ["D. melanogaster"]}
-                    "zfin"    {:covers ["D. rerio"]}
-                    "mousemine" {:covers ["M. musculus"]}
-                    "yeastmine" {:covers ["S. cerevisiae"]}}
+                    "flymine"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
+                    "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
+                    "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
+                    "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
         "http://*.labs.intermine.org/**"

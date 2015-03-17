@@ -6,3 +6,15 @@
     width: 100%;
     height: 100%;
 }
+
+.tones(@n, @m) when (@m > 0) {
+    &.palette-@{n}tone@{m} {
+        background-color: ~"@{@{n}tone@{m}}";
+    //    color: spin(~"@{@{n}tone@{m}}", 180);
+    }
+    .tones(@n, @m - 1);
+}
+
+.tones(@n) when (@n > 0) {
+    .tones(@n, @n);
+}

@@ -53,7 +53,7 @@
 (defn get-router [histories steps]
   (-> (new-router)
       (assoc :asset-pipeline asset-pipeline
-             :config {}
+             :config (atom {})
              :secrets {:key-phrase "some very difficult key-phrase"}
              :session-store (memory-store)
              :histories histories
