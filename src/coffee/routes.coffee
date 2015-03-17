@@ -19,7 +19,7 @@ define [], -> (app) ->
       templateUrl: '/partials/starting-point.html'
       controller: 'StartingPointCtrl'
       resolve: dependencies
-    router.when '/aboutnew',
+    router.when '/about',
       templateUrl: '/partials/about.html'
       controller: 'AboutCtrl'
     router.when '/projects',

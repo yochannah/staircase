@@ -187,7 +187,7 @@
       [:td [:a {:href "{{gethref(item)}}" :ng-click ""} [:i {:ng-class "geticon(item)"}] "{{item.item_id}}"]]
       [:td "{{project.item_id}}"]
       [:td.smallest [:span {:ng-show "item.type != 'Project'"} "{{item.type}}"]]
-      [:td "{{item.source}}"]
+      [:td.smallest "{{item.source}}"]
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonitem)]]
 
