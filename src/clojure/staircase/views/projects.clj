@@ -13,7 +13,6 @@
      [:p "Welcome to the project page."]]
     ])
 
-
 (defn create []
   [:div.panel.panel-primary
     [:div.panel-body
@@ -29,14 +28,21 @@
       [:div.form-group
       [:div.btn {:ng-click "createProject"} ]]]]])
 
+(def explorerfilter
+  [:input.form-control {:ng-model "explorerfilter"
+                        :type "text"
+                        :name "explorerfilter"
+                        :placeholder "Filter"}])
 
 (def list-group
   [:ul.list-group.cap
    [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
     [:span.badge.origin {:title "{{list.short}}"} "{{ list.short | limitTo:1 }}"]
+    [:span.badge.origin {:ng-show "list.authorized"} [:i.fa.fa-user]]
     [:h4 "{{list.title}}"
          [:i.fa.fa-ellipsis-h
           {:ng-show "list.description" :ng-click "showDescription = !showDescription"}]]
+
     [:p.text-muted.list-group-item-text {:ng-show "showDescription"} "{{list.description }}"]
     ]])
 
@@ -77,9 +83,6 @@
     [:div.col-sm-4.col-md-3.project-container
       {:ng-repeat "project in allProjects"}
      (project)]]]))
-
-
-
 
 (defn project-details []
   (html [:div.panel.panel-primary 
