@@ -100,7 +100,7 @@
 
 (defn breadcrumb []
   (html
-  [:ul.breadcrumb.list-inline
+  [:ul.breadcrumb.list-inline.mymine
     [:li [:a {:ng-click "setlevelbc(allProjects)"} "Home"]]
     [:li {:ng-repeat "item in breadcrumbs" :ng-click "setlevelbc(item, $index)"} [:a "{{getname(item)}}"]]]))
 
@@ -129,7 +129,6 @@
 
 (defn navbar []
   (html [:div.navbar.navbar-custom.navbar-default
-    (breadcrumb)
     [:div.collapse.navbar-collapse
       [:form.navbar-form.navbar-right
         [:div.form-group
@@ -140,6 +139,7 @@
 (defn project-table []
   (html
     (navbar)
+    (breadcrumb)
     [:table.table.table-hover.project-table.ng-hide
       {:ng-show "!details"
       :dropzone "level"
@@ -189,11 +189,10 @@
       [:td.smallest "{{project.last_modified | date:'dd/MM/yyyy hh:mm a'}}"]
       [:td.controls (ctrlbuttonitem)]]
 
-    [:tr {:ng-show "(!level.contents || !level.child_nodes) && breadcrumbs.length > 0"}
-      [:td {:colspan 6} "Empty folder. {{level.contents.length}}"]]
-
-    [:tr.ng-hide {:ng-show "breadcrumbs.length < 1 && level.child_nodes < 1"}
-      [:td {:colspan 6} "Please begin by creating a folder. {{level.contents.length}}"]]]]))
+    [:tr {:ng-model "level" :ng-show "emptymessage(level)"}
+      [:td {:colspan 6}
+        [:span {:ng-show "breadcrumbs.length > 0"} "Empty folder."]
+        [:span {:ng-show "breadcrumbs.length < 1"} "Please begin by creating a folder."]]]]]))
 
 (defn explorer []
   (html
