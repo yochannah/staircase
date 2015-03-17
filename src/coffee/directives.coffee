@@ -8,6 +8,21 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       $timeout -> el[0].focus()
     el.bind 'blur', -> scope.$apply model.assign scope, false
 
+  # Compatibility layer for backbone views.
+  # ie. views that have `setElement`, `remove`, and `render` methods.
+  Directives.directive 'backboneView', ->
+    restrict: 'E'
+    scope:
+      component: '='
+      eventHandler: '&'
+    link: (scope, element) ->
+      el = element[0]
+      view = scope.component
+      view.setElement el
+      view.render()
+      element.on '$destroy', -> view.remove()
+      view.on 'all', (evt, args...) -> scope.eventHandler event: evt, data: args
+
   Directives.directive 'blurOn', ->
     restrict: 'A'
     scope:
@@ -37,7 +52,6 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       service.fetchModel().then (model) ->
         $q.when(model.makePath(scope.type).getDisplayName()).then (name) ->
           scope.displayName = name
-
 
   # Pair of recursive directives for turning any json structure into an editable form.
   Directives.directive 'editableItem', ($compile) ->
