@@ -28,12 +28,6 @@
       [:div.form-group
       [:div.btn {:ng-click "createProject"} ]]]]])
 
-(def explorerfilter
-  [:input.form-control {:ng-model "explorerfilter"
-                        :type "text"
-                        :name "explorerfilter"
-                        :placeholder "Filter"}])
-
 (def list-group
   [:ul.list-group.cap
    [:li.list-group-item {:ng-repeat "list in lists | orderBy:'title'" :droppable "list" :ng-click "setInspection(list)"}
