@@ -25,9 +25,7 @@
         [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1"}]
         [:title title]
         (pv/include-persona)
-        (include-css "/css/style.css")
-        (include-css "/vendor/angular-xeditable/dist/css/xeditable.css")
-        ]
+        (include-css "/css/style.css")]
        [:body {:class "staircase"}
         [:section#content.main body]
         (staircase.views.header/snippet config)

@@ -20,7 +20,9 @@ require.config
     'angular-resource': ['angular']
     'angular-silent': ['angular']
     'angular-local-storage': ['angular']
-    'angular-xeditable': ['angular']
+    'angular-xeditable':
+      deps: ['angular']
+      init: -> loadCss '/vendor/angular-xeditable/dist/css/xeditable.css'
     'angular-notify':
       deps: ['angular']
       init: -> loadCss '/vendor/angular-notify/dist/angular-notify.css'
