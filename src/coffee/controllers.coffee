@@ -201,16 +201,14 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
         do synch
 
 
-
     Mines.all().then (values) ->
 
       scope.lists = []
 
       values.forEach (amine) ->
-        service = imjs.Service.connect root: amine.root
+        service = imjs.Service.connect amine
         service.fetchLists().then (lists) =>
 
-          lists = lists[0..5]
           for list in lists
               list.type = "List"
               list.id = list.title
@@ -221,8 +219,6 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
         service.fetchTemplates().then (templates) =>
 
-
-
           tosave = []
 
           for key, value of templates
@@ -231,26 +227,10 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
             value.type = "Template"
             tosave.push value
 
-          # # console.log "templates", templates
-          # for template in templates
-          #     template.type = "Template"
-          #     template.id = template.title
-          #     template.short = amine.name
-
-          # scope.templates = "HELLO WORLD"
-
           scope.templates = scope.templates.concat tosave
           scope.$digest()
 
-
-
     do synch
-
-    # Poll this to retrieve user's projects!
-    # setTimeout ->
-    #   # console.log "IDENT1", scope.auth
-    #   # scope.auth = "onetwo"
-    # , 3000
 
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
