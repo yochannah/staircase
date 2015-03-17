@@ -16,9 +16,6 @@
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require [compojure.handler :as handler]
             [devlin.table-utils :refer (full-outer-join)]
-            [clj-jwt.core  :as jwt]
-            [clj-jwt.key   :refer [private-key public-key]]
-            [clj-jwt.intdate :refer [intdate->joda-time]]
             [clj-time.core :as t]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -35,7 +32,8 @@
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
             [compojure.route :as route]
-            [staircase.projects :as projects])
+            [staircase.projects :as projects]
+            [staircase.tokens :refer (issue-session valid-claims)])
   )
 
 ;; TODO: this file is much too large, and in serious need of refactoring.
@@ -119,34 +117,11 @@
       (response (get-one steps step-id)))
     NOT_FOUND))
 
-(defn- issue-session [config secrets ident]
-  (let [key-phrase (:key-phrase secrets)
-        claim (jwt/jwt {:iss (:audience config)
-                        :exp (t/plus (t/now) (t/days 1))
-                        :iat (t/now)
-                        :prn ident})]
-    (if-let [rsa-prv-key
-             (try (private-key "rsa/private.key" key-phrase)
-               (catch java.io.FileNotFoundException fnf nil))]
-      (-> claim
-          (jwt/sign :RS256 rsa-prv-key)
-          jwt/to-str)
-      (-> claim
-          (jwt/sign :HS256 key-phrase)
-          jwt/to-str))))
-
 (defn get-principal [router auth]
   (or
     (when (and auth (.startsWith auth "Token: "))
-      (let [token (.replace auth "Token: " "")
-            web-token (jwt/str->jwt token)
-            claims (:claims web-token)
-            proof (try (public-key  "rsa/public.key")
-                       (catch java.io.FileNotFoundException fnf
-                         (get-in router [:secrets :key-phrase])))
-            valid? (jwt/verify web-token proof)]
-        (when (and valid? (t/after? (intdate->joda-time (:exp claims)) (t/now)))
-          (:prn claims))))
+      (let [token (.replace auth "Token: " "")]
+        (:prn (valid-claims (:secrets router) token))))
     ::invalid))
 
 (defn- wrap-api-auth [handler router]
@@ -160,7 +135,7 @@
 
 ;; Requires session functionality.
 (defn app-auth-routes [{:keys [config secrets]}]
-  (let [get-session (partial issue-session config secrets)
+  (let [get-session (partial issue-session @config secrets)
         session-resp #(-> %
                           get-session
                           response
@@ -211,26 +186,23 @@
   (-> (apply merge (map req [:params :form-params :multipart-params]))
       :__anti-forgery-token))
 
-(defn drawbridge-handler [session-store]
+(def drawbridge-handler
   (-> (drawbridge/ring-handler)
-      (wrap-keyword-params)
-      (wrap-nested-params)
-      (wrap-params)
-      (wrap-session)))
+      wrap-keyword-params
+      wrap-nested-params
+      wrap-params
+      wrap-session))
 
-(defn- wrap-drawbridge [handler config session-store]
-  (let [repl (drawbridge-handler session-store)
-        repl-user-creds (map #(% config) [:repl-user :repl-pwd])
-        repl? (fn [req] (and (= "/repl" (:uri req)) (not-any? nil? repl-user-creds)))
-        authenticated? (fn [usr pwd] (= [usr pwd] repl-user-creds))]
+(defn- wrap-drawbridge [handler user-creds]
+  (letfn [(repl?           [req] (and (= "/repl" (:uri req)) (not-any? nil? user-creds)))
+          (authenticated?  [usr pwd] (= [usr pwd] user-creds))]
     (fn [req]
-      (let [h (if (repl? req)
-                      (wrap-basic-authentication repl authenticated?)
-                      handler)]
+      (let [repl (wrap-basic-authentication drawbridge-handler authenticated?)
+            h    (if (repl? req) repl handler)]
         (h req)))))
 
 (defn- build-app-routes [{conf :config :as router}]
-  (let [serve-index (partial views/index conf)]
+  (let [serve-index #(views/index @conf)]
     (routes 
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
@@ -238,18 +210,18 @@
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
-      (GET "/tools" [capabilities] (response (get-tools conf capabilities)))
-      (GET "/tools/:id" [id] (if-let [tool (get-tool conf id)]
+      (GET "/tools" [capabilities] (response (get-tools @conf capabilities)))
+      (GET "/tools/:id" [id] (if-let [tool (get-tool @conf id)]
                               (response tool)
                               {:status 404}))
       (GET "/partials/:fragment.html"
           [fragment]
-          (views/render-partial conf fragment))
+          (views/render-partial @conf fragment))
       (context "/auth" [] (-> (app-auth-routes router)
                               (wrap-anti-forgery {:read-token read-token})))
       (route/resources "/" {:root "tools"})
       (route/resources "/" {:root "public"})
-      (route/not-found (views/four-oh-four conf)))))
+      (route/not-found (views/four-oh-four @conf)))))
 
 (defn- build-hist-routes [{:keys [histories steps]}]
   (routes ;; routes that start from histories.
@@ -295,7 +267,7 @@
 ;; Routes delivering dynamic config to the client.
 (defn build-config-routes
       [{:keys [config]}]
-      (routes (GET "/" [] (response (:client config)))))
+      (routes (GET "/" [] (response (:client @config)))))
 
 (defn- now [] (java.util.Date.))
 
@@ -313,15 +285,15 @@
                                                                              :token token})))]
                                        (merge service canon))))
         ensure-valid (comp ensure-token ensure-name)
-        real-id #(if (= "default" %) (:default-service config) %)]
+        real-id #(if (= "default" %) (:default-service @config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
                  (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
                   (let [user-services (get-all services)
-                        configured-services (->> config
+                        configured-services (->> @config
                                                  :services
                                                  (map (fn [[k v]]
-                                                        {:root v :confname k :meta (get-in config [:service-meta k])})))]
+                                                        {:root v :confname k :meta (get-in @config [:service-meta k])})))]
                     (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
                   (DELETE "/" []
@@ -334,7 +306,7 @@
                   (GET "/" []
                           (locking services
                             (let [ident (real-id ident)
-                                  uri (get-in config [:services ident])
+                                  uri (get-in @config [:services ident])
                                   user-services (get-where services [:= :root uri])
                                   service (-> [{:root uri :name ident}]
                                               (full-outer-join user-services :root)
@@ -342,7 +314,7 @@
                               (response (ensure-valid service)))))
                   (PUT "/" {doc :body}
                          (locking services
-                            (let [uri (or (get doc "root") (get-in config [:services (real-id ident)]))
+                            (let [uri (or (get doc "root") (get-in @config [:services (real-id ident)]))
                                   current (first (get-where services [:= :root uri]))]
                               (if current
                                 (update services (:id current) doc)
@@ -352,12 +324,12 @@
                                     (create-new services (-> doc (assoc :root uri :token token) (dissoc "root" "token"))))
                                   (catch Exception e {:status 400 :body {:message (str "bad service definition: " e)}}))))))))))
 
-(defn- build-api-session-routes [router]
+(defn- build-api-session-routes [{:keys [config secrets session-store]}]
   (-> (routes
         (POST "/"
               {sess :session}
-              (issue-session (:config router) (:secrets router) (:identity sess))))
-      (wrap-session {:store (:session-store router)})))
+              (issue-session @config secrets (:identity sess))))
+      (wrap-session {:store session-store})))
 
 (defn- api-v1 [router]
   (let [hist-routes (build-hist-routes router)
@@ -405,10 +377,11 @@
   component/Lifecycle
 
   (start [this]
-    (info "Starting steps app at" (:audience config))
-    (let [persona (partial persona-workflow (:audience config))
+    (info "Starting steps app at" (:audience @config))
+    (let [persona (partial persona-workflow (:audience @config))
           auth-conf {:credential-fn credential-fn
                      :workflows [persona anonymous-workflow]}
+          repl-user-creds (map #(% @config) [:repl-user :repl-pwd]) ;; Do not allow these to change.
           app-routes (build-app-routes this)
           v1 (context "/api/v1" [] (api-v1 this))
           handler (routes
@@ -423,7 +396,7 @@
           app (-> handler
                   wrap-restful-format
                   (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))
-                  (wrap-drawbridge config session-store))]
+                  (wrap-drawbridge repl-user-creds))]
       (assoc this :handler app)))
 
   (stop [this] this))

@@ -29,8 +29,8 @@
                                              :coffee "src/coffee"
                                              :ls     "src/ls"
                                              :less   "src/less")
-            :config (assoc (app-options options)
-                           :client (client-options options))
+            :config (atom (assoc (app-options options) ;; Allow config to change at run-time by atomising it.
+                                  :client (client-options options)))
             :secrets (secrets options)
             :session-store (sessions/new-pg-session-store)
             :db (data/new-pooled-db db)

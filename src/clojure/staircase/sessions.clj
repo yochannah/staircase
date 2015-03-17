@@ -93,7 +93,7 @@
   (write-session
     [store id data]
     (if-let [uuid (string->uuid (or id (new-id)))]
-      (let [valid-until (get-expiry (:max-session-age config))
+      (let [valid-until (get-expiry (:max-session-age @config))
             session {:data (prn-str data) :valid_until valid-until}
             where-clause ["id=?" uuid]
             con (:connection db)]
