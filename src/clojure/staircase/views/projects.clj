@@ -32,8 +32,10 @@
 
 (def list-group
   [:ul.list-group.cap
-   [:li.list-group-item {:ng-repeat "list in lists" :droppable "list" :ng-click "setInspection(list)"}
-    [:span.badge.origin {:title "{{list.short}}"} "{{ list.short | limitTo:1 }}"]
+   [:li.list-group-item {:ng-repeat "list in lists | orderBy:'title'" :droppable "list" :ng-click "setInspection(list)"}
+    [:span.badge.origin
+     {:title "{{list.short}}" :ng-class "list._mine.meta.color"}
+     "{{ list.short | limitTo:1 }}"]
     [:h4 "{{list.title}}"
          [:i.fa.fa-ellipsis-h
           {:ng-show "list.description" :ng-click "showDescription = !showDescription"}]]

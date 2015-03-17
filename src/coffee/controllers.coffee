@@ -158,12 +158,12 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
       # Are we adding a project to a list?
       if pkg.type is "List" and dest.type is "Project"
         Projects.addto dest.id, pkg
-          .then (result) ->         
+          .then (result) ->
               do synch
 
       if pkg.type is "Template" and dest.type is "Project"
         Projects.addto dest.id, pkg
-          .then (result) ->         
+          .then (result) ->
               do synch
 
     scope.setlevelbc = (id, index) ->
@@ -213,6 +213,7 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
               list.type = "List"
               list.id = list.title
               list.short = amine.name
+              list._mine = amine
 
           scope.lists = scope.lists.concat lists
           scope.$digest()
