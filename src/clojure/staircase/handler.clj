@@ -34,7 +34,8 @@
             [staircase.tools :refer (get-tools get-tool)]
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
-            [compojure.route :as route]) ;; Standard route builders.
+            [compojure.route :as route]
+            [staircase.projects :as projects])
   )
 
 ;; TODO: this file is much too large, and in serious need of refactoring.
@@ -68,9 +69,12 @@
 
 (defn register-for ;; currently gets anon session. Needs api hf to be applied.
   [service]
-  (let [session-url (str (:root service) "/session")
-        resp (client/get session-url {:as :json :throw-exceptions false})]
-    (get-in resp [:body :token])))
+  (let [http-conf {:as :json :throw-exceptions false}
+        token-coords [:body :token]
+        session-url  (str (:root service) "/session")]
+    (-> session-url
+        (client/get http-conf)
+        (get-in token-coords))))
 
 (defn get-end-of-history [histories id]
   (or
@@ -156,16 +160,16 @@
 
 ;; Requires session functionality.
 (defn app-auth-routes [{:keys [config secrets]}]
-  (let [issue-session (partial issue-session config secrets)
+  (let [get-session (partial issue-session config secrets)
         session-resp #(-> %
-                          issue-session
+                          get-session
                           response
                           (content-type "application/json-web-token"))]
     (routes
       (GET "/csrf-token" [] (-> (response *anti-forgery-token*) (content-type "text/plain")))
       (GET "/session"
            {session :session :as r}
-           (session-resp (:current (friend/identity r))))
+           (assoc (session-resp (:current (friend/identity r))) :session session))
       (POST "/login"
             {session :session :as r}
             (if (:email (friend/current-authentication r))
@@ -174,7 +178,7 @@
       (friend/logout (POST "/logout"
                            {session :session :as r}
                            (-> (response "ok")
-                               (assoc :session (dissoc session :anon-identity))
+                               (assoc :session nil)
                                (content-type "text/plain")))))))
 
 ;; replacement for persona-kit version. TODO: move to different file.
@@ -230,6 +234,7 @@
     (routes 
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
+      (GET "/projects" [] (serve-index))
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
@@ -265,6 +270,21 @@
                                   (fork-history-at histories id idx body))
                             (POST "/" {body :body} (add-step-to histories steps id body))))))
 
+(defn- build-project-routes [{:keys [projects]}]
+  (routes ;; routes that start from histories.
+          (GET  "/" [] (staircase.projects/get-all-projects))
+          (POST "/" {payload :body} (staircase.projects/create-project payload))
+          (context "/:id" [id]
+            (GET  "/test" [] (str "test"))
+            (DELETE  "/" [] (staircase.projects/delete-project id))
+            (POST  "/" {payload :body} [] (staircase.projects/update-project id payload))
+            (context "/items" []
+              (DELETE "/:itemid" [itemid] (staircase.projects/delete-item itemid))
+              (POST "/" {payload :body}
+                (staircase.projects/add-item-to-project id payload))))))
+              ; (DELETE "/post" [] (staircase.projects/delete-item))))))
+
+
 (defn build-step-routes [{:keys [steps]}]
   (routes ;; routes for access to step data.
           (GET  "/" [] (get-resources steps))
@@ -277,9 +297,11 @@
       [{:keys [config]}]
       (routes (GET "/" [] (response (:client config)))))
 
+(defn- now [] (java.util.Date.))
+
 (defn build-service-routes [{:keys [config services]}]
   (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
-        ensure-token (fn [service] (if (:token service)
+        ensure-token (fn [service] (if (and (:token service) (:valid_until service) (.before (now) (:valid_until service)))
                                      service
                                      (let [token (register-for service)
                                            current (first (get-where services [:= :root (:root service)]))
@@ -300,7 +322,6 @@
                                                  :services
                                                  (map (fn [[k v]]
                                                         {:root v :confname k :meta (get-in config [:service-meta k])})))]
-                    ;; (info "USER SERVICES" (count user-services) "CONF SERVICES" (count configured-services))
                     (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
             (context "/:ident" [ident]
                   (DELETE "/" []
@@ -315,9 +336,8 @@
                             (let [ident (real-id ident)
                                   uri (get-in config [:services ident])
                                   user-services (get-where services [:= :root uri])
-                                  service (-> (full-outer-join [{:root uri :confname ident}]
-                                                              user-services
-                                                              :root)
+                                  service (-> [{:root uri :name ident}]
+                                              (full-outer-join user-services :root)
                                               first)]
                               (response (ensure-valid service)))))
                   (PUT "/" {doc :body}
@@ -327,7 +347,8 @@
                               (if current
                                 (update services (:id current) doc)
                                 (try
-                                  (let [token (or (get doc "token") (register-for {:root uri}))] ;; New record. Ensure valid.
+                                  (let [token (or (get doc "token")
+                                                  (register-for {:root uri}))] ;; New record. Ensure valid.
                                     (create-new services (-> doc (assoc :root uri :token token) (dissoc "root" "token"))))
                                   (catch Exception e {:status 400 :body {:message (str "bad service definition: " e)}}))))))))))
 
@@ -339,9 +360,10 @@
       (wrap-session {:store (:session-store router)})))
 
 (defn- api-v1 [router]
-  (let [hist-routes        (build-hist-routes router)
-        step-routes        (build-step-routes router)
-        service-routes     (build-service-routes router)
+  (let [hist-routes (build-hist-routes router)
+        step-routes (build-step-routes router)
+        project-routes (build-project-routes router)
+        service-routes (build-service-routes router)
         api-session-routes (build-api-session-routes router)
         config-routes      (build-config-routes router)]
     (routes ;; put them all together
@@ -350,7 +372,8 @@
             (-> (routes ;; Protected resources.
                   (context "/histories" [] hist-routes)
                   (context "/services" [] service-routes)
-                  (context "/steps" [] step-routes))
+                  (context "/steps" [] step-routes)
+                  (context "/projects" [] project-routes))
                 (wrap-api-auth router))
             (route/not-found {:message "Not found"}))))
 
@@ -358,7 +381,6 @@
   [handler]
   (fn [request]
     (let [user (:identity (friend/current-authentication request))]
-      (info "for" (:uri request) "user =" user)
       (binding [staircase.resources/context {:user user}]
         (handler request)))))
 
@@ -407,4 +429,3 @@
   (stop [this] this))
 
 (defn new-router [] (map->Router {}))
-

@@ -26,6 +26,7 @@
         [:title title]
         (pv/include-persona)
         (include-css "/css/style.css")
+        (include-css "/vendor/angular-xeditable/dist/css/xeditable.css")
         ]
        [:body {:class "staircase"}
         [:section#content.main body]

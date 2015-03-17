@@ -14,17 +14,18 @@
   (-> staircase.resources/owned-resource
       (from :services)))
 
+(def ONE_DAY (* 24 60 60 1e3)) ;; One day in milli-seconds
+
+(defn one-day-from-now []
+  (java.sql.Timestamp. (+ (System/currentTimeMillis) ONE_DAY)))
+
 (defrecord ServicesResource [db]
   component/Lifecycle 
 
   (start [component]
-    (staircase.sql/create-tables
+    (staircase.sql/create-tables ;; Creates table and adds missing columns.
       (:connection db)
       schema/services)
-    (let [columns (staircase.sql/get-column-names (:connection db) :services)]
-      (info "Found columns" columns)
-      (when-not (columns "name") ;; TODO BAD! Should have proper migrations. But works for now.
-        (sql/execute! (:connection db) [(str "ALTER TABLE services ADD name " schema/string)])))
     component)
 
   (stop [component] component)
@@ -53,7 +54,7 @@
                        (:connection db)
                        :services
                        id (:user staircase.resources/context)
-                       doc))
+                       (if (:token doc) (assoc doc :valid_until (one-day-from-now)) doc)))
 
   (delete [_ id]
     (when-let [uuid (string->uuid id)]
@@ -65,7 +66,10 @@
   (create [_ doc]
     (let [id (new-id)
           owner (:user staircase.resources/context)
-          service (-> doc (dissoc :id "id" :owner) (assoc "id" id "owner" owner))]
+          service (-> doc (dissoc :id "id" :owner "valid_until" :valid_until)
+                          (assoc "id" id
+                                 "valid_until" (one-day-from-now)
+                                 "owner" owner))]
       (sql/insert! (:connection db) :services service)
       id))
   
