@@ -133,7 +133,12 @@
       [:form.navbar-form.navbar-right
         [:div.form-group
           [:input.form-control {:ng-model "foldername" :type "text" :name "projectname" :placeholder "Folder name..."}]]
-        [:button.btn.btn-default {:ng-click "createProject(foldername)"} [:i.fa.fa-folder " Create Folder"]]
+        [:button.btn.btn-default
+         {
+          :ng-class "{disabled: !foldername}"
+          :ng-click "createProject(foldername)"
+          }
+         [:i.fa.fa-folder " Create Folder"]]
         [:button.btn.btn-default.pushleft {:ng-click "showexplorer = !showexplorer" :ng-class "{'active': showexplorer}"} [:i.fa.fa-plus " Add Item"]]]]]))
 
 (defn project-table []

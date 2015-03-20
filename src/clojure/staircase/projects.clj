@@ -60,7 +60,6 @@
   (sql/query db-spec ["select * from projects where id = ?" id]))
 
 (defn sql-create-project [data]
-  (info (type data))
   (sql/insert! db-spec :projects
     {:parent_id (data "parent_id") :title (data "title") :owner_id (:user staircase.resources/context) :last_modified (staircase.helpers/sql-now) :last_accessed (staircase.helpers/sql-now) :created (staircase.helpers/sql-now) }))
 
