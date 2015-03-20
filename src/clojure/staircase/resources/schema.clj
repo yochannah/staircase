@@ -37,22 +37,25 @@
 ;; have many steps, steps can be part of more than one history).
 (def projects
    {:projects
-    [ [:title :text]
-      [:owner_id :text]
+    [ 
+      [:id :serial "PRIMARY KEY"]
+      [:title :text "NOT NULL"]
+      [:owner_id :text "NOT NULL"]
       [:description :text]
+      [:created "timestamp with time zone"]
       [:last_modified "timestamp with time zone"]
       [:last_accessed "timestamp with time zone"]
-      [:id :serial "PRIMARY KEY"]
-      [:created "timestamp with time zone"]
-      [:parent_id :integer "references projects (id) ON DELETE CASCADE"]] })
+      [:parent_id :integer "references projects (id) ON DELETE CASCADE"]
+      [:UNIQUE "(owner_id, title)"]
+      ] })
 
 (def project-contents
    {:project_contents
-    [ [:id :uuid]
-      [:project_id :integer "references projects (id) ON DELETE CASCADE"]
-      [:item_id :text]
-      [:type :text]
-      [:source :text]
+    [ [:id :uuid "primary key"]
+      [:project_id :integer "NOT NULL" "references projects (id) ON DELETE CASCADE"]
+      [:item_id :text "NOT NULL"]
+      [:type :text "NOT NULL"]
+      [:source :text "NOT NULL"]
       [:UNIQUE "(item_id, project_id, type, source)"]]})
 
 ;; Question: should steps also reference their owner? On one hand, since steps
