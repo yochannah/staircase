@@ -201,7 +201,7 @@
         [:tab {:heading "Templates"} templates-group]]))
 
 (defn snippet [config]
-  (html [:div.container-fluid
+  (html [:div.container-fluid.projects
     [:div.row-fluid {:ng-hide "auth.loggedIn"}
       [:p "Please log in to access MyMine"]]
     [:div.flex-row.guttered {:ng-show "auth.loggedIn"}
@@ -210,12 +210,4 @@
       [:div.flex-box.flex-col-4 {:ng-show "showexplorer"}
         [:div (explorer)]]]
       
-    ; [:div.row-fluid
-    ;   [:div.col-md-12 (items)]]
-    ; [:div.row-fluid
-    ;   [:div.col-md-12 
-    ;   [:div.panel.panel-warning 
-    ;     [:div.panel-heading "Inspection"]
-    ;     [:div.panel-body
-    ;       [:pre.projects "{{inspection}}"]]]]]
           ]))
