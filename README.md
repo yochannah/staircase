@@ -69,7 +69,14 @@ installation of the javascript dependencies using [npm][npm] and
 [Bower][bower].
 
 This application also makes use of a postgres database. So you will need
-[postgres][psql] installed and configured.
+[postgres][psql] installed and configured. We use the `uuid-ossp` psql
+extension, which is available by default on Heroku, and needs installing if you
+are setting up your own database. Luckily this is a standard extension, and is
+generally available in the contrib packages from your vendor, eg. in Ubuntu run:
+
+```sh
+sudo apt install postgresql-contrib
+```
 
 ## Configuration
 

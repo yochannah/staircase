@@ -19,6 +19,7 @@
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
+                 [org.flywaydb/flyway-core "3.0"]
                  [compojure "1.1.6"] ;; Request handlers
                  [ring-middleware-format "0.3.2"] ;; JSON marshalling
                  [ring "1.2.2"] ;; sessions.
@@ -54,6 +55,8 @@
   :source-paths ["src/clojure"]
   :resource-paths ["resources" "external"]
   :aliases {
+            "run-query" ["run" "-m" "staircase.tasks/run-query"]
+            "clean-db" ["run" "-m" "staircase.tasks/clean-db"]
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
             "clean-js" ["run" "-m" "staircase.tasks/clean-js"]
             "load-tools" ["run" "-m" "staircase.tasks/load-tools"]
@@ -67,6 +70,7 @@
       :web-gh-repository "https://github.com/alexkalderimis/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
+      :db-migrate true ;; Set falsy to disable migrations.
       :web-project-title "InterMine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)

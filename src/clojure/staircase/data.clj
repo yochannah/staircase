@@ -3,6 +3,7 @@
   (:use staircase.helpers
         [clojure.tools.logging :only (debug info error)])
   (:require staircase.resources
+            [staircase.migrations :as migrations]
             [staircase.resources.steps :as steps]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
@@ -27,7 +28,11 @@
 
   (start [component]
     (info "Starting pooled database" (prn-str config))
-    (assoc component :connection (open-pool config)))
+    (let [pool (open-pool config)]
+      (when (:migrate config)
+        (info "Migrating DB")
+        (migrations/migrate (:datasource pool)))
+      (assoc component :connection (open-pool config))))
 
   (stop [component]
     (info "Stopping pooled database")
