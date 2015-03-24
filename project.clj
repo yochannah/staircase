@@ -8,6 +8,7 @@
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [org.clojure/java.jdbc "0.3.3"] ;; DB interface
+                 [yesql "0.4.0"]
                  [clj-http "0.9.1"] ;; Perform http requests.
                  [http-kit "2.1.16"]
                  [clj-jwt "0.0.12"] ;; Generate signed json web-tokens.
@@ -66,6 +67,7 @@
                    :database :database
                    :default (complement :acceptance)}
   :env {
+      :asset-js-engine :v8
       :web-search-placeholder "enter a search term"
       :web-gh-repository "https://github.com/alexkalderimis/staircase"
       :db-classname "org.postgresql.Driver"
