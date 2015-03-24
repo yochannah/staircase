@@ -10,6 +10,7 @@
         [environ.core :only (env)]
         [staircase.sessions :as s])
   (:require
+    [staircase.data :as data]
     [clj-time.core :as t]
     [clj-time.coerce :as tc]
     [clojure.java.jdbc :as sql]))
@@ -38,7 +39,7 @@
 
 (def thirty-years-from-now (t/plus (t/now) (t/years 30)))
 
-(def session-conf (atom {:max-session-age 60}))
+(def session-conf {:max-session-age 60})
 
 (def dummy-data
   (map #(assoc %1 :id (new-id))
@@ -53,14 +54,15 @@
          :valid_until (tc/to-sql-time thirty-years-from-now)}]))
 
 (defn insert-dummy-data [store]
-    (apply sql/insert! (get-in store [:db :connection]) :sessions dummy-data))
+  (apply sql/insert! (:db store) :sessions dummy-data))
 
 (defn all-sessions [store]
-  (into [] (sql/query (get-in store [:db :connection]) ["select * from sessions"])))
+  (vec (sql/query (:db store) ["select * from sessions"])))
 
 (deftest test-empty-session-store
-  (let [store (-> (s/new-pg-session-store
-                    session-conf {:connection db-spec})
+  (let [db (-> (data/new-pooled-db db-spec)
+               component/start)
+        store (-> (s/new-pg-session-store (atom session-conf) db)
                   component/start)]
     (testing "bad keys"
       (testing "read"
@@ -101,8 +103,9 @@
 (def one-sec (t/seconds 1))
 
 (deftest test-pre-existing-sessions
-  (let [store (-> (s/new-pg-session-store
-                    session-conf {:connection db-spec})
+  (let [db (-> (data/new-pooled-db db-spec)
+               component/start)
+        store (-> (s/new-pg-session-store (atom session-conf) db)
                   component/start)]
     ;; Use the first store to bootstrap the db.
     (insert-dummy-data store)
@@ -136,5 +139,4 @@
         (is (= nil (delete-session store sid)))
         (let [sessions (all-sessions store)]
           (is (= 2 (count sessions))))))))
-
 

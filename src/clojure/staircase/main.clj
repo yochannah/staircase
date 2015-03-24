@@ -7,21 +7,24 @@
 
 (defn- to-int [s] (Integer/parseInt s 10))
 
-(defonce server (atom {}))
+(defonce servers (atom {}))
 
 (defn stop-server
   [port]
-  (when-let [app (get @server port)]
+  (when-let [app (get @servers port)]
     (app :timeout 100) ;; Close port
-    (swap! server dissoc port))) ;; Delete ref.
+    (swap! servers dissoc port))) ;; Delete ref.
 
 (defn start-server
   [port]
   (let [port (or port 3000)]
     (stop-server port)
-    (swap! server assoc port (run-server app/handler {:port port}))
+    (swap! servers
+           assoc port (run-server app/handler {:port port}))
     (info "Started staircase server on port" port)))
 
+;; Start a web-server
+;; arguments: port - the port to listen on (optional).
 (defn -main [ & [userport] ]
   (let [port (to-int (or userport (get env :port "3000")))]
     (start-server port)))

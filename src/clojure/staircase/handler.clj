@@ -10,7 +10,8 @@
         ring.middleware.json
         ring.middleware.format
         ring.middleware.anti-forgery
-        [staircase.protocols] ;; Compile, so import will work.
+        staircase.routing ;; small helpers.
+        [staircase.protocols]
         [staircase.helpers :only (new-id)]
         [clojure.tools.logging :only (debug info error)]
         [clojure.algo.monads :only (domonad maybe-m)])
@@ -18,10 +19,11 @@
             [devlin.table-utils :refer (full-outer-join)]
             [clj-time.core :as t]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [com.stuartsierra.component :as component]
             [ring.middleware.cors :refer (wrap-cors)]
             staircase.resources
+            [staircase.routes.service :refer (build-service-routes)]
+            [staircase.routes.histories :refer (build-hist-routes)]
             [persona-kit.friend :as pf]
             [persona-kit.core :as pk]
             [persona-kit.middleware :as pm]
@@ -35,87 +37,6 @@
             [staircase.projects :as projects]
             [staircase.tokens :refer (issue-session valid-claims)])
   )
-
-;; TODO: this file is much too large, and in serious need of refactoring.
-
-(def NOT_FOUND {:status 404})
-(def ACCEPTED {:status 204})
-
-(defn get-resource [rs id]
-  (if-let [ret (.get-one rs id)]
-    (response ret)
-    NOT_FOUND))
-
-;; Have to vectorise, since lazy seqs won't be jsonified.
-(defn get-resources [rs] (response (into [] (.get-all rs))))
-
-(defn create-new [rs doc]
-  (let [id (.create rs doc)]
-    (get-resource rs id)))
-
-(defn update-resource [rs id doc]
-  (if (.exists? rs id)
-    (response (.update rs id doc))
-    NOT_FOUND))
-
-(defn delete-resource [rs id]
-  (if (.exists? rs id)
-    (do 
-      (.delete rs id)
-      ACCEPTED)
-    NOT_FOUND))
-
-(defn register-for ;; currently gets anon session. Needs api hf to be applied.
-  [service]
-  (let [http-conf {:as :json :throw-exceptions false}
-        token-coords [:body :token]
-        session-url  (str (:root service) "/session")]
-    (-> session-url
-        (client/get http-conf)
-        (get-in token-coords))))
-
-(defn get-end-of-history [histories id]
-  (or
-    (when-let [end (first (data/get-steps-of histories id :limit 1))]
-      (response end))
-    NOT_FOUND))
-
-(defn get-steps-of [histories id]
-  (or
-    (when (.exists? histories id)
-      (response (into [] (data/get-steps-of histories id))))
-    NOT_FOUND))
-
-(defn get-step-of [histories id idx]
-  (or
-    (domonad maybe-m ;; TODO: use offsetting rather than nth.
-             [:when (.exists? histories id)
-              i     (try (Integer/parseInt idx) (catch NumberFormatException e nil))
-              step  (nth (data/get-steps-of histories id) i)]
-          (response step))
-    NOT_FOUND))
-
-(defn fork-history-at [histories id idx body]
-  (or
-    (domonad maybe-m
-             [original (get-one histories id)
-              title (or (get body "title") (str "Fork of " (:title original)))
-              history (assoc (dissoc original :id :steps) :title title)
-              ;; Don't really have to nummify it - but is good to catch error here.
-              limit (try (Integer/parseInt idx) (catch NumberFormatException e nil))
-              inherited-steps (data/get-history-steps-of histories id limit)
-              hid (create histories history)]
-             (do
-              (data/add-all-steps histories hid inherited-steps)
-              (response (get-one histories hid))))
-    NOT_FOUND))
-
-(defn add-step-to [histories steps id doc]
-  (if (exists? histories id)
-    (let [to-insert (assoc doc "history_id" id)
-          step-id (create steps to-insert)]
-      (response (get-one steps step-id)))
-    NOT_FOUND))
 
 (defn get-principal [router auth]
   (or
@@ -201,7 +122,7 @@
             h    (if (repl? req) repl handler)]
         (h req)))))
 
-(defn- build-app-routes [{conf :config :as router}]
+(defn- build-app-routes [{conf :config :as app}]
   (let [serve-index #(views/index @conf)]
     (routes 
       (GET "/" [] (serve-index))
@@ -217,47 +138,42 @@
       (GET "/partials/:fragment.html"
           [fragment]
           (views/render-partial @conf fragment))
-      (context "/auth" [] (-> (app-auth-routes router)
+      (context "/auth" [] (-> (app-auth-routes app)
                               (wrap-anti-forgery {:read-token read-token})))
       (route/resources "/" {:root "tools"})
       (route/resources "/" {:root "public"})
       (route/not-found (views/four-oh-four @conf)))))
 
-(defn- build-hist-routes [{:keys [histories steps]}]
-  (routes ;; routes that start from histories.
-          (GET  "/" [] (get-resources histories))
-          (POST "/" {body :body} (create-new histories body))
+(defn- project-item-routes [projects project-id]
+  (routes
+    (DELETE "/:itemid" [itemid]
+        (if (delete-item-from-project projects project-id itemid)
+          ACCEPTED
+          NOT_FOUND))
+    (POST "/" {payload :body}
+          (if (add-item-to-project projects id payload)
+            ACCEPTED
+            NOT_FOUND))))
+
+(defn- project-routes [projects id]
+  (routes
+    (GET "/" [] (get-resource projects id))
+    (DELETE  "/" [] (delete-resource projects id))
+    (PUT  "/" {payload :body}
+         (update-resource projects id payload))
+    (context "/items" []
+             (project-item-routes projects id))))
+
+(defn- build-project-routes [{{:keys [projects]} :resources}]
+  (routes ;; routes that start from projects
+          (GET  "/" []
+               (get-resources projects))
+          (POST "/" {payload :body}
+                (create-new projects payload))
           (context "/:id" [id]
-                   (GET    "/" [] (get-resource histories id))
-                   (PUT    "/" {body :body} (update-resource histories
-                                                             id
-                                                             (dissoc body "id" "steps" "owner")))
-                   (DELETE "/" [] (delete-resource histories id))
-                   (GET    "/head" [] (get-end-of-history histories id))
-                   (context "/steps" []
-                            (GET "/" [] (get-steps-of histories id))
-                            (GET "/:idx" [idx] (get-step-of histories id idx))
-                            (POST "/:idx/fork"
-                                  {body :body {idx :idx} :params}
-                                  (fork-history-at histories id idx body))
-                            (POST "/" {body :body} (add-step-to histories steps id body))))))
+                (project-routes projects id))))
 
-(defn- build-project-routes [{:keys [projects]}]
-  (routes ;; routes that start from histories.
-          (GET  "/" [] (staircase.projects/get-all-projects))
-          (POST "/" {payload :body} (staircase.projects/create-project payload))
-          (context "/:id" [id]
-            (GET  "/test" [] (str "test"))
-            (DELETE  "/" [] (staircase.projects/delete-project id))
-            (POST  "/" {payload :body} [] (staircase.projects/update-project id payload))
-            (context "/items" []
-              (DELETE "/:itemid" [itemid] (staircase.projects/delete-item itemid))
-              (POST "/" {payload :body}
-                (staircase.projects/add-item-to-project id payload))))))
-              ; (DELETE "/post" [] (staircase.projects/delete-item))))))
-
-
-(defn build-step-routes [{:keys [steps]}]
+(defn build-step-routes [{{:keys [steps]} :resources}]
   (routes ;; routes for access to step data.
           (GET  "/" [] (get-resources steps))
           (context "/:id" [id]
@@ -271,59 +187,6 @@
 
 (defn- now [] (java.util.Date.))
 
-(defn build-service-routes [{:keys [config services]}]
-  (let [ensure-name (fn [service] (-> service (assoc :name (or (:name service) (:confname service))) (dissoc :confname)))
-        ensure-token (fn [service] (if (and (:token service) (:valid_until service) (.before (now) (:valid_until service)))
-                                     service
-                                     (let [token (register-for service)
-                                           current (first (get-where services [:= :root (:root service)]))
-                                           canon (if current
-                                                  (update services (:id current) {:token token})
-                                                  (get-one services (create services
-                                                                            {:name (:name service)
-                                                                             :root (:root service)
-                                                                             :token token})))]
-                                       (merge service canon))))
-        ensure-valid (comp ensure-token ensure-name)
-        real-id #(if (= "default" %) (:default-service @config) %)]
-    (routes ;; Routes for getting service information.
-            (GET "/" []
-                 (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
-                  (let [user-services (get-all services)
-                        configured-services (->> @config
-                                                 :services
-                                                 (map (fn [[k v]]
-                                                        {:root v :confname k :meta (get-in @config [:service-meta k])})))]
-                    (response (vec (map ensure-valid (full-outer-join configured-services user-services :root)))))))
-            (context "/:ident" [ident]
-                  (DELETE "/" []
-                          (let [ident (real-id ident)
-                                id (-> services (get-where [:= :name ident]) first :id)]
-                            (if id
-                              (do (delete services id)
-                                  {:status 200})
-                              {:status 404})))
-                  (GET "/" []
-                          (locking services
-                            (let [ident (real-id ident)
-                                  uri (get-in @config [:services ident])
-                                  user-services (get-where services [:= :root uri])
-                                  service (-> [{:root uri :name ident}]
-                                              (full-outer-join user-services :root)
-                                              first)]
-                              (response (ensure-valid service)))))
-                  (PUT "/" {doc :body}
-                         (locking services
-                            (let [uri (or (get doc "root") (get-in @config [:services (real-id ident)]))
-                                  current (first (get-where services [:= :root uri]))]
-                              (if current
-                                (update services (:id current) doc)
-                                (try
-                                  (let [token (or (get doc "token")
-                                                  (register-for {:root uri}))] ;; New record. Ensure valid.
-                                    (create-new services (-> doc (assoc :root uri :token token) (dissoc "root" "token"))))
-                                  (catch Exception e {:status 400 :body {:message (str "bad service definition: " e)}}))))))))))
-
 (defn- build-api-session-routes [{:keys [config secrets session-store]}]
   (-> (routes
         (POST "/"
@@ -332,10 +195,10 @@
       (wrap-session {:store session-store})))
 
 (defn- api-v1 [router]
-  (let [hist-routes (build-hist-routes router)
-        step-routes (build-step-routes router)
-        project-routes (build-project-routes router)
-        service-routes (build-service-routes router)
+  (let [hist-routes        (build-hist-routes router)
+        step-routes        (build-step-routes router)
+        project-routes     (build-project-routes router)
+        service-routes     (build-service-routes router)
         api-session-routes (build-api-session-routes router)
         config-routes      (build-config-routes router)]
     (routes ;; put them all together
@@ -356,6 +219,7 @@
       (binding [staircase.resources/context {:user user}]
         (handler request)))))
 
+;; Move to config! TODO
 (def friendly-hosts [ #"http://localhost:"
                      #"http://[^/]*labs.intermine.org"
                      #"http://intermine.github.io"
@@ -369,9 +233,7 @@
                    asset-pipeline
                    config
                    secrets
-                   services
-                   histories
-                   steps
+                   resources
                    handler]
 
   component/Lifecycle

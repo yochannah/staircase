@@ -29,17 +29,19 @@ CREATE TABLE history_step (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-
 -- Projects that contain items and possibly other projects.
+-- Projects have titles and possibly descriptions, and they
+-- belong to users.
 CREATE TABLE projects (
     id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner         VARCHAR(1024) NOT NULL,
     title         TEXT NOT NULL,
-    owner_id      TEXT NOT NULL,
     description   TEXT,
     created_at    TIMESTAMP WITH TIME ZONE DEFAULT now(),
     last_accessed TIMESTAMP WITH TIME ZONE DEFAULT now(),
     last_modified TIMESTAMP WITH TIME ZONE DEFAULT now(),
     parent_id     UUID REFERENCES projects (id) ON DELETE CASCADE,
+    CHECK (parent_id <> id), -- Cannot be own parent.
     UNIQUE (owner_id, title)
 );
 

@@ -4,12 +4,9 @@
         [staircase.helpers :only (string->uuid new-id)]
         [clojure.algo.monads :only (domonad maybe-m)])
   (:require staircase.sql
-            [staircase.resources.schema :as schema]
             [clojure.tools.reader.edn :as edn]
             [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
-
-(def session-tables schema/sessions)
 
 (defn- now [] (java.sql.Timestamp. (System/currentTimeMillis)))
 
@@ -17,6 +14,7 @@
   (java.sql.Timestamp. (+ (System/currentTimeMillis) (* duration-secs 1e3))))
 
 ;; TODO - periodically clean out old sessions.
+;; use a background thread?
 (defn clear-old-sessions [db-spec]
   (sql/delete! db-spec :sessions ["valid_until <= ?" (now)]))
 
@@ -36,7 +34,7 @@
 
 (defn get-from-db
   [store id]
-  (let [db (get-in store [:db :connection])
+  (let [db (:db store)
         cache (:cache store)]
     (debug "Reading session from db:" id)
     (domonad maybe-m ;; Look in persistent store.
@@ -61,12 +59,12 @@
 
   (start
     [component]
-    ;; Set-up persistent db backed storage.
-    (staircase.sql/create-tables (:connection db) session-tables)
     ;; Clean up old expired sessions.
-    (clear-old-sessions (:connection db))
+    (clear-old-sessions db)
     ;; Set-up in-memory caching.
-    (assoc component :next-expiry (atom (find-next-expiry (:connection db))) :cache (atom {})))
+    (assoc component
+           :next-expiry (atom (find-next-expiry db))
+           :cache (atom {})))
 
   (stop [component] (dissoc component :next-expiry :cache))
 
@@ -78,9 +76,9 @@
     (when-let [uuid (string->uuid id)]
       ;; Delete this session.
       (locking write-monitor
-        (sql/delete! (:connection db) :sessions ["id = ?" uuid]))
+        (sql/delete! db :sessions ["id = ?" uuid]))
       ;; Use this db-access opportunity to clean out the db a little.
-      (clear-old-sessions (:connection db))
+      (clear-old-sessions db)
       nil))
 
   (read-session
@@ -95,16 +93,15 @@
     (if-let [uuid (string->uuid (or id (new-id)))]
       (let [valid-until (get-expiry (:max-session-age @config))
             session {:data (prn-str data) :valid_until valid-until}
-            where-clause ["id=?" uuid]
-            con (:connection db)]
+            where-clause ["id=?" uuid]]
         (debug "Storing" data "until" valid-until)
         (locking write-monitor
           (if (get-from-db store uuid)
-            (sql/update! con
+            (sql/update! db
                         :sessions
                         session
                         where-clause)
-            (sql/with-db-transaction [t-con con]
+            (sql/with-db-transaction [t-con db]
               (sql/delete! t-con ;; Might be a lingering expired session in there.
                           :sessions
                           where-clause)
