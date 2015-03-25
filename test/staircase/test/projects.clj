@@ -1,4 +1,4 @@
-(ns staircase.test.mymine
+(ns staircase.test.projects
   (:import java.sql.SQLException)
   (:use clojure.test
         staircase.protocols
