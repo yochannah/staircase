@@ -9,6 +9,7 @@
                  [org.clojure/algo.monads "0.1.5"] ;; Monadic interfaces.
                  [org.clojure/java.jdbc "0.3.3"] ;; DB interface
                  [yesql "0.4.0"]
+                 [ring-jdbc-session "0.1.0"] ;; Persisted sessions.
                  [clj-http "0.9.1"] ;; Perform http requests.
                  [http-kit "2.1.16"]
                  [clj-jwt "0.0.12"] ;; Generate signed json web-tokens.
@@ -20,7 +21,7 @@
                  [javax.servlet/servlet-api "2.5"] ;; Needed for middleware.
                  [honeysql "0.4.3"] ;; SQL sugar
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
-                 [org.flywaydb/flyway-core "3.0"]
+                 [org.flywaydb/flyway-core "3.2"]
                  [compojure "1.1.6"] ;; Request handlers
                  [ring-middleware-format "0.3.2"] ;; JSON marshalling
                  [ring "1.2.2"] ;; sessions.

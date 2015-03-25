@@ -61,7 +61,7 @@
 (defn setup [t]
   (let [histories (atomic-resource (map #(hash-map "id" %1 "owner" "foo") (range 3)))
         steps     (atomic-resource (map #(hash-map "id" %1 "owner" "foo") (range 5)))]
-    (binding [app (get-router histories steps)]
+    (binding [app (get-router {:histories histories :steps steps})]
       (t))))
 
 (use-fixtures :each setup)

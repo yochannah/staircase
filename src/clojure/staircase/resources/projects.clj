@@ -36,14 +36,14 @@
 ;; builds up the nested folder structure.
 (defn treeify [branches leaves parent]
   (let [pid (:id parent)
-        contents (get leaves pid)
+        contents (map #(dissoc % :project_id) (get leaves pid)) ;; Not needed publicly.
         child-nodes (->> (get branches pid)
                          (map (partial treeify branches leaves)))]
     (-> parent
         (dissoc :parent_id) ;; not needed publicly - remove.
         (assoc
-           :child_nodes child-nodes
-           :contents contents
+           :child_nodes (vec child-nodes)
+           :contents (vec contents)
            :type "Project"))))
 
 ;; Finds the roots (branches without parents), and then
@@ -55,12 +55,36 @@
         roots (get branches-of nil)]
     (map as-tree roots)))
 
-(defn add-item-to-project [projects project-id item]
+(defn touch-project
+  "Updates the last modified time"
+  [db project-id]
+  (sql/update! db
+               :projects
+               {:last_modified (sql-now)}
+               ["id=?" project-id]))
+
+(defn add-content-to-project
+  "Add a piece of content to a project"
+  [db project-id item]
+  (-> (sql/insert! db :project_contents
+                   (-> item ;; White-list properties and link to project.
+                       (select-keys ["item_id" "item_type" "source"])
+                       (assoc "project_id" project-id)))
+      first
+      :id))
+
+;; TODO: types (eg. Project) should be all lower-case
+(defn add-item-to-project
+  "Either adds a child item or a child project"
+  [projects project-id item]
   (when (exists? projects project-id) ;; Access control.
-    (sql/insert! (:db projects) :project_contents
-                (-> item
-                  (select-keys ["item_id" "item_type" "source"])
-                  (assoc "project_id" project-id)))))
+    (sql/with-db-transaction [trs (:db projects)]
+      (let [trs-projects (assoc projects :db trs) ;; So we can use create in the transaction.
+            new-id (if (= "Project" (get item "type"))
+                      (create trs-projects (assoc item "parent_id" project-id))
+                      (add-content-to-project trs project-id item))]
+      (touch-project trs project-id) ;; Touch the parent.
+      new-id))))
 
 (defn delete-item-from-project [{db :db} project-id item-id]
   (let [pid (string->uuid project-id)
@@ -69,7 +93,7 @@
       (sql/delete! db :project_contents ["id = ?" iid])
       iid))
 
-(defrecord Projects [db]
+(defrecord ProjectsResource [db]
 
   Resource
 
@@ -77,8 +101,8 @@
     (let [branches (sql/query db
                               (res/all-belonging-to :projects))
           leaves (get-project-items db (:user res/context))
-          tree (make-tree branches leaves)]
-      (vector (make-trees branches leaves))))
+          trees (make-trees branches leaves)]
+      (vec trees)))
   
   (get-one [_ id] ;; there can only be one, and first is nil safe.
     (let [uuid (string->uuid id)
@@ -100,31 +124,40 @@
   (update [_ id doc]
     (staircase.sql/update-owned-entity db :projects
       (assoc res/context :id id)
-      (doc -> ;; Only allow title and description to be updated.
-           (select-keys ["title" "description"])
-           (assoc :last_modified (sql-now)))))
+      (-> doc ;; Only allow title and description to be updated.
+          (select-keys ["title" "description"])
+          (assoc :last_modified (sql-now))))) ;; touch the document.
 
   (delete [_ id] ;; Deletion of subprojects and items is handled
                  ;; by cascading deletions.
     (staircase.sql/delete-entity db :projects id))
 
-  (create [_ doc]
-    (let [owner (:user res/context)
-          title (or (:title doc) ;; Given title, or generated one.
+  (create [this doc]
+    (let [doc   (stringly-keyed doc)
+          owner (:user res/context)
+          title (or (get doc "title") ;; Given title, or generated one.
                     (->> (range) ;; infinite list of ints 0 ..
                          (map #(str "new project " %))
-                         (filter (comp nil? find-by-title))
+                         (filter (comp nil? (partial find-by-title this)))
                          first))
           values (-> doc
                      (select-keys ["description" "parent_id"])
                      (assoc "owner" owner "title" title))]
-      (first (sql/insert! db :projects values))))
+      (-> db (sql/insert! :projects values) first :id)))
 
   (exists? [_ id]
     (staircase.sql/exists-with-owner
       db
       :projects
       (assoc res/context :id id)))
+
+  SubindexedResource
+
+  (delete-child [this id child-id]
+    (delete-item-from-project this id child-id))
+
+  (add-child [this id child] ;; Make sure all the keys are strings in the child
+    (add-item-to-project this id (stringly-keyed child)))
 
   Searchable
 

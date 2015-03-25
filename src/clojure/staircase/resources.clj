@@ -8,7 +8,7 @@
 ;; as the identity of the current resource owner.
 (def ^:dynamic context {:user nil})
 
-(def all-belonging-to [table & [base]]
+(defn all-belonging-to [table & [base]]
   (-> (or base (select :*))
       (from table)
       (where [:= :owner :?user])
@@ -34,5 +34,6 @@
     (apply dissoc component (keys factories))))
 
 (defn new-resource-manager
+  "Create a new resource manager"
   [factories]
   (map->ResourceManager {:factories factories}))

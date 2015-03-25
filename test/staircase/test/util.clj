@@ -50,13 +50,13 @@
 (defn atomic-resource [things]
   (map->MockStatefulResource {:serial (atom (count things)) :things (atom things)}))
 
-(defn get-router [histories steps]
+;; Construct a ring handler very simply.
+(defn get-router [resources]
   (-> (new-router)
       (assoc :asset-pipeline asset-pipeline
              :config (atom {})
              :secrets {:key-phrase "some very difficult key-phrase"}
              :session-store (memory-store)
-             :histories histories
-             :steps steps)
+             :resources resources)
       (component/start)
       :handler))

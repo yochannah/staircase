@@ -22,6 +22,7 @@
             [com.stuartsierra.component :as component]
             [ring.middleware.cors :refer (wrap-cors)]
             staircase.resources
+            [staircase.routes.projects :refer (build-project-routes)]
             [staircase.routes.service :refer (build-service-routes)]
             [staircase.routes.histories :refer (build-hist-routes)]
             [persona-kit.friend :as pf]
@@ -34,7 +35,6 @@
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
             [compojure.route :as route]
-            [staircase.projects :as projects]
             [staircase.tokens :refer (issue-session valid-claims)])
   )
 
@@ -143,35 +143,6 @@
       (route/resources "/" {:root "tools"})
       (route/resources "/" {:root "public"})
       (route/not-found (views/four-oh-four @conf)))))
-
-(defn- project-item-routes [projects project-id]
-  (routes
-    (DELETE "/:itemid" [itemid]
-        (if (delete-item-from-project projects project-id itemid)
-          ACCEPTED
-          NOT_FOUND))
-    (POST "/" {payload :body}
-          (if (add-item-to-project projects id payload)
-            ACCEPTED
-            NOT_FOUND))))
-
-(defn- project-routes [projects id]
-  (routes
-    (GET "/" [] (get-resource projects id))
-    (DELETE  "/" [] (delete-resource projects id))
-    (PUT  "/" {payload :body}
-         (update-resource projects id payload))
-    (context "/items" []
-             (project-item-routes projects id))))
-
-(defn- build-project-routes [{{:keys [projects]} :resources}]
-  (routes ;; routes that start from projects
-          (GET  "/" []
-               (get-resources projects))
-          (POST "/" {payload :body}
-                (create-new projects payload))
-          (context "/:id" [id]
-                (project-routes projects id))))
 
 (defn build-step-routes [{{:keys [steps]} :resources}]
   (routes ;; routes for access to step data.

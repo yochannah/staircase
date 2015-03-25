@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [persona-kit.core :as pk]
             [staircase.data :as data]
+            [staircase.resources.histories :as hs]
             [com.stuartsierra.component :as component])
   (:use clojure.test
         staircase.test.util
@@ -18,7 +19,7 @@
 (deftest test-empty-app
   (let [histories (MockResource. [])
         steps (MockResource. [])
-        app (get-router histories steps)]
+        app (get-router {:histories histories :steps steps})]
 
     (with-redefs [staircase.handler/get-principal mock-get-principal]
 
@@ -35,7 +36,7 @@
         (let [response (app (request :delete "/api/v1/histories/1"))]
           (is (= (:status response) 404))))
 
-      (with-redefs [data/get-steps-of (constantly (get-all steps))]
+      (with-redefs [hs/get-steps-of (constantly (get-all steps))]
         
         (testing "GET /api/v1/histories/1/head"
           (let [req (json-request :get "/api/v1/histories/1/head")
@@ -67,7 +68,7 @@
 (deftest test-app-with-stuff
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))
         steps     (MockResource. (map #(hash-map :id %1 :data "step") (range 5)))
-        app (get-router histories steps)]
+        app (get-router {:histories histories :steps steps})]
 
     (with-redefs [staircase.handler/get-principal mock-get-principal]
 
@@ -98,7 +99,7 @@
         (let [response (app (request :delete "/api/v1/histories/1"))]
           (is (= (:status response) 204))))
 
-      (with-redefs [data/get-steps-of (constantly (get-all steps))]
+      (with-redefs [hs/get-steps-of (constantly (get-all steps))]
         
         (testing "GET /histories/1/head"
           (let [req (json-request :get "/api/v1/histories/1/head")
@@ -124,8 +125,8 @@
 
       (testing "POST /api/v1/histories/1/steps/2/fork"
         (let [added (atom nil)]
-          (with-redefs [data/get-history-steps-of (constantly [:a :b])
-                        data/add-all-steps (fn [hs id steps] (swap! added (constantly steps)))]
+          (with-redefs [hs/get-history-steps-of (constantly [:a :b])
+                        hs/add-all-steps (fn [hs id steps] (swap! added (constantly steps)))]
             (let [req (json-request :post "/api/v1/histories/1/steps/2/fork" {})
                   response (app req)]
               (is (= (:status response) 200))
@@ -133,8 +134,8 @@
 
       (testing "POST /api/v1/histories/10/steps/2/fork"
         (let [added (atom nil)]
-          (with-redefs [data/get-history-steps-of (constantly [:a :b])
-                        data/add-all-steps (fn [hs id steps] (swap! added (constantly steps)))]
+          (with-redefs [hs/get-history-steps-of (constantly [:a :b])
+                        hs/add-all-steps (fn [hs id steps] (swap! added (constantly steps)))]
             (let [req (json-request :post "/api/v1/histories/10/steps/2/fork" {})
                   response (app req)]
               (is (= (:status response) 404))

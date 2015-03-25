@@ -31,6 +31,7 @@
   (when step
     (update-in step [:data] json/parse-string)))
 
+;; Parse a collection of step rows into a vector of steps.
 (def parse-steps (comp vec (partial map parse-data)))
 
 (defrecord StepsResource [db]
@@ -60,16 +61,18 @@
     nil)
 
   (create [_ doc] ;; TODO: reuse existing steps where possible...
+    "Creates a step and links it to its history."
     (let [step (-> doc
-                   (dissoc "history_id" :history_id :id) 
+                   stringly-keyed
+                   (dissoc "history_id" "id") 
                    (update-in ["data"] ensure-string))
           history-id (java.util.UUID/fromString
                        (str (get-prop doc :history_id)))]
       (sql/with-db-transaction [trs db]
-        (let [step-id (first (sql/insert! trs :steps step))]
+        (let [step-id (-> (sql/insert! trs :steps step) first :id)]
           (sql/insert! trs ;; Now link it to the history.
-                       :history_step
-                       {"history_id" history_id "step_id" step-id})
-          step-id))))
+                       :history_step ;; Foreign keys make sure that the history exists.
+                       {"history_id" history-id "step_id" step-id})
+          step-id)))))
 
 (defn new-steps-resource [db] (map->StepsResource {:db db}))

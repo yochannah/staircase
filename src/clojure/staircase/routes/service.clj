@@ -2,6 +2,7 @@
   (:use compojure.core
         staircase.protocols
         staircase.routing
+        staircase.helpers
         ring.util.response)
   (:require
             [devlin.table-utils :refer (full-outer-join)]

@@ -1,5 +1,4 @@
 (ns staircase.test.histories
-  (:import java.sql.SQLException)
   (:use clojure.test
         staircase.resources
         staircase.resources.histories
@@ -9,37 +8,42 @@
         [staircase.config :only (db-options)]
         [com.stuartsierra.component :as component]
         [environ.core :only (env)])
-  (:require [clojure.java.jdbc :as sql]))
+  (:require staircase.sql
+            [staircase.data :as data]
+            [clojure.java.jdbc :as sql]))
 
+;; The next 20 lines are a bit boiler-platey, and could be extracted.
 (def db-spec (db-options env))
 
-(defn ignore-errors [f]
-  (try (f) (catch SQLException e nil)))
+;; Create a db, but do not start it - it is cycled for each test.
+(def db (atom (data/new-pooled-db db-spec)))
 
+;; We set up and tear down by deleting everything in the database.
 (defn drop-tables [] 
   (debug "Dropping tables...")
-  (doseq [table [:histories :steps :history_step]]
-    (ignore-errors #(sql/db-do-commands db-spec (str "DELETE FROM " (name table)) (sql/drop-table-ddl table)))
-    (debug "Dropped" table)))
+  (staircase.sql/drop-all-tables db-spec))
 
 (defn clean-slate [f]
   (drop-tables)
+  (swap! db component/start)
   (f))
 
 (defn clean-up [f]
-  (try (f) (finally (drop-tables))))
+  (try (f) (finally
+             (swap! db component/stop)
+             (drop-tables))))
 
 (use-fixtures :each clean-slate clean-up)
 
+;; Should only be called within a fixure.
+(defn get-histories [] (new-history-resource @db))
+
+;; End of boilerplate - tests!
+
 (deftest read-empty-histories
-  (let [histories (new-history-resource :db {:connection db-spec})
+  (let [histories (get-histories)
         fake-id (new-id)]
     (binding [staircase.resources/context {:user "foo@bar.org"}]
-      (try
-        (component/start histories)
-        (catch SQLException e
-          (warn "Bad connection details" (prn-str db-spec))
-          (throw (Exception. "Could not initialise resource" e))))
       (testing "get-all"
         (is (= [] (get-all histories))))
       (testing "exists?"
@@ -53,11 +57,11 @@
 
 (deftest write-to-empty-histories
   (binding [staircase.resources/context {:user "quux@bar.org"}]
-    (let [histories (component/start (new-history-resource :db {:connection db-spec}))
+    (let [histories (get-histories)
           new-id (create histories {:title "My new history" :description "A testing history"})
           got (get-one histories new-id)
-          hists (into [] (get-all histories))]
-      (testing "Return value of create"
+          hists (get-all histories)]
+      (testing "generated column values"
         (is (instance? java.util.UUID new-id))
         (is (instance? java.util.Date (:created_at got))))
       (testing "retrieved record"
@@ -76,10 +80,10 @@
         (is (exists? histories new-id)))
       (let [updated (update histories new-id {:title "changed the title" :created_at "sneaky attempt to change the past"})
             retrieved (get-one histories new-id)
-            hists (into [] (get-all histories))]
+            hists (get-all histories)]
         (testing "Changed the title"
           (is (= "changed the title" (:title updated)))
-          (is (= (:created_at got) (:created_at updated)))
+          (is (= (:created_at got) (:created_at updated))) ;; Cannot change the creation date.
           (is (= "changed the title" (:title retrieved))))
         (testing "Changed, and did not add a history"
           (let [retrieved (hists 0)

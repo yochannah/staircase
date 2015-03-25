@@ -3,6 +3,7 @@
   (:use [clojure.tools.logging :only (info error debug)]
         staircase.helpers)
   (:require
+    [staircase.resources :refer (context)]
     [honeysql.core :as hsql]
     [honeysql.helpers :refer :all]
     [clojure.java.jdbc :as sql]))
@@ -76,4 +77,15 @@
   (if-let [uuid (string->uuid id)]
     (update-entity-where conn tbl values
                          (owner-and-id-clause uuid owner))))
+
+(defn drop-all-tables ;; Seriously - DON'T USE THIS if you are not writing a test!
+  "Drops all the tables and ALL THE DATA"
+  [db]
+  (let [tables (get-table-names db)
+        drop-commands (map #(str "drop table " % " cascade;") tables)]
+    (if-not (zero? (count tables))
+      (do
+        (apply (partial sql/db-do-commands db) drop-commands)
+        (info "Dropped" (count tables) "tables."))
+      (info "No tables to drop."))))
 

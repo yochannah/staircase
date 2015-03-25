@@ -12,7 +12,7 @@
     NOT_FOUND))
 
 ;; Have to vectorise, since lazy seqs won't be jsonified.
-(defn get-resources [rs] (response (vector (get-all rs))))
+(defn get-resources [rs] (response (vec (get-all rs))))
 
 (defn create-new [rs doc]
   (let [id (create rs doc)]

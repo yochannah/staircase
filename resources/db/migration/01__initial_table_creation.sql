@@ -16,7 +16,8 @@ CREATE TABLE steps (
     id    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(1024),
     tool  VARCHAR(1024) NOT NULL,
-    stamp VARCHAR(1024) NOT NULL, -- Optional stamp for identifying when this tool was run - context dependent.
+    stamp VARCHAR(1024), -- Intended for identifying against which version/release a step was run.
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     data TEXT
 );
 
@@ -24,9 +25,9 @@ CREATE TABLE steps (
 -- Histories can have many steps, and steps can belong
 -- in multiple histories.
 CREATE TABLE history_step (
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     history_id UUID NOT NULL REFERENCES histories (id) ON DELETE CASCADE,
-    step_id    UUID NOT NULL REFERENCES steps (id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+    step_id    UUID NOT NULL REFERENCES steps (id) ON DELETE CASCADE
 );
 
 -- Projects that contain items and possibly other projects.
@@ -42,7 +43,7 @@ CREATE TABLE projects (
     last_modified TIMESTAMP WITH TIME ZONE DEFAULT now(),
     parent_id     UUID REFERENCES projects (id) ON DELETE CASCADE,
     CHECK (parent_id <> id), -- Cannot be own parent.
-    UNIQUE (owner_id, title)
+    UNIQUE (owner, title)
 );
 
 -- The kind of thing that can be in a project.
@@ -81,10 +82,10 @@ CREATE TABLE tool_config (
     UNIQUE (toolset, idx)
 );
 
-CREATE TABLE sessions (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    data        TEXT,
-    created_at  TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    valid_until TIMESTAMP WITH TIME ZONE NOT NULL
+-- The table structure used by ring-jdbc-session.
+-- see: https://github.com/kumarshantanu/ring-jdbc-session
+CREATE TABLE ring_session (
+    session_key VARCHAR(100) UNIQUE NOT NULL,
+    session_val TEXT,
+    session_ts TIMESTAMP NOT NULL
 );
-

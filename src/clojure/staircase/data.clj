@@ -7,21 +7,21 @@
             [clojure.java.jdbc :as sql]))
 
 (defn- open-pool
-      [config]
-      (let [cpds (doto (ComboPooledDataSource.)
-                    (.setDriverClass (:classname config))
-                    (.setMaxPoolSize 6)
-                    (.setMinPoolSize 1)
-                    (.setInitialPoolSize 1))]
-        (if-let [uri (:connection-uri config)]
-          (.setJdbcUrl cpds uri)
-          (doto cpds
-                (.setUser (:user config))
-                (.setPassword (:password config))
-                (.setJdbcUrl
-                  (str "jdbc:"
-                       (:subprotocol config) ":" (:subname config)))))
-        cpds))
+  [config]
+  (let [cpds (doto (ComboPooledDataSource.)
+               (.setDriverClass (:classname config))
+               (.setMaxPoolSize 6)
+               (.setMinPoolSize 1)
+               (.setInitialPoolSize 1))]
+    (if-let [uri (:connection-uri config)]
+      (.setJdbcUrl cpds uri)
+      (doto cpds
+        (.setUser (:user config))
+        (.setPassword (:password config))
+        (.setJdbcUrl
+          (str "jdbc:"
+               (:subprotocol config) ":" (:subname config)))))
+    cpds))
 
 (defrecord PooledDatabase [config datasource]
   component/Lifecycle
@@ -34,10 +34,13 @@
         (migrations/migrate pool))
       (assoc component :datasource pool)))
 
+  ;; We want to return a component from stop, so we
+  ;; have to wrap it in a call to the constructor since
+  ;; assoc returns a record but dissoc does not.
   (stop [component]
     (info "Stopping pooled database")
     (.close datasource)
-    (dissoc component :datasource)))
+    (map->PooledDatabase (dissoc component :datasource))))
 
 (defn new-pooled-db [config]
   (info "Creating new pooled db with config: " config)

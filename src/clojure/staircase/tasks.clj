@@ -92,7 +92,7 @@
   (if-not query
     (warn "No query!")
     (with-component [db (-> env db-options data/new-pooled-db)]
-      (doseq [row (-> db :connection (jdbc/query [query]))]
+      (doseq [row (jdbc/query db [query])]
         (prn row)))))
 
 (defn clean-db [& [force?]]
@@ -102,13 +102,4 @@
       Pass in `force' to make this go through")
     (let [db-conf (-> env db-options (assoc :migrate false))]
       (with-component [db (data/new-pooled-db db-conf)]
-        (let [connection (:connection db)
-              tables (sql/get-table-names connection)
-              drop-commands (map #(str "drop table " % " cascade;")
-                                 tables)]
-           (if-not (zero? (count tables))
-             (do
-               (apply (partial jdbc/db-do-commands connection)
-                      drop-commands)
-               (info (str "Dropped " (count tables) " tables.")))
-             (info "No tables to drop.")))))))
+        (sql/drop-all-tables db)))))

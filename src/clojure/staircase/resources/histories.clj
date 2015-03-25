@@ -4,6 +4,7 @@
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
             staircase.resources
+            [staircase.resources.steps :as steps]
             [honeysql.helpers :refer
               (select merge-select from where merge-where
                left-join group order-by merge-order-by)]
@@ -70,8 +71,9 @@
 
   Resource
 
-  (get-all [histories]
-    (sql/query db (all-history-query)))
+  (get-all [_]
+    (sql/query db (all-history-query)
+               :result-set-fn vec))
 
   (exists? [_ id]
     (staircase.sql/exists-with-owner
@@ -109,7 +111,7 @@
           values (-> doc
                      (dissoc :owner "created_at" :created_at)
                      (assoc "owner" owner))]
-      (first (sql/insert! db :histories values))))
+      (-> db (sql/insert! :histories values) first :id))))
 
 (defn new-history-resource [db] (map->HistoryResource {:db db}))
 

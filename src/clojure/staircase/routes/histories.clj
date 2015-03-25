@@ -69,7 +69,7 @@
                    (DELETE "/" [] (delete-resource histories id))
                    (GET    "/head" [] (get-end-of-history histories id))
                    (context "/steps" []
-                            (GET "/" [] (get-steps-of histories id))
+                            (GET "/" [] (hs/get-steps-of histories id))
                             (GET "/:idx" [idx] (get-step-of histories id idx))
                             (POST "/:idx/fork"
                                   {body :body {idx :idx} :params}

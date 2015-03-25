@@ -60,7 +60,7 @@
                      (dissoc "id" :id :owner :valid_until)
                      (assoc "valid_until" (one-day-from-now)
                             "owner" owner))]
-      (first (sql/insert! db :services values))))
+      (-> db (sql/insert! :services values) first :id)))
   
   Searchable
 
