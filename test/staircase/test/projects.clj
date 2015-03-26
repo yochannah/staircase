@@ -137,6 +137,7 @@
                     :item_id "some list name"
                     :item_type "List"
                     :source "NoMine"
+                    :type "Item"
                     }
               item-id (add-child projects folder-id item)
               updated-proj (get-one projects folder-id)]
@@ -151,8 +152,17 @@
           (is (= 1 (count (:child_nodes updated-proj))))))
       )))
 
-(def ids [:ID_A :ID_B :ID_C :ID_D])
-(def times [:TIME_A :TIME_B :TIME_C])
+(deftest project-default-values
+  (binding [staircase.resources/context {:user "nil@nil"}]
+    (let [projects (get-projects)
+          folder-id-a (create projects {})
+          folder-id-b (create projects {})
+          retrieved-a (get-one projects folder-id-a)
+          retrieved-b (get-one projects folder-id-b)]
+      (testing "A new title was generated for folder a"
+        (is (= "new project 1" (:title retrieved-a))))
+      (testing "And a different title was generated for folder b"
+        (is (= "new project 2" (:title retrieved-b)))))))
 
 ;; Normalisation machinery - replace every time and id in the graph with
 ;; a number, making sure that we preserve identity and sequence between

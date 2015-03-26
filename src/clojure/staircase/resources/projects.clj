@@ -68,14 +68,6 @@
                {:last_modified (or mod-time (sql-now))}
                ["id=?" project-id]))
 
-(defn add-content-to-project
-  "Add a piece of content to a project, returning map with created_at and id"
-  [db project-id item]
-  (first (sql/insert! db :project_contents
-                   (-> item ;; White-list properties and link to project.
-                       (select-keys ["item_id" "item_type" "source"])
-                       (assoc "project_id" project-id)))))
-
 (defn create-project
   "Create a project, returning map with created_at and id"
   [projects doc]
@@ -84,30 +76,38 @@
         owner (:user res/context)
         title (or (get doc "title") ;; Given title, or generated one.
                   (->> (range) ;; infinite list of ints 0 ..
-                       (map #(str "new project " %))
-                       (filter (comp nil? (partial find-by-title projects)))
-                       first))
+                       (map inc) ;; An infinite list starting from 1
+                       (map #(str "new project "  %)) ;; Now its a list of names (TODO: make this configurable)
+                       (filter (comp nil? (partial find-by-title projects))) ;; Find all the ones that haven't been assigned
+                       first)) ;; Get the first unassigned generated name
         values (-> doc
                    (select-keys ["description" "parent_id"])
                    (assoc "owner" owner "title" title))]
     (first (sql/insert! db :projects values))))
 
-(defn add-subproject
-  "Add a sub-project to a project, returning map with created_at and id"
+(defmulti add-content
+  "Add an item of content to a project, dispatching on the content's type"
+  (fn [ps p c] (keyword (get c "type"))))
+
+(defmethod add-content :Project
   [projects parent child]
   (create-project projects (assoc child "parent_id" parent)))
 
-;; TODO: types (eg. Project) should be all lower-case
+(defmethod add-content :Item
+  [{db :db} project item]
+  (first (sql/insert! db :project_contents
+                   (-> item ;; White-list properties and link to project.
+                       (select-keys ["item_id" "item_type" "source"])
+                       (assoc "project_id" project)))))
+
+;; TODO: types (eg. Project) should be all lower-case, and probably be keywords.
 (defn add-item-to-project
   "Either adds a child item or a child project"
   [projects project-id item]
   (when (exists? projects project-id) ;; Access control.
     (sql/with-db-transaction [trs (:db projects)]
       (let [trs-proj (assoc projects :db trs)
-            is-subproject? (= "Project" (get item "type"))
-            {new-id :id mod-time :created_at} (if is-subproject?
-                     (add-subproject trs-proj project-id item)
-                     (add-content-to-project trs project-id item))]
+            {new-id :id mod-time :created_at} (add-content trs-proj project-id item)]
       ;; Touch the parent, setting its mod time to the creation time of its new child.
       (touch-project trs project-id mod-time)
       new-id))))
