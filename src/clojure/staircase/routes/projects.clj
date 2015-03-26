@@ -11,9 +11,12 @@
           ACCEPTED
           NOT_FOUND))
     (POST "/" {payload :body}
-          (if (add-child projects project-id payload)
-            ACCEPTED
-            NOT_FOUND))))
+          (if-let [result (add-child projects project-id payload)]
+            (if-let [error (:error result)]
+              (assoc CLIENT_ERROR :body (.getMessage error))
+              (update-in ACCEPTED [:headers] ;; Ideally we really need a reverse mapper here
+                         assoc "id" (str result))) ;; Since URLs are better than IDs.
+            NOT_FOUND)))) ;; returns nil if there is no parent project
 
 (defn- project-routes [projects id]
   (routes

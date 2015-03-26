@@ -25,8 +25,19 @@
   (get-all [_] things)
   (get-one [_ id] (first (filter #(= (str (:id %1)) (str id)) things)))
   (update [this id doc] (merge (get-one this id) doc))
-  (delete [_ id])
-  (create [_ doc] (or (doc :id) (doc "id") (count things))))
+  (delete [this id] (when (exists? this id) id))
+  (create [_ doc] (or (doc :id) (doc "id") (count things)))
+
+  ;; the things may optionally have :children, which are used to mock subindexing.
+  SubindexedResource
+
+  (delete-child [this id child-id] ;; Return the id we 'deleted', if we have it.
+    (when-let [thing (get-one this id)]
+      (first (filter #{child-id} (map :id (:children thing))))))
+
+  (add-child [this id child]
+    (when-let [thing (get-one this id)]
+      (count (:children thing)))))
 
 (defrecord MockStatefulResource [things serial]
   ;; Implementation of resource that stores its state in an atom.
@@ -45,7 +56,28 @@
   (create [_ doc]
     (let [id (swap! serial inc)]
       (swap! things conj (assoc doc "id" id "owner" (:user staircase.resources/context)))
-      id)))
+      id))
+  
+  SubindexedResource
+
+  ;; Adds a new child to the existing thing, if it exists, returning the new id.
+  (add-child [this id child]
+    (when-let [thing (get-one this id)]
+      (let [next-id (swap! serial inc)
+            child (assoc child "id" next-id)
+            kids (conj (or (:children thing) []) child)]
+        (letfn [(update-kids [x] (if (= id (x "id")) (assoc x :children kids) x))]
+          (swap! things map update-kids))
+        next-id)))
+
+  ;; Removes the child with the given id from the thing with that id, if it exists.
+  (delete-child [this id child-id]
+    (when (exists? this id)
+      (letfn [(remove-child [kids] (filter (comp (complement #{child-id}) :id) kids))
+              (update-kids [x] (if (= id (x "id")) (update-in x [:children] remove-child) x))]
+        (swap! things map update-kids))
+      child-id))
+  )
 
 (defn atomic-resource [things]
   (map->MockStatefulResource {:serial (atom (count things)) :things (atom things)}))

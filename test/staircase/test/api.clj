@@ -19,7 +19,8 @@
 (deftest test-empty-app
   (let [histories (MockResource. [])
         steps (MockResource. [])
-        app (get-router {:histories histories :steps steps})]
+        projects (MockResource. [])
+        app (get-router {:histories histories :steps steps :projects projects})]
 
     (with-redefs [staircase.handler/get-principal mock-get-principal]
 
@@ -34,6 +35,22 @@
 
       (testing "DELETE /api/v1/histories/id"
         (let [response (app (request :delete "/api/v1/histories/1"))]
+          (is (= (:status response) 404))))
+
+      (testing "GET /api/v1/projects"
+        (let [req (json-request :get "/api/v1/projects")
+              response (app req)]
+          (is (= (:status response) 200))
+          (data-is response [])))
+
+      (testing "GET /api/v1/projects/1"
+        (let [req (json-request :get "/api/v1/projects/1")
+              response (app req)]
+          (is (= (:status response) 404))))
+
+      (testing "DELETE /api/v1/projects/1"
+        (let [req (json-request :delete "/api/v1/projects/1")
+              response (app req)]
           (is (= (:status response) 404))))
 
       (with-redefs [hs/get-steps-of (constantly (get-all steps))]

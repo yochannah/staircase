@@ -2,9 +2,12 @@
   (:use staircase.protocols
         ring.util.response))
 
-(def SUCCESS {:status 200})
-(def ACCEPTED {:status 204})
-(def NOT_FOUND {:status 404})
+(def default-headers {})
+
+(def SUCCESS {:status 200 :headers default-headers})
+(def ACCEPTED {:status 204 :headers default-headers})
+(def NOT_FOUND {:status 404 :headers default-headers})
+(def CLIENT_ERROR {:status 400 :headers default-headers})
 
 (defn get-resource [rs id]
   (if-let [ret (get-one rs id)]
