@@ -174,6 +174,9 @@
 
   SubindexedResource
 
+  (get-child [this id child-id]
+    (first (find-item db (string->uuid id) (string->uuid child-id) (:user res/context))))
+
   (delete-child [this id child-id]
     (delete-item-from-project this id child-id))
 

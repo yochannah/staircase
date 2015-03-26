@@ -21,3 +21,10 @@
           mapping
           (filter (comp keyword? first) mapping)))
 
+;; Take a mapping with keys that are keywords or strings and
+;; return a mapping with only keyword keys.
+(defn keywordly-keyed [mapping]
+  (reduce (fn [m [k v]] (-> m (dissoc k) (assoc (keyword k) v)))
+          mapping
+          (filter (comp (complement keyword?) first) mapping)))
+

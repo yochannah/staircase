@@ -9,9 +9,18 @@
 (def NOT_FOUND {:status 404 :headers default-headers})
 (def CLIENT_ERROR {:status 400 :headers default-headers})
 
-(defn get-resource [rs id]
+(defn serialise-link
+  [[uri rel]]
+  (str "<" uri ">; rel=\"" rel "\""))
+
+(defn get-resource
+  "Fetch a single resource, or return NOT FOUND. Add a HATEOS link if provided"
+  [rs id & {:keys [linker] ;; Optional linker function, which provides one or more links in a seq.
+            :or {linker (constantly [])}}]
   (if-let [ret (get-one rs id)]
-    (response ret)
+    (update-in (response ret)
+              [:headers "Link"]
+              concat (map serialise-link (linker ret)))
     NOT_FOUND))
 
 ;; Have to vectorise, since lazy seqs won't be jsonified.

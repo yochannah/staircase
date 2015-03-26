@@ -9,8 +9,9 @@
   (create [this doc] "Create a new thing"))
 
 (defprotocol SubindexedResource
-  (delete-child [this id child-id] "Destroy a child item")
-  (add-child [this id child] "Add a child document"))
+  (get-child [this id child-id] "Get a child item.")
+  (delete-child [this id child-id] "Destroy a child item, returning its id.")
+  (add-child [this id child] "Add a child document, returning its id."))
 
 (defprotocol Searchable
   (get-where [this constraint] "Find all the things matching the constraint"))
