@@ -154,47 +154,6 @@
 (def ids [:ID_A :ID_B :ID_C :ID_D])
 (def times [:TIME_A :TIME_B :TIME_C])
 
-(def expected-nested-projects
-  {
-   :type "Project",
-   :id 0,
-   :title "root",
-   :description nil,
-   :owner "nil@nil",
-   :created_at 0,
-   :last_accessed 0,
-   :last_modified 1,
-   :contents [],
-   :child_nodes
-   [{
-     :type "Project",
-     :id 1,
-     :title "sub folder",
-     :description nil,
-     :owner "nil@nil",
-     :created_at 1,
-     :last_accessed 1,
-     :last_modified 2,
-     :contents [],
-     :child_nodes
-     [{
-       :type "Project",
-       :title "sub sub folder",
-       :description nil,
-       :id 2,
-       :owner "nil@nil",
-       :created_at 2,
-       :last_accessed 2,
-       :last_modified 3,
-       :child_nodes [],
-       :contents
-       [{:source "there",
-         :item_type "thing",
-         :item_id "thingy",
-         :id 3}]
-       }]
-     }]})
-
 ;; Normalisation machinery - replace every time and id in the graph with
 ;; a number, making sure that we preserve identity and sequence between
 ;; items, ie. any two identical times should be given the same number and
@@ -229,24 +188,77 @@
 
 (defn normalise [project-graph]
   "Replace the variable things (ids and times) with sequential numbers, so we can compare"
-  (let [graph-times (apply sorted-set (times-in-graph project-graph))
-        graph-ids (ids-in-graph project-graph) ;; No point making set - they are UUIDs after all.
-        normed-times (zipmap graph-times (range))
-        normed-ids (zipmap graph-ids (range))]
-    (normalise-node normed-times normed-ids project-graph)))
+  (when project-graph
+    (let [graph-times (apply sorted-set (times-in-graph project-graph))
+          graph-ids (ids-in-graph project-graph) ;; No point making set - they are UUIDs after all.
+          normed-times (zipmap graph-times (range))
+          normed-ids (zipmap graph-ids (range))]
+      (normalise-node normed-times normed-ids project-graph))))
+
+(def expected-nested-projects
+  {
+   :type "Project",
+   :id 0,
+   :title "root",
+   :description nil,
+   :created_at 0,
+   :last_accessed 0,
+   :last_modified 1,
+   :contents [],
+   :child_nodes
+   [{
+     :type "Project",
+     :id 1,
+     :title "sub folder",
+     :description nil,
+     :created_at 1,
+     :last_accessed 1,
+     :last_modified 2,
+     :contents [],
+     :child_nodes
+     [{
+       :type "Project",
+       :title "sub sub folder",
+       :description nil,
+       :id 2,
+       :created_at 2,
+       :last_accessed 2,
+       :last_modified 3,
+       :child_nodes [],
+       :contents
+       [{:source "there",
+         :item_type "thing",
+         :item_id "thingy",
+         :id 3}]
+       }]
+     }]})
+
+(def expected-nested-projects-get-one ;; Get one sets access time.
+  (assoc expected-nested-projects :last_accessed 4))
+
+(def expected-nested-projects-b ;; Need to re-normalise due to the re-rooting.
+  (-> (get-in expected-nested-projects [:child_nodes 0])
+      normalise
+      (assoc :last_accessed 3)))
 
 (deftest writing-nested-projects
   (binding [staircase.resources/context {:user "nil@nil"}]
     (let [projects (get-projects)
           folder-a (create projects {:title "root"})
+          _        (Thread/sleep 5) ;; We want predictable timestamps, so we nap between insertions.
+          folder-b (add-child projects folder-a {:type "Project" :title "sub folder"})
           _        (Thread/sleep 5) ;; We want predictable times.
-          folder-b (add-child projects folder-a {:title "sub folder" :type "Project"})
+          folder-c (add-child projects folder-b {:type "Project" :title "sub sub folder"})
           _        (Thread/sleep 5) ;; We want predictable times.
-          folder-c (add-child projects folder-b {:title "sub sub folder" :type "Project"})
-          _        (Thread/sleep 5) ;; We want predictable times.
-          item-id  (add-child projects folder-c {:item_id "thingy" :item_type "thing" :source "there" :type "Item"})
+          item-id  (add-child projects folder-c {:type "Item" :item_id "thingy" :item_type "thing" :source "there"})
           retrieved (get-all projects)]
       (testing "Correct nesting"
-        (is (= 1 (count retrieved)) "There should only be 1 root project")
-        (is (= expected-nested-projects (normalise (first retrieved))))))))
+        (is (= 1 (count retrieved)) "There should only be one root project")
+        (is (= expected-nested-projects (normalise (first retrieved)))))
+      (testing "Correct nesting with get-one"
+        (is (= expected-nested-projects-get-one (normalise (get-one projects folder-a)))))
+      (testing "Accessing nested project"
+        (is (= true (exists? projects folder-b)) "The sub folder exists")
+        (is (= expected-nested-projects-b       (normalise (get-one projects folder-b)))))
+      )))
 

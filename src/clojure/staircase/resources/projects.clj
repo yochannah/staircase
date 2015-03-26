@@ -48,11 +48,16 @@
 
 ;; Finds the roots (branches without parents), and then
 ;; tree-ifies them.
-(defn make-trees [branches leaves]
+(defn make-trees [branches leaves & [target-id]] ;; When processing true roots, target-id is nil.
   (let [branches-of (group-by :parent_id branches)
         leaves-of (group-by :project_id leaves)
         as-tree (partial treeify branches-of leaves-of)
-        roots (get branches-of nil)]
+        root-id (when target-id ;; The when is unnecessary, but saves a pointless loop on get-all
+                  (->> branches-of
+                       (filter (fn [[k nodes]] (some #{target-id} (map :id nodes))))
+                       (map first)
+                       first))
+        roots (get branches-of root-id)]
     (map as-tree roots)))
 
 (defn touch-project
@@ -118,20 +123,25 @@
 
   Resource
 
-  (get-all [_] ;; Should we be recording access here?
-    (let [branches (sql/query db
-                              (res/all-belonging-to :projects))
+  (get-all [_] ;; We don't mark projects accessed when we get all of them.
+    (let [branches (map #(dissoc % :owner) ;; We don't need to expose owner - it might be useful later though.
+                        (sql/query db (res/all-belonging-to :projects)))
           leaves (get-project-items db (:user res/context))
           trees (make-trees branches leaves)]
       (vec trees)))
   
-  (get-one [_ id] ;; there can only be one, and first is nil safe.
+  (get-one [_ id]
+    """
+    Get the project with the given id, or nil
+    ----------------
+    Respects access restrictions in regards to the current user.
+    """
     (let [uuid (string->uuid id)
           user (:user res/context)
           now (sql-now)
-          leaves (get-items-of-project db uuid user)
+          leaves   (get-items-of-project db uuid user)
           branches (get-project-and-subprojects db uuid user)]
-      (when-let [proj (first (make-trees branches leaves))]
+      (when-let [proj (first (make-trees branches leaves uuid))]
         ;; record that we accessed this project.
         ;; if this becomes a bottleneck then it should be moved
         ;; into a messaging queue.
