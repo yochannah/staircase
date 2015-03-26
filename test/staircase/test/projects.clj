@@ -163,7 +163,7 @@
    :owner "nil@nil",
    :created_at 0,
    :last_accessed 0,
-   :last_modified 2,
+   :last_modified 1,
    :contents [],
    :child_nodes
    [{
@@ -174,7 +174,7 @@
      :owner "nil@nil",
      :created_at 1,
      :last_accessed 1,
-     :last_modified 4,
+     :last_modified 2,
      :contents [],
      :child_nodes
      [{
@@ -183,9 +183,9 @@
        :description nil,
        :id 2,
        :owner "nil@nil",
-       :created_at 3,
-       :last_accessed 3,
-       :last_modified 5,
+       :created_at 2,
+       :last_accessed 2,
+       :last_modified 3,
        :child_nodes [],
        :contents
        [{:source "there",

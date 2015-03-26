@@ -57,21 +57,40 @@
 
 (defn touch-project
   "Updates the last modified time"
-  [db project-id]
+  [db project-id & [mod-time]]
   (sql/update! db
                :projects
-               {:last_modified (sql-now)}
+               {:last_modified (or mod-time (sql-now))}
                ["id=?" project-id]))
 
 (defn add-content-to-project
-  "Add a piece of content to a project"
+  "Add a piece of content to a project, returning map with created_at and id"
   [db project-id item]
-  (-> (sql/insert! db :project_contents
+  (first (sql/insert! db :project_contents
                    (-> item ;; White-list properties and link to project.
                        (select-keys ["item_id" "item_type" "source"])
-                       (assoc "project_id" project-id)))
-      first
-      :id))
+                       (assoc "project_id" project-id)))))
+
+(defn create-project
+  "Create a project, returning map with created_at and id"
+  [projects doc]
+  (let [doc   (stringly-keyed doc)
+        db    (:db projects)
+        owner (:user res/context)
+        title (or (get doc "title") ;; Given title, or generated one.
+                  (->> (range) ;; infinite list of ints 0 ..
+                       (map #(str "new project " %))
+                       (filter (comp nil? (partial find-by-title projects)))
+                       first))
+        values (-> doc
+                   (select-keys ["description" "parent_id"])
+                   (assoc "owner" owner "title" title))]
+    (first (sql/insert! db :projects values))))
+
+(defn add-subproject
+  "Add a sub-project to a project, returning map with created_at and id"
+  [projects parent child]
+  (create-project projects (assoc child "parent_id" parent)))
 
 ;; TODO: types (eg. Project) should be all lower-case
 (defn add-item-to-project
@@ -79,11 +98,13 @@
   [projects project-id item]
   (when (exists? projects project-id) ;; Access control.
     (sql/with-db-transaction [trs (:db projects)]
-      (let [trs-projects (assoc projects :db trs) ;; So we can use create in the transaction.
-            new-id (if (= "Project" (get item "type"))
-                      (create trs-projects (assoc item "parent_id" project-id))
-                      (add-content-to-project trs project-id item))]
-      (touch-project trs project-id) ;; Touch the parent.
+      (let [trs-proj (assoc projects :db trs)
+            is-subproject? (= "Project" (get item "type"))
+            {new-id :id mod-time :created_at} (if is-subproject?
+                     (add-subproject trs-proj project-id item)
+                     (add-content-to-project trs project-id item))]
+      ;; Touch the parent, setting its mod time to the creation time of its new child.
+      (touch-project trs project-id mod-time)
       new-id))))
 
 (defn delete-item-from-project [{db :db} project-id item-id]
@@ -133,17 +154,7 @@
     (staircase.sql/delete-entity db :projects id))
 
   (create [this doc]
-    (let [doc   (stringly-keyed doc)
-          owner (:user res/context)
-          title (or (get doc "title") ;; Given title, or generated one.
-                    (->> (range) ;; infinite list of ints 0 ..
-                         (map #(str "new project " %))
-                         (filter (comp nil? (partial find-by-title this)))
-                         first))
-          values (-> doc
-                     (select-keys ["description" "parent_id"])
-                     (assoc "owner" owner "title" title))]
-      (-> db (sql/insert! :projects values) first :id)))
+    (:id (create-project this doc)))
 
   (exists? [_ id]
     (staircase.sql/exists-with-owner
