@@ -1,5 +1,6 @@
 language: clojure
 lein: lein2
+sudo: false # opt in to docker containers for faster builds
 before_script:
 - psql -c 'create database "staircase-test";' -U postgres
 jdk:
