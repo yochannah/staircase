@@ -7,5 +7,9 @@ jdk:
 - openjdk7
 - oraclejdk7
 - openjdk6
-install: lein2 with-profile dev,travis deps
-script: lein2 with-profile dev,travis do pprint :env, test
+install:
+- lein2 with-profile dev,travis deps # Server side deps
+- npm install # Client side deps
+script:
+- lein2 with-profile dev,travis do pprint :env, test
+- npm test
