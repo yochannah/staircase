@@ -69,37 +69,44 @@
    :id 0
    :title "Root"
    :type "Project"
+   :item_count 12
    :contents [{:id "0.0"} {:id "0.1"}]
    :child_nodes [
                  {:id 1
                   :type "Project"
                   :title "sub folder 1"
+                  :item_count 4
                   :contents [{:id "1.0"} {:id "1.1"}, {:id "1.2"}]
                   :child_nodes [
                                 {:id 2
                                  :type "Project"
                                  :title "sub-sub folder 1"
+                                 :item_count 1
                                  :contents [{:id "2.0"}]
                                  :child_nodes []
                                  }]}
                  {:id 3
                   :type "Project"
                   :title "sub folder 2"
+                  :item_count 6
                   :contents [{:id "3.0"} {:id "3.1"}, {:id "3.2"}]
                   :child_nodes [
                                 {:id 4
                                  :type "Project"
                                  :title "sub-sub folder 2"
+                                 :item_count 3
                                  :contents [{:id "4.0"} {:id "4.1"}]
                                  :child_nodes [{:id 5
                                                 :type "Project"
                                                 :title "sub-sub-sub folder"
+                                                :item_count 1
                                                 :contents [{:id "5.0"}]
                                                 :child_nodes []}]
                                  }]}
                  {:id 6
                   :type "Project"
                   :title "empty child"
+                  :item_count 0
                   :contents []
                   :child_nodes []}]})
 
@@ -214,6 +221,7 @@
    :created_at 0,
    :last_accessed 0,
    :last_modified 1,
+   :item_count 2 ;; All items in graph, even though none at root.
    :contents [],
    :child_nodes
    [{
@@ -224,7 +232,12 @@
      :created_at 1,
      :last_accessed 1,
      :last_modified 2,
-     :contents [],
+     :item_count 2 ;; This item, and item in sub sub project
+     :contents [
+                {:source "here"
+                 :item_type "thing"
+                 :item_id "thangy"
+                 :id 4}],
      :child_nodes
      [{
        :type "Project",
@@ -234,6 +247,7 @@
        :created_at 2,
        :last_accessed 2,
        :last_modified 3,
+       :item_count 1 ;; Just this item.
        :child_nodes [],
        :contents
        [{:source "there",
@@ -258,9 +272,11 @@
           _        (Thread/sleep 5) ;; We want predictable timestamps, so we nap between insertions.
           folder-b (add-child projects folder-a {:type "Project" :title "sub folder"})
           _        (Thread/sleep 5) ;; We want predictable times.
+          item-id-a (add-child projects folder-b {:type "Item" :item_id "thangy" :item_type "thing" :source "here"})
+          _        (Thread/sleep 5) ;; We really really want predictable times.
           folder-c (add-child projects folder-b {:type "Project" :title "sub sub folder"})
-          _        (Thread/sleep 5) ;; We want predictable times.
-          item-id  (add-child projects folder-c {:type "Item" :item_id "thingy" :item_type "thing" :source "there"})
+          _        (Thread/sleep 5) ;; We want predictable times, at this point a macro looks pretty good...
+          item-id-b  (add-child projects folder-c {:type "Item" :item_id "thingy" :item_type "thing" :source "there"})
           retrieved (get-all projects)]
       (testing "Correct nesting"
         (is (= 1 (count retrieved)) "There should only be one root project")

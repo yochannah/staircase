@@ -42,8 +42,10 @@
     (-> parent
         (dissoc :parent_id) ;; not needed publicly - remove.
         (assoc
-           :child_nodes (vec child-nodes)
-           :contents (vec contents)
+           ;; Transitive item count.
+           :item_count (+ (count contents) (reduce + (map :item_count child-nodes)))
+           :child_nodes (vec child-nodes) ;; The treeified child nodes
+           :contents (vec contents) ;; The leaves as they are.
            :type "Project"))))
 
 ;; Finds the roots (branches without parents), and then

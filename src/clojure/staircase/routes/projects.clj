@@ -33,11 +33,9 @@
 
 (defn- project-routes [projects id]
   (routes
-    (GET "/" []
-         (get-resource projects id :linker link-project))
+    (GET "/" [] (get-resource projects id :linker link-project))
     (DELETE  "/" [] (delete-resource projects id))
-    (PUT  "/" {payload :body}
-         (update-resource projects id payload))
+    (PUT  "/" {payload :body} (update-resource projects id payload))
     (context "/items" []
              (project-item-routes projects id))))
 
