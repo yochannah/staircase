@@ -11,7 +11,7 @@
     "npm": "2.7.x"
   },
   "scripts": {
-    "test": "karma start config/karma.conf.coffee --single-run",
+    "test": "karma start config/karma.conf.coffee --single-run --browsers PhantomJS",
     "install-bower-tools": "node ./script/install-bower-tools.js",
     "postinstall": "bower install --allow-root && npm run install-bower-tools"
   },
