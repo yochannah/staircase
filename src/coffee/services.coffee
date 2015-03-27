@@ -304,48 +304,11 @@ define (require, exports, module) ->
 
   Services.service 'WebServiceAuth', ['apiTokenPromise', '$rootScope', 'authorizer', WebServiceAuth]
 
-  Services.factory 'Projects', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
-    URL = "/api/v1/projects"
-
-    all = -> auth.authorize().then (headers) -> http.get(URL, {headers}).then asData
-
-    # THIS is post/create!
-    put = (data) ->
-      auth.authorize().then (headers) -> http.post("#{URL}", data, {headers}).then asData
-
-    # TODO - THIS is put/update!
-    update = (pid, data) ->
-      # Move data validation to clojure / backend
-      auth.authorize().then (headers) -> http.post("#{URL}/#{pid}", data, {headers}).then asData
-
-    addto = (pid, data) ->
-      # Move data validation to clojure / backend
-      # Trim the last slash off the list source (to match Mines)
-      # if data.service?.root?
-      #   if data.service.root.slice(-1) is "/"
-      #     data.service.root = data.service.root.slice 0, data.service.root.length - 1
-
-      # console.log "new value is", data
-      transformed =
-        source: data.short
-        type: data.type
-        item_id: data.id
-        project_id: pid
-
-      auth.authorize().then (headers) -> http.post("#{URL}/#{pid}/items", transformed, {headers}).then asData
-
-    deletefolder = (id) ->
-      auth.authorize().then (headers) -> http.delete("#{URL}/#{id}", {headers}).then asData
-
-    deleteitem = (item) ->
-      console.log "deleteitem called with item", item
-      auth.authorize().then (headers) -> http.delete("#{URL}/#{item.project_id}/items/" + item.id, {headers}).then asData
-
-    get = (id) ->
-      auth.authorize().then (headers) -> http.get("#{URL}/#{id}", {headers}).then asData
-
-    return {all, put, get, addto, update, deletefolder, deleteitem}
-
+  # This service is not implemented as a $resource because it uses
+  # identifiers, not parameter objects (although that could be changed, albeit
+  # with significant pain), and it does some post-processing on the response
+  # More recent versions of ng-resource allow injectable transformers, so this
+  # second objection is a bit moot now.
   Services.factory 'Mines', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
     URL = "/api/v1/services"
 
@@ -369,18 +332,22 @@ define (require, exports, module) ->
 
     return {all, get, atURL, put, delete: del}
 
-  Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
-    headers = auth.headers
+  # API endpoint adapter for Histories
+  Services.factory 'Histories', Array 'WebServiceAuth', '$http', '$resource', (auth, http, resource) ->
+    headers = auth.headers # This object is updated with the latest auth data - DO NOT CLONE.
     resource "/api/v1/histories/:id", {id: '@id'},
       get: {method: 'GET', headers: headers}
       getStep: {method: 'GET', headers: headers, url: '/api/v1/histories/:id/steps/:idx'}
       getSteps: {method: 'GET', headers: headers, isArray: true, url: '/api/v1/histories/:id/steps'}
       query: {method: 'GET', headers: headers, isArray: true}
+      all: {method: 'GET', headers: headers, isArray: true}
       save: {method: 'PUT', headers: headers}
       fork: {method: 'POST', headers: headers, params: {at: '@at'}, url: '/api/v1/histories/:id/steps/:at/fork'}
       create: {method: 'POST', headers: headers}
       delete: {method: 'DELETE', headers: headers}
-      append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
+      remove: {method: 'DELETE', headers: headers}
+      append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'} # Terrible name: deprecate!
+      addStep: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
   do (name = 'historyListener', deps = ['Histories', '$log', '$location', 'serviceStamp']) ->
     Services.factory name, Array deps..., (H, console, loc, stamp) ->

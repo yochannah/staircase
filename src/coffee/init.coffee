@@ -43,7 +43,6 @@ require.config
     }
   ]
   paths:
-    
     font: "/vendor/requirejs-plugins/src/font"
     goog: "/vendor/requirejs-plugins/src/goog"
     image: "/vendor/requirejs-plugins/src/image"

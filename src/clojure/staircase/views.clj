@@ -9,8 +9,6 @@
             staircase.views.projects
             [staircase.views.layout :as layout]))
 
-(def vendor-scripts ["jquery/dist/jquery.min.js"])
-
 ;; Render a named partial page section. These generally correspond to angularjs
 ;; page templates.
 (defn render-partial
@@ -24,7 +22,7 @@
     "choose-tool-dialogue" (staircase.views.options/choose-tool-dialogue config)
     "options-dialogue"     (staircase.views.options/user-options-dialogue config)
     "history"              (staircase.views.history/snippet config)
-    {:status 404})) ;; Plain 404, since this handler called as a service.
+    {:status 404 :body (four-oh-four config)}))
 
 (defn four-oh-four [config]
   (layout/common (assoc config :project-title "Page Not Found")
@@ -33,5 +31,4 @@
 (defn index [config]
   (layout/common config
                  [:div {:ng-view ""}]
-                 "/js/init"
-                 (map (partial str "/vendor/") vendor-scripts)))
+                 "/js/init"))

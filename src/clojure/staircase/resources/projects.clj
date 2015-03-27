@@ -99,7 +99,7 @@
   [{db :db} project item]
   (first (sql/insert! db :project_contents
                    (-> item ;; White-list properties and link to project.
-                       (select-keys ["item_id" "item_type" "source"])
+                       (select-keys ["item_id" "item_type" "source" "description"])
                        (assoc "project_id" project)))))
 
 ;; TODO: types (eg. Project) should be all lower-case, and probably be keywords.
@@ -181,6 +181,8 @@
 
   (delete-child [this id child-id]
     (delete-item-from-project this id child-id))
+
+  ;; TODO: add put-child, or update-child
 
   (add-child [this id child] ;; Make sure all the keys are strings in the child
     (add-item-to-project this id (stringly-keyed child)))

@@ -1,12 +1,20 @@
-define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imjs) ->
+define (require) ->
 
-  Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
+  ng = require 'angular'
+  L = require 'lodash'
+  imjs = require 'imjs'
+  require 'angular-cookies'
+  require 'services'
+  require 'projects'
+
+  Controllers = ng.module('steps.controllers', [
+    'ngCookies', 'steps.services', 'steps.projects.controllers'
+  ])
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
     require ['controllers/' + ident], (ctrl) ->
       instance = injector.instantiate(ctrl, {$scope})
       $scope.controller = instance # Working around breakage of controllerAs
-      $scope.foo = 1
       $scope.$apply()
 
   mountController = (name, ident) -> Controllers.controller name, requiredController ident
@@ -44,197 +52,6 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
     historyListener.watch scope
 
-  #############################################
-  ### PROJECTS CONTROLLER
-  #############################################
-  Controllers.controller 'ProjectsCtrl', Array '$rootScope', '$modal', '$scope', 'Mines', 'Projects', 'uuid', 'Persona', (rs, modals, scope, Mines, Projects, uuid, Persona) ->
-
-    # Does an initial synch at the bottom of the controller.
-
-    scope.breadcrumbs = []
-    scope.templates = []
-
-    mines = []
-    Mines.all().then (val) -> mines = val
-
-    scope.status =
-      isopen: false
-
-    scope.level = []
-    scope.flattened = []
-
-    scope.showexplorer = false
-
-    scope.gethref = (item) ->
-      src = L.findWhere mines, {name: item.source}
-      switch item.type
-        when "List"
-          "starting-point/choose-list/#{src.name}?name=#{item.item_id}"
-
-    scope.getformname = (project) ->
-      "folder" + project.id
-
-    scope.emptymessage = (item) ->
-      if scope.level.child_nodes?.length < 1 and !scope.level.contents? then true
-
-    scope.updatefolder = (folderdata) ->
-      Projects.update folderdata.id, folderdata
-      .then (results) ->
-        console.log "post update is", results
-
-    scope.checkempty = (value) ->
-      if value is "" or value is null then return "Please provide a value."
-
-    scope.getname = (id) ->
-      found = L.findWhere scope.flattened, {id: id}
-      found.title
-
-    scope.geticon = (obj) ->
-      switch obj.type
-        when "Project" then return "fa fa-folder"
-        when "List" then return "fa fa-list"
-        when "Template" then return "fa fa-search"
-
-    scope.deletefolder = (proj) ->
-      console.log "delete the folder", proj
-      Projects.deletefolder proj.id
-      .then ->
-        do synch
-
-    scope.deleteitem = (item) ->
-      Projects.deleteitem item
-      .then (results) ->
-        do synch
-
-    scope.getContentCount = (project) ->
-      count = 0
-
-      flatten = (item) ->
-        if item.contents? then count += item.contents.length
-        if item.child_nodes.length > 0
-          for folder in item.child_nodes
-            flatten folder
-
-      flatten project
-
-      return count
-
-    synch = ->
-
-      look = (item) ->
-        if not scope.level.id?
-          scope.level = scope.allProjects # Where does allProjects come from?
-        else
-          if item.child_nodes.length > 0
-            for folder in item.child_nodes
-              if folder.id is scope.level.id
-                scope.level = folder
-              else
-                look folder
-
-      flatten = (item) ->
-        scope.flattened.push item
-        if item.child_nodes.length > 0
-          for folder in item.child_nodes
-            flatten folder
-
-      Projects.all().then (projects)->
-        scope.allProjects = projects
-        look scope.allProjects
-
-        # Used for quick retrieval and breadcrumbs
-        scope.flattened = []
-        flatten scope.allProjects
-
-
-
-    scope.dropped = (pkg, dest) ->
-
-      if typeof pkg is "string" then pkg = JSON.parse pkg
-      if typeof dest is "string" then dest = JSON.parse dest
-
-
-      # This needs a serious overhaul. Proof of concept, for now:
-
-      # Are we adding a project to a list?
-      if pkg.type is "List" and dest.type is "Project"
-        Projects.addto dest.id, pkg
-          .then (result) ->
-              do synch
-
-      if pkg.type is "Template" and dest.type is "Project"
-        Projects.addto dest.id, pkg
-          .then (result) ->
-              do synch
-
-    scope.setlevelbc = (id, index) ->
-      if !items? and !index?
-        scope.level = scope.allProjects
-      else
-        # Find the object in our
-        found = L.findWhere scope.flattened, {id: id}
-        scope.level = L.findWhere scope.flattened, {id: id}
-
-      scope.breadcrumbs = scope.breadcrumbs.slice 0, index + 1
-
-    scope.setlevel = (items) ->
-      scope.level = items
-      scope.breadcrumbs.push scope.level.id
-
-    scope.hoverIn = () ->
-      this.hoverEdit = true
-
-    scope.hoverOut = () ->
-      this.hoverEdit = false
-
-    scope.setInspection = (item) ->
-      scope.inspection = item
-
-    scope.createProject = (title) ->
-      data =
-        title: title
-        parent_id: scope.level.id
-
-      scope.foldername = ""
-
-      Projects.put(data)
-      .then (result) ->
-        do synch
-
-
-    # TODO: generalise, move to projects.coffee...
-    Mines.all().then (values) ->
-
-      scope.lists = []
-
-      values.forEach (amine) ->
-        service = imjs.Service.connect amine
-        service.fetchLists().then (lists) =>
-
-          for list in lists
-              list.type = "List"
-              list.id = list.title
-              list.short = amine.name
-              list._mine = amine
-
-          scope.lists = scope.lists.concat lists
-          scope.$digest()
-
-        service.fetchTemplates().then (templates) =>
-
-          tosave = []
-
-          for key, value of templates
-            value.id = value.title
-            value.short = amine.name
-            value.type = "Template"
-            tosave.push value
-
-          scope.templates = scope.templates.concat tosave
-          scope.$digest()
-
-    do synch
-
   # Inline controller.
   Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
     rs.auth ?= identity: null # TODO: put this somewhere more sensible.
@@ -268,6 +85,4 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
   mountController 'NavCtrl', 'brand'
 
   mountController 'FacetCtrl', 'facets'
-
-  return Controllers
 
