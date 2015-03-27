@@ -7,10 +7,11 @@ require.loadCss = loadCss = (url) -> # Helper for css dependencies.
 
 require.config
   baseUrl: '/js',
+
   shim:
-    'angular':
+    angular:
       exports: 'angular'
-    'underscore':
+    underscore:
       exports: '_'
     'ng-headroom': ['angular', 'headroom']
     'angular-route': ['angular']
@@ -32,9 +33,10 @@ require.config
     'angular-mocks':
       deps: [ 'angular' ]
       exports: 'angular.mock'
-    'jschannel':
+    jschannel: # TODO: replace with UMD fork.
       exports: 'Channel'
     priority: [ 'angular' ]
+
   packages: [
     {
       name: 'lodash',
@@ -42,35 +44,36 @@ require.config
       main: 'lodash'
     }
   ]
+
   paths:
-    font: "/vendor/requirejs-plugins/src/font"
-    goog: "/vendor/requirejs-plugins/src/goog"
-    image: "/vendor/requirejs-plugins/src/image"
-    json: "/vendor/requirejs-plugins/src/json"
-    mdown: "/vendor/requirejs-plugins/src/mdown.js"
-    text: "/vendor/requirejs-plugins/lib/text"
-    markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"
-    analytics:       '/js/ga'
-    angular:         '/vendor/angular/angular'
-    headroom:        '/vendor/headroom.js/dist/headroom'
-    'ng-headroom':   '/vendor/headroom.js/dist/angular.headroom'
-    domReady:        '/vendor/requirejs-domready/domReady'
-    'underscore':    '/vendor/lodash/dist/lodash.underscore'
-    'jschannel':      '/vendor/jschannel'
-    'angular-route': '/vendor/angular-route/angular-route'
+    analytics:         '/js/argus' # named after the 100 eyed figure in el. myth.
     'angular-animate': '/vendor/angular-animate/angular-animate'
-    'angular-resource': '/vendor/angular-resource/angular-resource'
-    'angular-mocks': '/vendor/angular-mocks/angular-mocks'
     'angular-cookies': '/vendor/angular-cookies/angular-cookies'
-    'angular-ui':    '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
+    'angular-local-storage': '/vendor/angular-local-storage/dist/angular-local-storage.min'
+    'angular-mocks':   '/vendor/angular-mocks/angular-mocks'
+    'angular-notify':  '/vendor/angular-notify/dist/angular-notify',
+    'angular-resource': '/vendor/angular-resource/angular-resource'
+    'angular-route':   '/vendor/angular-route/angular-route'
+    'angular-silent':  '/vendor/angular-silent/ngSilent'
     'angular-ui-select2': '/vendor/angular-ui-select2/src/select2'
-    'angular-silent': '/vendor/angular-silent/ngSilent'
+    'angular-ui':      '/vendor/angular-ui-bootstrap-bower/ui-bootstrap-tpls'
+    angular:           '/vendor/angular/angular'
     'angular-xeditable': '/vendor/angular-xeditable/dist/js/xeditable.min'
-    'angular-notify': '/vendor/angular-notify/dist/angular-notify',
-    'pluralize': '/vendor/pluralize/pluralize',
-    'angular-local-storage':
-      '/vendor/angular-local-storage/dist/angular-local-storage.min'
-    select2:         '/vendor/select2/select2'
-    imjs:            '/vendor/imjs/js/im'
+    domReady:          '/vendor/requirejs-domready/domReady'
+    font:              "/vendor/requirejs-plugins/src/font"
+    goog:              "/vendor/requirejs-plugins/src/goog"
+    headroom:          '/vendor/headroom.js/dist/headroom'
+    image:             "/vendor/requirejs-plugins/src/image"
+    imjs:              '/vendor/imjs/js/im'
+    jschannel:         '/vendor/jschannel'
+    json:              "/vendor/requirejs-plugins/src/json"
+    markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"
+    mdown:             "/vendor/requirejs-plugins/src/mdown.js"
+    'ng-headroom':     '/vendor/headroom.js/dist/angular.headroom'
+    pluralize:         '/vendor/pluralize/pluralize',
+    select2:           '/vendor/select2/select2'
+    text:              "/vendor/requirejs-plugins/lib/text"
+    underscore:        '/vendor/lodash/dist/lodash.underscore'
+
   deps: ['./bootstrap']
 
