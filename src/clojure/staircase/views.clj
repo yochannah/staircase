@@ -9,6 +9,10 @@
             staircase.views.projects
             [staircase.views.layout :as layout]))
 
+(defn four-oh-four [config]
+  (layout/common (assoc config :project-title "Page Not Found")
+                 [:div#four-oh-four "The page you requested could not be found"]))
+
 ;; Render a named partial page section. These generally correspond to angularjs
 ;; page templates.
 (defn render-partial
@@ -23,10 +27,6 @@
     "options-dialogue"     (staircase.views.options/user-options-dialogue config)
     "history"              (staircase.views.history/snippet config)
     {:status 404 :body (four-oh-four config)}))
-
-(defn four-oh-four [config]
-  (layout/common (assoc config :project-title "Page Not Found")
-                 [:div#four-oh-four "The page you requested could not be found"]))
 
 (defn index [config]
   (layout/common config

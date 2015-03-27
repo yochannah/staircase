@@ -15,6 +15,7 @@
 
 (defn common
   ([config body] (common config body nil []))
+  ([config body main] (common config body main []))
   ([config body main scripts]
    (let [title (:project-title config)
          js (concat (apply include-js scripts) (entry-point main))]

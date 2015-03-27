@@ -179,19 +179,31 @@
   [normed-ids thing]
   (update-in thing [:id] normed-ids))
 
+(defn normalise-item
+  [normed-times normed-ids item]
+  (-> (update-id normed-ids item)
+      (update-in [:created_at] normed-times)
+      (update-in [:last_modified] normed-times)))
+
 (defn normalise-node
   [normed-times normed-ids project-graph]
   (-> (update-id normed-ids project-graph)
       (update-in [:created_at]    normed-times)
       (update-in [:last_accessed] normed-times)
       (update-in [:last_modified] normed-times)
-      (update-in [:contents] #(into [] (map (partial update-id normed-ids) %)))
+      (update-in [:contents] #(into [] (map (partial normalise-item normed-times normed-ids) %)))
       (update-in [:child_nodes] #(into [] (map (partial normalise-node normed-times normed-ids) %)))))
+
+(defn times-in-item
+  "Get all the times mentioned in an item"
+  [item]
+  (map #(% item) [:created_at :last_modified]))
 
 (defn times-in-graph
   "Get all the times mentioned in the graph"
   [graph]
-  (conj (mapcat times-in-graph (:child_nodes graph))
+  (conj (concat (mapcat times-in-graph (:child_nodes graph))
+                (mapcat times-in-item (:contents graph)))
         (:created_at graph)
         (:last_accessed graph)
         (:last_modified graph)))
@@ -231,10 +243,13 @@
      :description nil,
      :created_at 1,
      :last_accessed 1,
-     :last_modified 2,
+     :last_modified 3,
      :item_count 2 ;; This item, and item in sub sub project
      :contents [
                 {:source "here"
+                 :description nil
+                 :last_modified 2
+                 :created_at 2
                  :item_type "thing"
                  :item_id "thangy"
                  :id 4}],
@@ -244,13 +259,16 @@
        :title "sub sub folder",
        :description nil,
        :id 2,
-       :created_at 2,
-       :last_accessed 2,
-       :last_modified 3,
+       :created_at 3,
+       :last_accessed 3,
+       :last_modified 4,
        :item_count 1 ;; Just this item.
        :child_nodes [],
        :contents
        [{:source "there",
+         :description nil
+         :last_modified 4
+         :created_at 4
          :item_type "thing",
          :item_id "thingy",
          :id 3}]
@@ -258,12 +276,12 @@
      }]})
 
 (def expected-nested-projects-get-one ;; Get one sets access time.
-  (assoc expected-nested-projects :last_accessed 4))
+  (assoc expected-nested-projects :last_accessed 5))
 
 (def expected-nested-projects-b ;; Need to re-normalise due to the re-rooting.
   (-> (get-in expected-nested-projects [:child_nodes 0])
       normalise
-      (assoc :last_accessed 3)))
+      (assoc :last_accessed 4)))
 
 (deftest writing-nested-projects
   (binding [staircase.resources/context {:user "nil@nil"}]
