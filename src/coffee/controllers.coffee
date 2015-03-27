@@ -123,7 +123,7 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
 
       look = (item) ->
         if not scope.level.id?
-          scope.level = scope.allProjects
+          scope.level = scope.allProjects # Where does allProjects come from?
         else
           if item.child_nodes.length > 0
             for folder in item.child_nodes
@@ -202,6 +202,7 @@ define ['angular', 'lodash', 'imjs', 'angular-cookies', 'services'], (ng, L, imj
         do synch
 
 
+    # TODO: generalise, move to projects.coffee...
     Mines.all().then (values) ->
 
       scope.lists = []
