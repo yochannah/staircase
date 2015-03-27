@@ -130,7 +130,9 @@ DB_USER=$PSQL_USER
 
 To start a web server for the application, run:
 
-    lein ring server
+```sh
+lein ring server
+```
 
 To run the tests, you will need a test database (by default named
 `staircase-test`) and be able to access it. It is recommended you
@@ -138,7 +140,9 @@ add configuration values to `~/.lein/profiles.clj` for these
 properties, but this can also be configured in environment
 variables - see [Configuration][].
 
-    lein test
+```sh
+lein test
+```
 
 ## License
 
