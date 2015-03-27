@@ -9,6 +9,6 @@ WITH RECURSIVE parents(project_id) -- all the parents.
     SELECT ch.id AS project_id -- and all its children.
     FROM projects AS ch, parents AS pr -- join onto the cte
     WHERE ch.parent_id = pr.project_id)
-SELECT *
+SELECT pc.*
 FROM project_contents AS pc
 WHERE pc.project_id IN (SELECT project_id FROM parents);

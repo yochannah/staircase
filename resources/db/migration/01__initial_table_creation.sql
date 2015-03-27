@@ -46,13 +46,19 @@ CREATE TABLE projects (
     UNIQUE (owner, title)
 );
 
--- The kind of thing that can be in a project.
+-- The kind of thing that can be in a project (not a sub-project).
+-- They have a type, (eg. Template, List) and an identifier (such
+-- as a name) and a source identifier.
+-- They can be given optional descriptions.
 CREATE TABLE project_contents (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID REFERENCES projects (id) ON DELETE CASCADE,
     item_id    TEXT NOT NULL,
     item_type  TEXT NOT NULL,
     source     TEXT NOT NULL,
+    description TEXT,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    last_modified TIMESTAMP WITH TIME ZONE DEFAULT now(),
     UNIQUE (item_id, item_type, project_id, source)
 );
 
