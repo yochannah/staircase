@@ -26,7 +26,7 @@ define (require, exports) ->
       @currentProject = child_nodes: [], contents: []
 
       # The data sources we have available to us.
-      @mines = Mines.all()
+      Mines.all().then (mines) => @mines = mines
       # The things we can add to projects.
       getEntities().then ({templates, lists}) =>
         @templates = templates

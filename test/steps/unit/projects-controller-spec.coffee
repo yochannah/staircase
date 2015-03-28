@@ -39,7 +39,8 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     beforeEach mocks.module 'steps.projects.controllers'
 
-    beforeEach  mocks.inject ($injector, $controller) ->
+    beforeEach  mocks.inject ($rootScope, $injector, $controller) ->
+      test.scope = $rootScope.$new()
       test.$httpBackend = $injector.get('$httpBackend')
       test.$controller = $controller
       test.$httpBackend
@@ -56,8 +57,8 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
       beforeEach -> 
         test.projects = test.$controller 'ProjectsCtrl',
+          scope: test.scope
           getMineUserEntities: mockGetEntities
-          Mines: {all: -> mockServices}
         test.$httpBackend.flush()
 
       it 'has an empty path to here', ->
