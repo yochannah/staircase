@@ -112,9 +112,9 @@ define (require, exports) ->
       projectId = @currentProject.id
       done = => @sync()
       if projectId # Add as a nested project.
-        Projects.addItem {projectId}, data, done
+        @Projects.addItem {projectId}, data, done
       else # Add as top level project.
-        Projects.create data, done
+        @Projects.create data, done
       
   ng.module('steps.projects.controllers', ['steps.services', 'steps.projects.services'])
     .controller 'ProjectsCtrl', ProjectsCtrl

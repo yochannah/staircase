@@ -5,7 +5,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
     mockServices = [{name: 'foo'}, {name: 'bar'}]
     mockTemplates = []
     mockLists = []
-    mockProjects = [
+    mockProjects = -> [ # Function so we get a fresh one every time. Workaround for mutable data.
       {
         id: 1
         title: 'mock project 1'
@@ -29,19 +29,22 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         child_nodes: []
       }
     ]
+    mockNewProject = {id: 7, title: 'added', item_count: 0, description: null, contents: [], child_nodes: []}
 
     # We mock this directly to prevent calls to the InterMine
     # back ends. We can't really intercept them.
-    mockGetEntities = -> then: (f) ->
-      f templates: mockTemplates, lists: mockLists
+    mockGetEntities = -> then: (f) -> f templates: mockTemplates, lists: mockLists
 
     test = {}
 
     beforeEach mocks.module 'steps.projects.controllers'
 
-    beforeEach  mocks.inject ($rootScope, $injector, $controller) ->
-      test.scope = $rootScope.$new()
+    beforeEach mocks.inject ($rootScope, $injector, $controller) ->
       test.$httpBackend = $injector.get('$httpBackend')
+      test.locals =
+        $scope: $rootScope.$new()
+        getMineUserEntities: mockGetEntities
+
       test.$controller = $controller
       test.$httpBackend
           .when 'GET', '/auth/session'
@@ -49,16 +52,20 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       test.$httpBackend
           .when 'GET', '/api/v1/services'
           .respond mockServices
+      test.projectHandler = test.$httpBackend.when 'GET', '/api/v1/projects'
+      test.projectHandler.respond 200, mockProjects()
       test.$httpBackend
-          .when 'GET', '/api/v1/projects'
-          .respond mockProjects
+          .when 'POST', '/api/v1/projects/6/items', /"type":\s*"Project"/
+          .respond 200, mockNewProject
+      test.$httpBackend
+          .when 'POST', '/api/v1/projects'
+          .respond mockNewProject
+
+      test.projects = test.$controller 'ProjectsCtrl', test.locals
 
     describe 'Initial state', ->
 
       beforeEach -> 
-        test.projects = test.$controller 'ProjectsCtrl',
-          scope: test.scope
-          getMineUserEntities: mockGetEntities
         test.$httpBackend.flush()
 
       it 'has an empty path to here', ->
@@ -82,10 +89,6 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     describe 'Initial server load', ->
 
-      beforeEach -> 
-        test.projects = test.$controller 'ProjectsCtrl',
-          getMineUserEntities: mockGetEntities
-
       afterEach ->
         test.$httpBackend.verifyNoOutstandingExpectation()
         test.$httpBackend.verifyNoOutstandingRequest()
@@ -100,10 +103,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
     describe 'Selecting a project', ->
 
       beforeEach -> 
-        test.projects = test.$controller 'ProjectsCtrl',
-          getMineUserEntities: mockGetEntities
-        test.$httpBackend.flush()
-        test.projects.setCurrentProject mockProjects[1]
+        test.projects.setCurrentProject mockProjects()[1]
 
       it 'should have added a project to the path', ->
         expect(test.projects.pathToHere.length).toEqual 1
@@ -114,3 +114,47 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       it 'should now have that project as the current project', ->
         expect(test.projects.currentProject.id).toBe 6
       
+    describe 'Adding a project', ->
+
+      beforeEach -> 
+        test.projects.createProject 'added'
+        test.projectHandler.respond 200, mockProjects().concat([mockNewProject])
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+
+      it 'should have made a call to the back end to create the project', ->
+        test.$httpBackend.expectPOST '/api/v1/projects', {type: 'Project', title: 'added'}
+        test.$httpBackend.flush()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should have updated the projects list', ->
+        test.$httpBackend.flush()
+        expect(test.projects.allProjects.length).toBe 3
+
+    describe 'Adding a nested project', ->
+
+      beforeEach -> 
+        test.projects.setCurrentProject mockProjects()[1]
+        test.projects.createProject 'added'
+        updated = mockProjects()
+        updated[1].child_nodes.push mockNewProject
+        test.projectHandler.respond 200, updated
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+
+      it 'should have made a call to the back end to create the project', ->
+        test.$httpBackend.expectPOST '/api/v1/projects/6/items', {type: 'Project', title: 'added'}
+        test.$httpBackend.flush()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should not have changed the number of root projects', ->
+        test.$httpBackend.flush()
+        expect(test.projects.allProjects.length).toBe 2
+
+      it 'should have updated the current project', ->
+        expect(test.projects.currentProject.child_nodes.length).toBe 0
+        test.$httpBackend.flush()
+        expect(test.projects.currentProject.child_nodes.length).toBe 1
+
