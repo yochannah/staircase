@@ -24,6 +24,7 @@ module.exports = (config) ->
     # Exclude the application main file - we don't want to start the app, just run tests.
     exclude: [
       'src/coffee/init.coffee'
+      'src/coffee/bootstrap.coffee'
     ]
 
     # preprocess matching files before serving them to the browser

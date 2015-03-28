@@ -35,6 +35,7 @@ require.config
     headroom:             '../../resources/public/vendor/headroom.js/dist/headroom'
     image:                '../../resources/public/vendor/requirejs-plugins/src/image'
     imjs:                 '../../resources/public/vendor/imjs/js/im'
+    jquery:               '../../resources/public/vendor/jquery/dist/jquery.min'
     jschannel:            '../../resources/public/vendor/jschannel'
     json:                 '../../resources/public/vendor/requirejs-plugins/src/json'
     markdownConverter:    '../../resources/public/vendor/requirejs-plugins/lib/Markdown.Converter'

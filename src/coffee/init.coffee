@@ -65,6 +65,7 @@ require.config
     headroom:          '/vendor/headroom.js/dist/headroom'
     image:             "/vendor/requirejs-plugins/src/image"
     imjs:              '/vendor/imjs/js/im'
+    jquery:            '/vendor/jquery/dist/jquery.min' # Used for dataTransfer in drag-drop.
     jschannel:         '/vendor/jschannel'
     json:              "/vendor/requirejs-plugins/src/json"
     markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"

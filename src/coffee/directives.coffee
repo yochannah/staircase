@@ -1,4 +1,15 @@
-require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, Channel) ->
+define (require) ->
+
+  ng = require 'angular'
+  L = require 'lodash'
+  lines = require 'lines'
+  Channel = require 'jschannel'
+  jQuery = require 'jquery'
+
+  require 'services'
+
+  # Used by drag/drop directives for interacting with native drag and drop API.
+  jQuery.event.props.push('dataTransfer')
 
   Directives = ng.module('steps.directives', ['steps.services'])
 

@@ -34,6 +34,7 @@
     "angular-local-storage": "~0.1.5",
     "angular-notify": "~2.0.2",
     "pluralize": "~1.1.2",
-    "requirejs-plugins": "~1.0.3"
+    "requirejs-plugins": "~1.0.3",
+    "jquery": "~2.1.3"
   }
 }

@@ -5,8 +5,5 @@ define deps, (require, ng) ->
   # Depending on compilation sequence, various modules were not being found. This is dumb, and
   # a better way ought to be found.
   require ['domReady!'], (document) ->
-  	setTimeout (->
-  		ng.bootstrap document, ['steps']
-  		jQuery.event.props.push('dataTransfer'))
-  	, 100
-
+    load = -> ng.bootstrap document, ['steps']
+  	setTimeout load, 50
