@@ -31,7 +31,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
     ]
 
     # We mock this directly to prevent calls to the InterMine
-    # back ends.
+    # back ends. We can't really intercept them.
     mockGetEntities = -> then: (f) ->
       f templates: mockTemplates, lists: mockLists
 
@@ -97,3 +97,20 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
           Accept: "application/json, text/plain, */*"
         test.$httpBackend.flush()
 
+    describe 'Selecting a project', ->
+
+      beforeEach -> 
+        test.projects = test.$controller 'ProjectsCtrl',
+          getMineUserEntities: mockGetEntities
+        test.$httpBackend.flush()
+        test.projects.setCurrentProject mockProjects[1]
+
+      it 'should have added a project to the path', ->
+        expect(test.projects.pathToHere.length).toEqual 1
+
+      it 'should have the right names on the path', ->
+        expect(s.name for s in test.projects.pathToHere).toEqual ['mock project 3']
+
+      it 'should now have that project as the current project', ->
+        expect(test.projects.currentProject.id).toBe 6
+      
