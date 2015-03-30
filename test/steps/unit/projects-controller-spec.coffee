@@ -69,9 +69,26 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
       test.projects = test.$controller 'ProjectsCtrl', test.locals
 
+    describe 'getHref', ->
+
+      it 'should generate an href for lists', ->
+        input =
+          source: 'there'
+          item_type: 'List'
+          item_id: 'that'
+        output = "starting-point/choose-list/there?name=that"
+        expect(test.projects.getHref input).toEqual output
+
+      it 'should not generate an href for anything else', ->
+        input =
+          source: 'there'
+          item_type: 'Warble'
+          item_id: 'foo'
+        expect(test.projects.getHref input).not.toBeDefined()
+
     describe 'Initial state', ->
 
-      beforeEach -> 
+      beforeEach ->
         test.$httpBackend.flush()
 
       it 'has an empty path to here', ->
@@ -111,7 +128,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     describe 'Selecting a project', ->
 
-      beforeEach -> 
+      beforeEach ->
         test.projects.setCurrentProject mockProjects()[1]
 
       it 'should have added a project to the path', ->
@@ -125,7 +142,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       
     describe 'Adding a project', ->
 
-      beforeEach -> 
+      beforeEach ->
         test.projects.createProject 'added'
         test.projectHandler.respond 200, mockProjects().concat([mockNewProject])
 
@@ -143,7 +160,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     describe 'Adding a nested project', ->
 
-      beforeEach -> 
+      beforeEach ->
         test.projects.setCurrentProject mockProjects()[1]
         test.projects.createProject 'added'
         updated = mockProjects()
@@ -169,7 +186,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     describe 'addItem', ->
 
-      beforeEach -> 
+      beforeEach ->
         thing =
           source: 'there'
           type: 'List'
@@ -200,7 +217,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         test.$httpBackend.verifyNoOutstandingExpectation()
 
       it 'should not have caused an error', ->
-        expect(test.projects.error).not.toBeDefined
+        expect(test.projects.error).not.toBeDefined()
 
       it 'should not have changed the number of root projects', ->
         test.$httpBackend.flush()
@@ -215,7 +232,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
     describe 'using drag and drop', ->
 
-      beforeEach -> 
+      beforeEach ->
         thing =
           source: 'there'
           type: 'List'
@@ -256,4 +273,6 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         target = test.projects.currentProject.child_nodes[0]
         expect(target.contents.length).toBe 3
         expect(target.item_count).toBe 4
+
+
 

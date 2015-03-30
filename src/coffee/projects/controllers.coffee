@@ -35,10 +35,9 @@ define (require, exports) ->
       @sync()
 
     getHref: ({source, item_type, item_id}) ->
-      src = L.findWhere @mines, name: source
       switch item_type
         when 'List'
-          "starting-point/choose-list/#{ src.name }?name=#{ item_id }"
+          "starting-point/choose-list/#{ source }?name=#{ item_id }"
 
     showEmptyMessage: ({child_nodes, contents}) ->
       (not child_nodes?.length) and (not contents?.length)
