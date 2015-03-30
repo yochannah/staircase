@@ -79,7 +79,7 @@
      :type "text"
      :placeholder placeholder}]])
 
-(def navbar ^:private
+(defn- navbar [config]
   [:div.navbar.navbar-custom.navbar-default
    [:div.collapse.navbar-collapse
     [:form.navbar-form.navbar-right
@@ -89,12 +89,12 @@
       {:ng-class "{disabled: !newProjectName}"
        :ng-click "appView.createProject(newProjectName, newProjectDesc)"}
       [:i.fa.fa-folder]
-      " Create Folder"]
+      (get-in config [:strings :projects.add-project])]
      [:button.btn.btn-default.pushleft
       {:ng-class "{active: appView.showExplorer}"
        :ng-click "appView.showExplorer = !appView.showExplorer"}
       [:i.fa.fa-plus]
-      " Add Item"]]]])
+      (get-in config [:strings :projects.add-item])]]]])
 
 (def project-table-head ^:private
   [:thead
@@ -148,9 +148,9 @@
    [:td.smallest "{{ item.last_modified | date:appView.dateFormat }}"]
    [:td.controls ctrl-button-item]])
 
-(def project-table ^:private
+(defn- project-table [config]
   [:div
-   navbar
+   (navbar config)
    breadcrumbs
    [:table.table.table-hover.project-table.ng-hide
     {:dropzone "appView.currentProject"
@@ -177,6 +177,6 @@
     [:div.row-fluid {:ng-hide "auth.loggedIn"}
       [:p "Please log in to access MyMine"]]
     [:div.flex-row.guttered {:ng-show "auth.loggedIn"}
-      [:div.flex-box project-table]
+      [:div.flex-box (project-table config)]
       [:div.flex-box.flex-col-4 {:ng-show "showExplorer"}
         [:div explorer]]]]))

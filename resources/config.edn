@@ -3,5 +3,9 @@
         [keyword-search
          "https://github.com/alexkalderimis/multimine-search-tool.git"]]
 
+    :strings {
+              :projects.add-item "Add Item"
+              :projects.add-project "Create Folder"
+              }
 }
 
