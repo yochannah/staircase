@@ -164,8 +164,12 @@
      content-rows
      [:tr {:ng-if "appView.currentProject._is_empty"}
       [:td {:colspan (dec (count (nth project-table-head 1)))} ;; Calculate the col-span by looking at the head.
-       [:span {:ng-show "appView.pathToHere.length"} "Empty folder."]
-       [:span {:ng-hide "appView.pathToHere.length"} "Please begin by creating a folder."]]]]]])
+       [:span
+        {:ng-show "appView.pathToHere.length"}
+        (get-in config [:strings :projects.empty-folder])]
+       [:span
+        {:ng-hide "appView.pathToHere.length"}
+        (get-in config [:strings :projects.create-folder-to-begin])]]]]]])
 
 (def explorer ^:private
   [:tabset

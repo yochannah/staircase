@@ -6,6 +6,8 @@
     :strings {
               :projects.add-item "Add Item"
               :projects.add-project "Create Folder"
+              :projects.empty-folder "Empty Folder"
+              :projects.create-folder-to-begin "Please begin by creating a folder."
               }
 }
 
