@@ -87,8 +87,8 @@ define (require, exports) ->
       @Projects.delete {projectId: project.id}, => @sync()
 
     dropped: (pkg, dest) ->
-      if typeof pkg is "string" then pkg = JSON.parse pkg
-      if typeof dest is "string" then dest = JSON.parse dest
+      pkg = JSON.parse pkg if L.isString pkg
+      dest = JSON.parse dest if L.isString dest
       return unless dest.type is 'Project'
       @addItem pkg, dest.id
     
@@ -105,7 +105,7 @@ define (require, exports) ->
       else if thing.type not in ['List', 'Template']
         @error = 'UNKNOWN_ITEM_TYPE'
       else
-        Projects.addItem {projectId}, item, => @sync()
+        @Projects.addItem {projectId}, item, => @sync()
 
     createProject: (title, description) ->
       data = {title, description, type: 'Project'}

@@ -7,6 +7,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
     mockLists = []
     mockProjects = -> [ # Function so we get a fresh one every time. Workaround for mutable data.
       {
+        type: 'Project'
         id: 1
         title: 'mock project 1'
         item_count: 3
@@ -14,6 +15,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         child_nodes: [
           {
             id: 4
+            type: 'Project'
             title: 'mock project 2'
             item_count: 1
             contents: [{id: 5}]
@@ -23,6 +25,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       }
       {
         id: 6
+        type: 'Project'
         title: 'mock project 3'
         item_count: 0
         contents: []
@@ -60,6 +63,9 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       test.$httpBackend
           .when 'POST', '/api/v1/projects'
           .respond mockNewProject
+      test.$httpBackend
+          .when 'POST', '/api/v1/projects/1/items', /"type":\s*"Item"/
+          .respond 200, {id: 100}
 
       test.projects = test.$controller 'ProjectsCtrl', test.locals
 
@@ -86,6 +92,9 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
       it 'should have two projects', ->
         expect(test.projects.allProjects.length).toEqual 2
+
+      it 'should have the right project data', ->
+        expect(test.projects.currentProject.child_nodes[0].id).toEqual 1
 
     describe 'Initial server load', ->
 
@@ -157,4 +166,94 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         expect(test.projects.currentProject.child_nodes.length).toBe 0
         test.$httpBackend.flush()
         expect(test.projects.currentProject.child_nodes.length).toBe 1
+
+    describe 'addItem', ->
+
+      beforeEach -> 
+        thing =
+          source: 'there'
+          type: 'List'
+          id: 'added thing'
+
+        updated = mockProjects()
+        updated[0].contents.push
+          id: 100
+          source: 'there'
+          item_type: 'List'
+          item_id: 'added thing'
+        updated[0].item_count++
+
+        test.projectHandler.respond 200, updated
+
+        test.projects.addItem thing, 1
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+
+      it 'should have made a call to the back end to add the item', ->
+        test.$httpBackend.expectPOST '/api/v1/projects/1/items',
+          type: 'Item'
+          source: 'there'
+          item_type: 'List'
+          item_id: 'added thing'
+        test.$httpBackend.flush()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should not have caused an error', ->
+        expect(test.projects.error).not.toBeDefined
+
+      it 'should not have changed the number of root projects', ->
+        test.$httpBackend.flush()
+        expect(test.projects.allProjects.length).toBe 2
+
+      it 'should have updated the target project', ->
+        test.$httpBackend.flush()
+        target = test.projects.currentProject.child_nodes[0]
+        expect(target.contents.length).toBe 3
+        expect(target.item_count).toBe 4
+        expect(target.contents[2].item_id).toEqual 'added thing'
+
+    describe 'using drag and drop', ->
+
+      beforeEach -> 
+        thing =
+          source: 'there'
+          type: 'List'
+          id: 'dropped thing'
+        dest = mockProjects()[0]
+
+        updated = mockProjects()
+        updated[0].contents.push
+          id: 100
+          source: 'there'
+          item_type: 'List'
+          item_id: 'dropped thing'
+        updated[0].item_count++
+
+        test.$httpBackend.flush()
+        test.projectHandler.respond 200, updated
+
+        test.projects.dropped JSON.stringify(thing), JSON.stringify(dest)
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should have made a call to the back end to add the item', ->
+        test.$httpBackend.expectPOST '/api/v1/projects/1/items',
+          type: 'Item'
+          source: 'there'
+          item_type: 'List'
+          item_id: 'dropped thing'
+        test.$httpBackend.flush()
+
+      it 'should not have changed the number of root projects', ->
+        test.$httpBackend.flush()
+        expect(test.projects.allProjects.length).toBe 2
+
+      it 'should have updated the current project', ->
+        test.$httpBackend.flush()
+        target = test.projects.currentProject.child_nodes[0]
+        expect(target.contents.length).toBe 3
+        expect(target.item_count).toBe 4
 
