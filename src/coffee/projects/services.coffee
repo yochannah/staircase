@@ -2,7 +2,6 @@ define (require) ->
 
   L = require 'lodash'
   ng = require 'angular'
-  imjs = require 'imjs'
   require 'services' # provides steps.services
 
   ProjectServices = ng.module('steps.projects.services', ['steps.services'])
@@ -24,7 +23,7 @@ define (require) ->
       deleteItem: {method: 'DELETE', headers: headers, url: '/api/v1/projects/:projectId/items/:itemId'}
       addItem: {method: 'POST', headers: headers, url: '/api/v1/projects/:projectId/items'}
 
-  ProjectServices.factory 'getMineUserEntities', Array 'Mines', '$q', (Mines, Q) ->
+  ProjectServices.factory 'getMineUserEntities', Array 'imjs', 'Mines', '$q', (imjs, Mines, Q) ->
     asEntity = (mine, type, id, entity) ->
       type: type
       id: id
@@ -35,11 +34,11 @@ define (require) ->
     mergeArrays = (a, b) -> a.concat(b) if L.isArray a
     reduceFn = (m, es) -> L.merge m, es, mergeArrays
 
-    () -> Mines.all().then (mines) ->
+    return getMineUserEntities = -> Mines.all().then (mines) ->
       promises = mines.map (amine) ->
         service = imjs.Service.connect amine
 
-        getLists = service.fetchLists().then (lists) -> lists.map (list) ->
+        getLists = service.fetchLists().then (lists) -> L.map lists, (list) ->
           asEntity amine, 'List', list.name, list
         getTemplates = service.fetchTemplates().then (ts) -> L.map ts, (t) ->
           asEntity amine, 'Template', t.name, t

@@ -107,17 +107,30 @@ define (require, exports, module) ->
         currentName = "#{ baseName } (#{ suffix++ })"
       return currentName
 
-  createConnection = (conf) ->
-    s = imjs.Service.connect conf
+  # Service with no dependencies whose only job is to provide imjs.
+  # Use this in your tests to provide a mocked version of imjs resources.
+  class ImjsProvider
+
+    constructor: ->
+      @impl = imjs
+
+    setImpl: (mock) -> @impl = mock
+
+    $get: -> @impl
+
+  Services.provider 'imjs', ImjsProvider
+
+  Services.factory 'createConnection', Array 'imjs', ({Service}) -> (conf) ->
+    s = Service.connect conf
     s.name = conf.name
     return s
 
   # Provide a function for connecting to a mine by URL.
-  Services.factory 'connectTo', Array 'Mines', (mines) -> (root) ->
+  Services.factory 'connectTo', Array 'createConnection', 'Mines', (createConnection, mines) -> (root) ->
     mines.atURL(root).then createConnection
 
   # Connect to a mine by name
-  Services.factory 'connect', Array 'Mines', (Mines) ->
+  Services.factory 'connect', Array 'createConnection', 'Mines', (createConnection, Mines) ->
     cache = {}
     (name) -> cache[name] ?= Mines.get(name).then createConnection
 
