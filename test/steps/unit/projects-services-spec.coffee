@@ -132,7 +132,7 @@ define ['angularMocks', 'projects/services'], (mocks) ->
       beforeEach ->
         test.minesHandler.respond [{name: 'bar'}]
 
-      it 'should return a valid but empty result', ->
+      it 'should return results from bar', ->
         success = jasmine.createSpy 'success'
         error = jasmine.createSpy 'error'
         test.getMineUserEntities().then success, error
@@ -205,7 +205,7 @@ define ['angularMocks', 'projects/services'], (mocks) ->
       beforeEach ->
         test.minesHandler.respond [{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]
 
-      it 'should return a valid but empty result', ->
+      it 'should return everthing it can find', ->
         success = jasmine.createSpy 'success'
         error = jasmine.createSpy 'error'
         test.getMineUserEntities().then success, error
@@ -213,4 +213,39 @@ define ['angularMocks', 'projects/services'], (mocks) ->
         expect(success).toHaveBeenCalledWith allEntities
         expect(error).not.toHaveBeenCalled()
 
+    describe 'entities from services with metadata', ->
 
+      entitiesWithMetadata =
+        lists: [
+          {
+            type: 'List'
+            id: 'baz list 1'
+            source : 'baz'
+            meta: 'meta of baz'
+            entity:
+              name: 'baz list 1'
+              size: 200
+          }
+        ]
+        templates: [
+          {
+            type: 'Template'
+            id: 'baz template 1'
+            source: 'baz'
+            meta: 'meta of baz'
+            entity:
+              name: 'baz template 1'
+              prop: 'w'
+          },
+        ]
+
+      beforeEach ->
+        test.minesHandler.respond 200, [{name: 'baz', meta: 'meta of baz'}]
+
+      it 'should make sure all the entities have the correct meta', ->
+        success = jasmine.createSpy 'success'
+        error = jasmine.createSpy 'error'
+        test.getMineUserEntities().then success, error
+        test.$httpBackend.flush() # return http result
+        expect(success).toHaveBeenCalledWith entitiesWithMetadata
+        expect(error).not.toHaveBeenCalled()
