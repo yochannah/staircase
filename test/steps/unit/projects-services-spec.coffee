@@ -24,7 +24,8 @@ define ['angularMocks', 'projects/services'], (mocks) ->
 
     beforeEach mocks.module 'steps.projects.services', (imjsProvider) ->
       imjsProvider.setImpl getMockImjs()
-      null
+      # ng gets very upset if this function returns anything, so
+      null # <-- this is really important 
 
     beforeEach mocks.inject ($rootScope, $q, $injector, getMineUserEntities) ->
         test.scope = $rootScope
