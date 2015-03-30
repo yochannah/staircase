@@ -11,7 +11,7 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         id: 1
         title: 'mock project 1'
         item_count: 3
-        contents: [{id: 2}, {id: 3}]
+        contents: [{id: 2, item_type: 'List'}, {id: 3, item_type: 'Template'}]
         child_nodes: [
           {
             id: 4
@@ -369,4 +369,32 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         test.$httpBackend.flush()
         expect(test.projects.currentProject.child_nodes[0].id).toBe 6
         expect(test.projects.allProjects.length).toEqual 1
+
+    describe 'deleting an item', ->
+
+      beforeEach ->
+        test.$httpBackend.flush()
+        test.projects.setCurrentProject test.projects.allProjects[0]
+        test.projects.deleteItem test.projects.currentProject, test.projects.currentProject.contents[0]
+
+        test.$httpBackend
+            .when 'DELETE', '/api/v1/projects/1/items/2'
+            .respond 204
+
+        updated = mockProjects()
+        updated[0].contents.shift() # Pops first
+        test.projectHandler.respond 200, updated
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should make a call to the back end to delete the item', ->
+        test.$httpBackend.expectDELETE '/api/v1/projects/1/items/2'
+        test.$httpBackend.flush()
+
+      it 'should have updated the current project', ->
+        expect(test.projects.currentProject.contents.length).toEqual 2
+        test.$httpBackend.flush()
+        expect(test.projects.currentProject.contents.length).toEqual 1
 

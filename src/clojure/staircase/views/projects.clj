@@ -67,8 +67,9 @@
                 {:click "deleteProject(project)" :text "Delete Folder"}))
 
 (def ctrl-button-item ^:private
-  (row-controls "appView.updateItem(item)"
-                {:click "deleteItem(item)" :text "Remove {{item.item_type}} from Folder"}))
+  (row-controls "appView.updateItem(appView.currentProject, item)"
+                {:click "deleteItem(appView.currentProject, item)"
+                 :text "Remove {{item.item_type}} from Folder"}))
 
 (defn- new-project-input
   [[prop placeholder]]
