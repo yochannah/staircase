@@ -45,10 +45,6 @@ define (require, exports) ->
     isEmptyProject: ({child_nodes, contents}) ->
       (not child_nodes?.length) and (not contents?.length)
 
-    updateProject: (project) ->
-      updating = Projects.update project.id, project
-      updating.then => @sync()
-
     checkEmpty: (value) -> "Please provide a value" unless trim value
 
     goToRoot: ->
@@ -88,6 +84,11 @@ define (require, exports) ->
       @pathToHere = @pathToHere.concat [{id: project.id, name: project.title}]
       @currentProject = project
       @currentProject._is_empty = @isEmptyProject project
+
+    updateProject: (project) ->
+      # Only send the project info we are updating.
+      data = L.pick project, 'title', 'description'
+      @Projects.update {projectId: project.id}, data, => @sync()
 
     deleteProject: (project) ->
       @Projects.delete {projectId: project.id}, => @sync()

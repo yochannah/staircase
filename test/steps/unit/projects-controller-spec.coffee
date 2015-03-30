@@ -311,5 +311,36 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         expect(target.contents.length).toBe 3
         expect(target.item_count).toBe 4
 
+    describe 'updating a project', ->
 
+      beforeEach ->
+        test.$httpBackend.flush()
+        # The user would provide a value using the editable form...
+        target = test.projects.allProjects[0]
+        target.description = 'edited'
+        test.projects.updateProject target
+
+        test.$httpBackend
+            .when 'PUT', '/api/v1/projects/1', /"description":\s*"edited"/
+            .respond 200, {id: 1}
+        updated = mockProjects()
+        updated[0].description = 'edited, and saved'
+
+        test.projectHandler.respond 200, updated
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should have made a call to the back end to save the data', ->
+        test.$httpBackend.expectPUT '/api/v1/projects/1',
+          title: 'mock project 1'
+          description: 'edited'
+
+        test.$httpBackend.flush()
+
+      it 'should update the current data', ->
+        test.$httpBackend.flush()
+        target = test.projects.currentProject.child_nodes[0]
+        expect(target.description).toEqual 'edited, and saved'
 
