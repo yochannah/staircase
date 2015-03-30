@@ -86,6 +86,20 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
           item_id: 'foo'
         expect(test.projects.getHref input).not.toBeDefined()
 
+    describe 'checkEmpty', ->
+
+      it 'should provide an error message if the value is null', ->
+        expect(test.projects.checkEmpty null).toBe 'Please provide a value'
+
+      it 'should provide an error message if the value is an empty string', ->
+        expect(test.projects.checkEmpty '').toBe 'Please provide a value'
+
+      it 'should provide an error message if the value is a blank string', ->
+        expect(test.projects.checkEmpty '   ').toBe 'Please provide a value'
+
+      it 'should not complain if there is a value', ->
+        expect(test.projects.checkEmpty 'not empty').not.toBeDefined()
+
     describe 'Initial state', ->
 
       beforeEach ->
@@ -113,6 +127,9 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       it 'should have the right project data', ->
         expect(test.projects.currentProject.child_nodes[0].id).toEqual 1
 
+      it 'should know that the current project is not empty', ->
+        expect(test.projects.currentProject._is_empty).toBe false
+
     describe 'Initial server load', ->
 
       afterEach ->
@@ -139,7 +156,10 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
 
       it 'should now have that project as the current project', ->
         expect(test.projects.currentProject.id).toBe 6
-      
+
+      it 'should know that the current project is empty', ->
+        expect(test.projects.currentProject._is_empty).toBe true
+
     describe 'Adding a project', ->
 
       beforeEach ->
@@ -157,6 +177,23 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       it 'should have updated the projects list', ->
         test.$httpBackend.flush()
         expect(test.projects.allProjects.length).toBe 3
+
+    describe 'Adding a project to an empty project', ->
+
+      beforeEach ->
+        test.$httpBackend.flush()
+        test.projects.setCurrentProject mockProjects()[1]
+        test.projects.createProject 'added'
+        updated = mockProjects()
+        updated[1].child_nodes.push(mockNewProject)
+        test.projectHandler.respond 200, updated
+
+      it 'should think the project is empty before we add anything to it', ->
+        expect(test.projects.currentProject._is_empty).toBe true
+
+      it 'should know that the current project is not empty', ->
+        test.$httpBackend.flush()
+        expect(test.projects.currentProject._is_empty).toBe false
 
     describe 'Adding a nested project', ->
 
