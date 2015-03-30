@@ -343,4 +343,30 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
         test.$httpBackend.flush()
         target = test.projects.currentProject.child_nodes[0]
         expect(target.description).toEqual 'edited, and saved'
+    
+    describe 'deleting a project', ->
+
+      beforeEach ->
+        test.$httpBackend.flush()
+        test.projects.deleteProject test.projects.allProjects[0]
+
+        test.$httpBackend
+            .when 'DELETE', '/api/v1/projects/1'
+            .respond 204
+
+        updated = mockProjects().slice 1
+        test.projectHandler.respond 200, updated
+
+      afterEach ->
+        test.$httpBackend.verifyNoOutstandingRequest()
+        test.$httpBackend.verifyNoOutstandingExpectation()
+
+      it 'should make a call to the back end to delete the project', ->
+        test.$httpBackend.expectDELETE '/api/v1/projects/1'
+        test.$httpBackend.flush()
+
+      it 'should remove the deleted project from the current data', ->
+        test.$httpBackend.flush()
+        expect(test.projects.currentProject.child_nodes[0].id).toBe 6
+        expect(test.projects.allProjects.length).toEqual 1
 

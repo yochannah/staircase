@@ -93,6 +93,9 @@ define (require, exports) ->
     deleteProject: (project) ->
       @Projects.delete {projectId: project.id}, => @sync()
 
+    deleteItem: (project, item) ->
+      @Projects.delete {projectId: project.id, itemId: item.id}, => @sync()
+
     dropped: (pkg, dest) ->
       pkg = JSON.parse pkg if L.isString pkg
       dest = JSON.parse dest if L.isString dest
