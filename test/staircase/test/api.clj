@@ -188,7 +188,7 @@
           (data-is resp {:id 7 :item_name "I am an item"}
               "The item has the correct data"))))))
 
-(deftest get-nested-project
+(deftest ^:api get-nested-project
   (let [projects (mock-projects)
         app (get-router {:projects projects})]
     (with-redefs [staircase.handler/get-principal mock-get-principal]
@@ -202,6 +202,29 @@
                   "</api/v1/projects/3>; rel=\"subproject\""]
                  (get-in resp [:headers "Link"]))
               "We have HATEOS links back to the parent project, the items and the child nodes"))))))
+
+(deftest ^:api delete-my-stuff
+
+  (let [projects (mock-projects)
+        app (get-router {:projects projects})]
+    (with-redefs [staircase.handler/get-principal mock-get-principal]
+      (testing "DELETE /api/v1/projects/2"
+        (let [del-req (json-request :delete "/api/v1/projects/2")
+              get-req (json-request :get "/api/v1/projects/2")
+              resp (app del-req)
+              resp-2 (app get-req)]
+          (is (= 204 (:status resp)) "The request should be accepted")
+          (is (= 404 (:status resp-2)) "The resource should now be gone"))))))
+
+(deftest ^:api delete-your-stuff
+
+  (let [projects (mock-projects)
+        app (get-router {:projects projects})]
+    (with-redefs [staircase.handler/get-principal mock-get-principal]
+      (testing "DELETE /api/v1/projects/4"
+        (let [del-req (json-request :delete "/api/v1/projects/4")
+              resp (app del-req)]
+          (is (= 404 (:status resp)) "The request should be refused with 404"))))))
 
 (deftest test-app-with-stuff
   (let [histories (MockResource. (map #(hash-map :id %1 :data "mock") (range 3)))

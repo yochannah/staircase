@@ -65,6 +65,7 @@
   :test-selectors {
                    :all (constantly true)
                    :database :database
+                   :api :api
                    :default (complement :acceptance)}
   :env {
       :asset-js-engine :v8

@@ -52,15 +52,22 @@
   Resource
 
   (exists? [this id] (not (nil? (get-one this id))))
+
   (get-all [_]
-    (map keywordly-keyed (filter #(= (% "owner") (:user staircase.resources/context)) @things)))
+    (map keywordly-keyed
+         (filter #(= (% "owner") (:user staircase.resources/context))
+                 @things)))
+
   (get-one [this id]
-    (first (filter #(= (str (:id %1)) (str id)) (get-all this))))
+    (first (filter #(= (str id)
+                       (str (:id %)))
+                   (get-all this))))
+
   (update [this id doc]
-    (swap! things map #(if (= id (% "id")) (merge % doc) %))
+    (swap! things (partial map #(if (= (str id) (str (% "id"))) (merge % doc) %)))
     (get-one this id))
-  (delete [_ id]
-    (swap! things filter #(not (= id (% "id")))))
+  (delete [this id]
+    (swap! things (partial filter #(not (= (str id) (str (% "id")))))))
   (create [_ doc]
     (let [id (swap! serial inc)]
       (swap! things conj (assoc doc "id" id "owner" (:user staircase.resources/context)))
