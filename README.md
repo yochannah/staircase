@@ -144,6 +144,13 @@ variables - see [Configuration][].
 lein test
 ```
 
+To run the client side tests:
+
+```sh
+npm install
+npm test
+```
+
 ## License
 
 Copyright © 2014 Alex Kalderimis and InterMine
