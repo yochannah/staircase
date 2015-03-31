@@ -4,6 +4,7 @@
          "https://github.com/alexkalderimis/multimine-search-tool.git"]]
 
     :strings {
+              :projects.projects "Folders"
               :projects.add-item "Add Item"
               :projects.add-project "Create Folder"
               :projects.empty-folder "Empty Folder"

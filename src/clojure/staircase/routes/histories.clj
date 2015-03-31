@@ -57,21 +57,29 @@
       (response (get-one steps step-id)))
     NOT_FOUND))
 
+(defn- history-steps-routes
+  [histories steps id]
+  (routes
+    (GET "/" [] (hs/get-steps-of histories id))
+    (POST "/" {body :body} (add-step-to histories steps id body))
+    (GET "/:idx" [idx] (get-step-of histories id idx))
+    (POST "/:idx/fork"
+          {body :body {idx :idx} :params}
+          (fork-history-at histories id idx body))))
+
+(defn- single-history-routes
+  [histories steps id]
+  (routes
+    (GET    "/" [] (get-resource histories id))
+    (PUT    "/" {body :body} (update-resource histories
+                                              id
+                                              (dissoc body "id" "steps" "owner")))
+    (DELETE "/" [] (delete-resource histories id))
+    (GET    "/head" [] (get-end-of-history histories id))
+    (context "/steps" [] (history-steps-routes histories steps id))))
+
 (defn build-hist-routes [{{:keys [histories steps]} :resources}]
   (routes ;; routes that start from histories.
           (GET  "/" [] (get-resources histories))
           (POST "/" {body :body} (create-new histories body))
-          (context "/:id" [id]
-                   (GET    "/" [] (get-resource histories id))
-                   (PUT    "/" {body :body} (update-resource histories
-                                                             id
-                                                             (dissoc body "id" "steps" "owner")))
-                   (DELETE "/" [] (delete-resource histories id))
-                   (GET    "/head" [] (get-end-of-history histories id))
-                   (context "/steps" []
-                            (GET "/" [] (hs/get-steps-of histories id))
-                            (GET "/:idx" [idx] (get-step-of histories id idx))
-                            (POST "/:idx/fork"
-                                  {body :body {idx :idx} :params}
-                                  (fork-history-at histories id idx body))
-                            (POST "/" {body :body} (add-step-to histories steps id body))))))
+          (context "/:id" [id] (single-history-routes histories steps id))))

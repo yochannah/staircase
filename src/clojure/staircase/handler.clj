@@ -8,7 +8,6 @@
         [ring.middleware.params :only (wrap-params)]
         [ring.middleware.basic-authentication :only (wrap-basic-authentication)]
         ring.middleware.json
-        ring.middleware.format
         ring.middleware.anti-forgery
         staircase.routing ;; small helpers.
         [staircase.protocols]
@@ -21,6 +20,7 @@
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [ring.middleware.cors :refer (wrap-cors)]
+            [ring.middleware.format :refer (wrap-restful-format)]
             staircase.resources
             [staircase.routes.projects :refer (build-project-routes)]
             [staircase.routes.service :refer (build-service-routes)]
@@ -227,7 +227,7 @@
                           asset-pipeline
                           pm/wrap-persona-resources))
           app (-> handler
-                  wrap-restful-format
+                  (wrap-restful-format :formats [:json :edn])
                   (wrap-cors :access-control-allow-origin (allowed-origins (:audience config)))
                   (wrap-drawbridge repl-user-creds))]
       (assoc this :handler app)))

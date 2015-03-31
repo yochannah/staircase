@@ -30,6 +30,8 @@ require.config
     'angular-ui-select2':
       deps: ['angular', 'select2']
       init: -> loadCss "/vendor/select2/select2.css"
+    select2:
+      deps: ['jquery']
     'angular-mocks':
       deps: [ 'angular' ]
       exports: 'angular.mock'

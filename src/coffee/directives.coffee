@@ -1,3 +1,5 @@
+requirejs = require
+
 define (require) ->
 
   ng = require 'angular'
@@ -44,7 +46,7 @@ define (require) ->
       # Give the element a unique if it does not already have one
       id = angular.element(element).attr("id")
       if !id
-        id = uuid.new()
+        id = uuid.random()
         angular.element(element).attr("id", id)
 
       # Hacky, but works!
@@ -73,8 +75,8 @@ define (require) ->
       # Give the element a unique if it does not already have one
       id = el.attr("id")
       if !id
-        id = uuid.new()
-        angular.element(el).attr("id", id)
+        id = uuid.random()
+        el.attr("id", id)
 
       el.bind 'dragover', (e) ->
         e.stopPropagation
@@ -83,31 +85,30 @@ define (require) ->
 
       el.bind 'dragenter', (e) ->
         counter++
-        angular.element(el).addClass('im-drag-over')
-        angular.element(el).removeClass('im-drag-target')
+        el.addClass('im-drag-over')
+        el.removeClass('im-drag-target')
 
       el.bind 'dragleave', (e) ->
         counter--
         if counter is 0
-          angular.element(el).removeClass('im-drag-over')
-          angular.element(el).addClass('im-drag-target')
+          el.removeClass('im-drag-over')
+          el.addClass('im-drag-target')
 
       el.bind 'drop', (e) ->
-        angular.element(el).removeClass('im-drag-over')
+        console.log "DROP", e
+        el.removeClass('im-drag-over')
         e.stopPropagation()
         # The item that was dragged onto me.
         data = e.dataTransfer.getData('item')
-        scope.onDrop({dragE1: data, dropE1: scope.dropzone})
+        scope.onDrop({dragged: data, dropzone: scope.dropzone})
 
       $rootScope.$on 'IM-DRAG-START', ->
         counter = 0
-        el = document.getElementById(id)
-        angular.element(el).addClass('im-drag-target')
+        el.addClass('im-drag-target')
 
       $rootScope.$on 'IM-DRAG-END', ->
-        el = document.getElementById(id)
-        angular.element(el).removeClass("im-drag-target")
-        angular.element(el).removeClass("im-drag-over");
+        el.removeClass("im-drag-target")
+        el.removeClass("im-drag-over")
 
   Directives.directive 'blurOn', ->
     restrict: 'A'
@@ -280,10 +281,6 @@ define (require) ->
     """
     link: (scope, element, attrs) ->
       iframe = element.find('iframe')
-
-      do resize = -> iframe.css height: ng.element(win).height() * 0.85
-
-      win.addEventListener 'resize', resize
 
       console.debug 'connecting to iframe'
 
@@ -497,7 +494,7 @@ define (require) ->
         tmpl = scope.tool[turi]
         console.log ctrl, tmpl
 
-        require {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
+        requirejs {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
 
           c = injector.instantiate controller, {'$scope': scope}
           compileScope = scope # TODO: scope.$new false
@@ -547,7 +544,7 @@ define (require) ->
           ctrl = '.' + scope.tool.headingControllerURI
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
-          require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
+          requirejs {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
             scope.previousStep.$promise.then -> # Resolve the previous step.
 
               $injector.invoke controller, this, {'$scope': scope}

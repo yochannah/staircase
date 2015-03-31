@@ -22,9 +22,9 @@
                  [honeysql "0.4.3"] ;; SQL sugar
                  [postgresql/postgresql "8.4-702.jdbc4"] ;; DB Driver
                  [org.flywaydb/flyway-core "3.2"]
-                 [compojure "1.1.6"] ;; Request handlers
-                 [ring-middleware-format "0.3.2"] ;; JSON marshalling
-                 [ring "1.2.2"] ;; sessions.
+                 [compojure "1.3.2"] ;; Request handlers
+                 [ring-middleware-format "0.5.0"] ;; JSON marshalling
+                 [ring "1.3.2"] ;; sessions.
                  [ring/ring-json "0.3.1"]
                  [ring/ring-anti-forgery "0.3.1"] ;; CSRF protection.
                  [ring-cors "0.1.1"]

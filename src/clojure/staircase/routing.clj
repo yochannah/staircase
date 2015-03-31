@@ -1,4 +1,5 @@
 (ns staircase.routing
+  (:require [compojure.response :refer (Renderable)])
   (:use staircase.protocols
         ring.util.response))
 
@@ -41,3 +42,7 @@
       (delete rs id)
       ACCEPTED)
     NOT_FOUND))
+
+(extend-protocol Renderable
+  clojure.lang.PersistentVector ;; Enable compojure routes to return vectors.
+  (render [body req] (response body)))

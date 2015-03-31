@@ -7,6 +7,21 @@ define (require, exports) ->
   TRIM_RE = /(^\s*|\s*$)/g
   trim = (s) -> s?.replace TRIM_RE, ''
 
+  class ProjectCreator
+
+    @$inject = ['$scope']
+
+    constructor: (@scope, @Projects) ->
+      @scope.newProjectName = null
+      @scope.newProjectDesc = null
+
+    create: ->
+      name = @scope.newProjectName
+      desc = @scope.newProjectDesc
+      @scope.appView.createProject(name, desc)
+      @scope.newProjectName = null
+      @scope.newProjectDesc = null
+
   class ProjectsCtrl
 
     @$inject = ['Mines', 'Projects', 'getMineUserEntities']
@@ -14,6 +29,8 @@ define (require, exports) ->
     showExplorer: false
 
     dateFormat: 'dd/MM/yyyy hh:mm a'
+
+    tableSort: 'title'
 
     constructor: (Mines, @Projects, getEntities) ->
 
@@ -47,12 +64,21 @@ define (require, exports) ->
 
     checkEmpty: (value) -> "Please provide a value" unless trim value
 
+    selectedItems: ->
+      L.where(@lists, selected: true).concat(L.where @templates, selected: true)
+
+    addAllSelected: ->
+      currentId = @currentProject.id
+      for item in @selectedItems()
+        @addItem item, currentId
+        item.selected = false
+
     goToRoot: ->
       @pathToHere = []
       @currentProject = @getRoot()
 
     getRoot: ->
-      _is_empty: (@allProjects.length > 0)
+      _is_empty: (@allProjects.length is 0)
       contents: []
       child_nodes: @allProjects
 
@@ -81,6 +107,8 @@ define (require, exports) ->
 
     # Add a project to the path, and focus on it.
     setCurrentProject: (project) ->
+      unless L.findWhere(@currentProject.child_nodes, id: project.id)
+        @pathToHere = [] # replacement, not append.
       @pathToHere = @pathToHere.concat [{id: project.id, name: project.title}]
       @currentProject = project
       @currentProject._is_empty = @isEmptyProject project
@@ -99,6 +127,7 @@ define (require, exports) ->
     dropped: (pkg, dest) ->
       pkg = JSON.parse pkg if L.isString pkg
       dest = JSON.parse dest if L.isString dest
+      console.log "DROP", pkg, dest
       return unless dest.type is 'Project'
       @addItem pkg, dest.id
     
@@ -128,4 +157,5 @@ define (require, exports) ->
       
   ng.module('steps.projects.controllers', ['steps.services', 'steps.projects.services'])
     .controller 'ProjectsCtrl', ProjectsCtrl
+    .controller 'ProjectCreator', ProjectCreator
 

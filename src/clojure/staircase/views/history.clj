@@ -22,7 +22,7 @@
 
 (defn snippet [config]
   (html [:div.container-fluid.history-view
-   [:div.row
+   [:div.row.flex-row
 
     [:div.sidebar.slide-left.col-xs-12.col-md-2
      {:ng-class "{minimised: state.expanded, collapsed: collapsed}"}
@@ -72,11 +72,11 @@
       [:div.panel-body {:ng-hide "nextSteps.length"}
        [:em "No steps available"]]]]
 
-    [:div.col-xs-12.slide-left.central-panel
+    [:div.col-xs-12.slide-left.central-panel.flex-column
      {:ng-class "{'col-md-8': !state.expanded,
                   'col-md-offset-2': !state.expanded}"}
      (tool-not-found {:ng-show "error.status === 404"} config)
-     [:div.current-step
+     [:div.current-step.flex-box
       {:ng-hide "error.status === 404"
        :tool "tool"
        :step "step"

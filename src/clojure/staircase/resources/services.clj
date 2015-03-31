@@ -25,7 +25,7 @@
   (get-all [_]
     (sql/query db
                (res/all-belonging-to :services)
-               :result-set-fn vector))
+               :result-set-fn vec))
 
   (exists? [_ id]
     (staircase.sql/exists-with-owner db 

@@ -45,14 +45,18 @@
     }
 
     .disabled {
-        background: grey;
+        background: @gray-lighter;
     }
 
+    .item-explorer {
+        .flex-column();
+        .stretched();
+    }
 
     .cap {
         .flexbox();
         .flex-column();
-        height: 75vh;
+        height: 80vh;
         overflow: auto;
         margin-bottom: 0;
 
@@ -167,6 +171,10 @@
         margin-bottom: 0;
         background: white;
         padding-left: 3px;
+
+        .active {
+            font-weight: bold;
+        }
     }
 
 }

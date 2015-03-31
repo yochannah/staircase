@@ -84,6 +84,7 @@
                        first)) ;; Get the first unassigned generated name
         values (-> doc
                    (select-keys ["description" "parent_id"])
+                   (update-in ["parent_id"] string->uuid)
                    (assoc "owner" owner "title" title))]
     (first (sql/insert! db :projects values))))
 
@@ -100,7 +101,7 @@
   (first (sql/insert! db :project_contents
                    (-> item ;; White-list properties and link to project.
                        (select-keys ["item_id" "item_type" "source" "description"])
-                       (assoc "project_id" project)))))
+                       (assoc "project_id" (string->uuid project))))))
 
 ;; TODO: types (eg. Project) should be all lower-case, and probably be keywords.
 (defn add-item-to-project
@@ -111,7 +112,7 @@
       (let [trs-proj (assoc projects :db trs)
             {new-id :id mod-time :created_at} (add-content trs-proj project-id item)]
       ;; Touch the parent, setting its mod time to the creation time of its new child.
-      (touch-project trs project-id mod-time)
+      (touch-project trs (string->uuid project-id) mod-time)
       new-id))))
 
 (defn delete-item-from-project [{db :db} project-id item-id]

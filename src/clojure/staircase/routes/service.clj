@@ -5,6 +5,7 @@
         staircase.helpers
         ring.util.response)
   (:require
+            [clojure.tools.logging :refer (info)]
             [devlin.table-utils :refer (full-outer-join)]
             [clj-http.client :as client]
     ))
@@ -14,6 +15,7 @@
   (let [http-conf {:as :json :throw-exceptions false}
         token-coords [:body :token]
         session-url  (str (:root service) "/session")]
+    (info "Registering for" service session-url)
     (-> session-url
         (client/get http-conf)
         (get-in token-coords))))
@@ -40,13 +42,15 @@
 (defn- get-services
   [services config]
   (locking services ;; Not very happy about this - is there some better way to avoid this bottle-neck?
-    (let [user-services (get-all services)
-          configured-services (->> config
-                                   :services
-                                   (map (fn [[k v]]
-                                          {:root v :confname k :meta (get-in config [:service-meta k])})))]
-      (response (vec (map (partial ensure-valid services)
-                          (full-outer-join configured-services user-services :root)))))))
+    (letfn [(as-service [[k v]] {:root v
+                                  :confname k
+                                  :meta (get-in config [:service-meta k])})]
+      (let [user-services (get-all services)
+            configured-services (->> config
+                                     :services
+                                     (map as-service))
+            joined-services (full-outer-join configured-services user-services :root)]
+        (response (vec (map (partial ensure-valid services) joined-services)))))))
 
 (defn- delete-service [services ident]
   (if-let [id (-> services (get-where [:= :name ident]) first :id)]
@@ -91,7 +95,7 @@
                  (get-services services @config))
             (context "/:ident" [ident]
                      (GET "/" []
-                          (get-service services (real-id ident)))
+                          (get-service services @config (real-id ident)))
                      (DELETE "/" []
                              (delete-service services @config (real-id ident)))
                      (PUT "/" {doc :body}
