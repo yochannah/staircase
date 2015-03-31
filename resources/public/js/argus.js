@@ -21,7 +21,7 @@ define([], function () {
   return function () {
     // Need to wrap as we cannot return a reference to the analytics which is a global
     // object and gets replaced by the script.
-    if (ga) {
+    if (typeof ga !== 'undefined' && ga.apply) {
       ga.apply(null, arguments);
     }
   };
