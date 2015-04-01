@@ -46,7 +46,10 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
       test.$httpBackend = $injector.get('$httpBackend')
       test.locals =
         $scope: $rootScope.$new()
+        $routeParams: {}
         getMineUserEntities: mockGetEntities
+        $ngSilentLocation:
+          silent: -> # TODO: test calls to this.
 
       test.$controller = $controller
       test.$httpBackend

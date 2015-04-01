@@ -51,6 +51,7 @@
   [:ul.breadcrumb.list-inline.mymine.clearfix
    [:button.btn.btn-default.pull-right
     {:ng-click "appView.editing = !appView.editing"
+     :blur-on "click"
      :ng-class "{active: appView.editing}"}
     [:i.fa.fa-2x.fa-edit]]
    [:li [:a {:ng-click "appView.goToRoot()"} "Home"]]
@@ -115,6 +116,7 @@
      [:button.btn.btn-default.pushleft
       {:ng-class "{active: appView.showExplorer}"
        :ng-disabled "!appView.allProjects.length"
+       :blur-on "click"
        :ng-click "appView.showExplorer = !appView.showExplorer"}
       [:i.fa.fa-plus]
       " "
@@ -182,6 +184,16 @@
 
 (defn- project-table [config]
   [:div
+
+   [:div.alert.alert-danger
+    {:ng-show "appView.error"}
+    [:button.close
+     {:ng-click "appView.error = null"
+      :type "button"}
+     [:span "&times;"]]
+    [:strong "Error: {{appView.error.type}}"]
+    [:p "{{appView.error.summary}}"]]
+
    (navbar config)
    breadcrumbs
    [:table.table.table-hover.project-table

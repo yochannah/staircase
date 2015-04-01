@@ -128,6 +128,7 @@
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
       (GET "/projects" [] (serve-index))
+      (GET ["/projects/:path" :path #".+"] [] (serve-index))
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
@@ -165,6 +166,15 @@
               (issue-session @config secrets (:identity sess))))
       (wrap-session {:store session-store})))
 
+(defn wrap-exception-summaries [handler {config :config}]
+  (fn [req]
+    (let [resp (handler req)]
+      (if (and (= 400 (:status resp))
+               (get-in resp [:body :type]))
+        (let [summary (get-in @config [:exceptions (:body resp)])]
+          (update-in resp [:body :summary] (constantly summary)))
+        resp))))
+
 (defn- api-v1 [router]
   (let [hist-routes        (build-hist-routes router)
         step-routes        (build-step-routes router)
@@ -180,7 +190,8 @@
                   (context "/services" [] service-routes)
                   (context "/steps" [] step-routes)
                   (context "/projects" [] project-routes))
-                (wrap-api-auth router))
+                (wrap-api-auth router)
+                (wrap-exception-summaries router))
             (route/not-found {:message "Not found"}))))
 
 (defn wrap-bind-user

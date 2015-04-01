@@ -28,8 +28,13 @@
 (defn get-resources [rs] (response (vec (get-all rs))))
 
 (defn create-new [rs doc]
-  (let [id (create rs doc)]
-    (get-resource rs id)))
+  (try
+    (let [id (create rs doc)]
+      (get-resource rs id))
+    (catch clojure.lang.ExceptionInfo e
+      (if (= :constraint-violation (-> e ex-data :type))
+        (assoc CLIENT_ERROR :body (ex-data e))
+        (throw e)))))
 
 (defn update-resource [rs id doc]
   (if (exists? rs id)

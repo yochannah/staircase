@@ -50,6 +50,6 @@
 (defn app-options [opts]
   (letfn [(merge-in* [a b] (if (map? a) (merge-with merge-in* a b) b))]
     (merge-with merge-in*
-                (select-keys @configuration [:strings])
+                (select-keys @configuration [:strings :exceptions])
                 (options opts "web-"))))
 

@@ -1,5 +1,3 @@
-@about-header-size: 128px;
-
 .about {
     background-color: @panel-bg;
     padding: 2 * @panel-body-padding;
@@ -20,12 +18,21 @@
 
     h1 {
         text-align: center;
-        font-size: @about-header-size;
         margin-left: auto;
         margin-right: auto;
         line-height: 1;
         margin-top: 0;
+        font-size: @about-header-size;
         // color: rgb(255, 255, 255);
+
+        @media (min-width: @screen-md) {
+            font-size: @about-header-size-md;
+        }
+    }
+
+    @media (min-width: @screen-md) {
+        padding-left: @about-header-size-md / 2;
+        padding-right: @about-header-size-md / 2;
     }
 
 }
