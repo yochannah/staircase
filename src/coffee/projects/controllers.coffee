@@ -3,6 +3,7 @@ define (require, exports) ->
   L = require 'lodash'
   ng = require 'angular'
   require './services'
+  require 'angular-silent'
 
   TRIM_RE = /(^\s*|\s*$)/g
   trim = (s) -> s?.replace TRIM_RE, ''
@@ -24,7 +25,13 @@ define (require, exports) ->
 
   class ProjectsCtrl
 
-    @$inject = ['Mines', 'Projects', 'getMineUserEntities']
+    @$inject = [
+      '$routeParams',
+      '$ngSilentLocation',
+      'Mines',
+      'Projects',
+      'getMineUserEntities'
+    ]
 
     showExplorer: false
 
@@ -32,7 +39,8 @@ define (require, exports) ->
 
     tableSort: 'title'
 
-    constructor: (Mines, @Projects, getEntities) ->
+    constructor: (params, @silentLocation, Mines, @Projects, getEntities) ->
+      console.log params
 
       # The kinds of things we can add to projects.
       @templates = []
@@ -52,7 +60,21 @@ define (require, exports) ->
         @templates = templates
         @lists = lists
 
-      @sync()
+      @sync().then =>
+        paramPath = params.pathToHere?.split '/'
+        if paramPath?.length
+          @pathToHere = @createPathFromTitles paramPath
+          @setCurrentProjectFromPath()
+
+    createPathFromTitles: (titles) ->
+      path = []
+      here = @currentProject
+      for t in titles
+        next = L.findWhere here.child_nodes, title: t
+        return path unless next
+        path.push id: next.id, name: t
+        here = next
+      return path
 
     getHref: ({source, item_type, item_id}) ->
       switch item_type
@@ -76,6 +98,7 @@ define (require, exports) ->
     goToRoot: ->
       @pathToHere = []
       @currentProject = @getRoot()
+      @silentLocation.silent '/projects'
 
     getRoot: ->
       _is_empty: (@allProjects.length is 0)
@@ -86,9 +109,16 @@ define (require, exports) ->
     goToPathSegment: (idx) ->
       @pathToHere = @pathToHere.slice 0, (idx + 1)
       @setCurrentProjectFromPath()
+      @updateURL()
+
+    updateURL: ->
+      url = "/projects/#{ (s.name for s in @pathToHere).join '/' }"
+      @silentLocation.silent url
 
     # Fetch the project graph, and then re-select the current project.
-    sync: -> @allProjects = @Projects.all => @setCurrentProjectFromPath()
+    sync: ->
+      @allProjects = @Projects.all => @setCurrentProjectFromPath()
+      @allProjects.$promise
 
     setCurrentProjectFromPath: ->
       here = @getRoot()
@@ -112,6 +142,7 @@ define (require, exports) ->
       @pathToHere = @pathToHere.concat [{id: project.id, name: project.title}]
       @currentProject = project
       @currentProject._is_empty = @isEmptyProject project
+      @updateURL()
 
     updateProject: (project) ->
       # Only send the project info we are updating.

@@ -128,6 +128,7 @@
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
       (GET "/projects" [] (serve-index))
+      (GET ["/projects/:path" :path #".+"] [] (serve-index))
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
