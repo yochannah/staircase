@@ -5,7 +5,7 @@
         staircase.helpers
         ring.util.response)
   (:require
-            [clojure.tools.logging :refer (info)]
+            [clojure.tools.logging :refer (info debug)]
             [devlin.table-utils :refer (full-outer-join)]
             [clj-http.client :as client]
     ))
@@ -15,7 +15,7 @@
   (let [http-conf {:as :json :throw-exceptions false}
         token-coords [:body :token]
         session-url  (str (:root service) "/session")]
-    (info "Registering for" service session-url)
+    (debug "Registering for" service session-url)
     (-> session-url
         (client/get http-conf)
         (get-in token-coords))))
