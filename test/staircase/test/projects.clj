@@ -283,7 +283,7 @@
       normalise
       (assoc :last_accessed 4)))
 
-(deftest writing-nested-projects
+(deftest ^:database writing-nested-projects
   (binding [staircase.resources/context {:user "nil@nil"}]
     (let [projects (get-projects)
           folder-a (create projects {:title "root"})
@@ -305,4 +305,33 @@
         (is (= true (exists? projects folder-b)) "The sub folder exists")
         (is (= expected-nested-projects-b       (normalise (get-one projects folder-b)))))
       )))
+
+(deftest ^:database project-title-constraints
+  (binding [staircase.resources/context {:user "nil@nil"}]
+    (let [projects (get-projects)]
+      (is (not (nil? (create projects {:title "name without slashes"}))) "Slashless names are fine")
+      (is (thrown-with-msg? org.postgresql.util.PSQLException #"projects_title_sluggish"
+                            (create projects {:title "name/with/slashes"}))))))
+
+(deftest ^:database project-loop-constraints
+  (binding [staircase.resources/context {:user "nil@nil"}]
+    (let [projects (get-projects)
+          proj-id  (create projects {})
+          updated  (update projects proj-id {:parent_id proj-id})]
+      (is (nil? (:parent_id updated))))))
+
+(deftest ^:database identically-named-projects
+  (binding [staircase.resources/context {:user "nil@nil"}]
+    (let [foo      {:title "foo" :type "Project"}
+          projects (get-projects)
+          folder-a (create projects {:title "a"})
+          folder-b (create projects {:title "b"})
+          folder-foo (create projects foo)
+          folder-foo-a (add-child projects folder-a foo)
+          folder-foo-b (add-child projects folder-b foo)]
+      (is (= 3 (count #{folder-foo folder-foo-a folder-foo-b})))
+      (is (thrown? org.postgresql.util.PSQLException #"projects_owner_title_parent_id"
+                   (add-child projects folder-a foo)))
+      (is (thrown? org.postgresql.util.PSQLException #"projects_owner_title_parent_id"
+                   (create projects foo))))))
 
