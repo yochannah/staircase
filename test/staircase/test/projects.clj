@@ -310,8 +310,13 @@
   (binding [staircase.resources/context {:user "nil@nil"}]
     (let [projects (get-projects)]
       (is (not (nil? (create projects {:title "name without slashes"}))) "Slashless names are fine")
-      (is (thrown-with-msg? org.postgresql.util.PSQLException #"projects_title_sluggish"
-                            (create projects {:title "name/with/slashes"}))))))
+      (is (= {:type :constraint-violation
+              :constraint "projects_title_sluggish"}
+             (try
+               (create projects {:title "name/with/slashes"})
+               :no-exception-thrown!
+               (catch clojure.lang.ExceptionInfo e
+                 (ex-data e))))))))
 
 (deftest ^:database project-loop-constraints
   (binding [staircase.resources/context {:user "nil@nil"}]

@@ -184,6 +184,16 @@
 
 (defn- project-table [config]
   [:div
+
+   [:div.alert.alert-danger
+    {:ng-show "appView.error"}
+    [:button.close
+     {:ng-click "appView.error = null"
+      :type "button"}
+     [:span "&times;"]]
+    [:strong "Error: {{appView.error.type}}"]
+    [:p "{{appView.error.summary}}"]]
+
    (navbar config)
    breadcrumbs
    [:table.table.table-hover.project-table

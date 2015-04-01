@@ -86,7 +86,13 @@
                    (select-keys ["description" "parent_id"])
                    (update-in ["parent_id"] string->uuid)
                    (assoc "owner" owner "title" title))]
-    (first (sql/insert! db :projects values))))
+    (try
+      (first (sql/insert! db :projects values))
+      (catch org.postgresql.util.PSQLException e
+        (if-let [[m con-name] (re-find #"violates check constraint \"(\w+)\"" (.getMessage e))]
+          (throw (ex-info m {:type :constraint-violation
+                             :constraint con-name}))
+          (throw e))))))
 
 (defmulti add-content
   "Add an item of content to a project, dispatching on the content's type"

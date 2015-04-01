@@ -10,5 +10,8 @@
               :projects.empty-folder "Empty Folder"
               :projects.create-folder-to-begin "Please begin by creating a folder."
               }
+    :exceptions {
+      {:type :constraint-violation :constraint "projects_title_sluggish"}
+      "Project titles must not have slashes in them"}
 }
 
