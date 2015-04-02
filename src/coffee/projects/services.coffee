@@ -33,19 +33,25 @@ define (require) ->
 
     mergeArrays = (a, b) -> a.concat(b) if L.isArray a
     reduceFn = (m, es) -> L.merge m, es, mergeArrays
+    # Never fail - always return an empty list - this prevents failing to
+    # return any entities when only one service is down/unreliable.
+    recover = (err) -> Q.when errors: [err]
+    mergeEntitySets = (entitySets) ->
+      L.reduce entitySets, reduceFn, {errors: [], lists: [], templates: []}
 
     return getMineUserEntities = -> Mines.all().then (mines) ->
       promises = mines.map (amine) ->
         service = imjs.Service.connect amine
 
-        getLists = service.fetchLists().then (lists) -> L.map lists, (list) ->
+        handleLists = (lists) -> lists: L.map lists, (list) ->
           asEntity amine, 'List', list.name, list
-        getTemplates = service.fetchTemplates().then (ts) -> L.map ts, (t) ->
+        handleTemplates =  (ts) -> templates: L.map ts, (t) ->
           asEntity amine, 'Template', t.name, t
 
-        Q.all([getLists, getTemplates]).then ([lists, templates]) ->
-          {lists, templates}
+        getLists = service.fetchLists().then handleLists, recover
+        getTemplates = service.fetchTemplates().then handleTemplates, recover
+
+        Q.all([getLists, getTemplates]).then mergeEntitySets
 
       # Return a promise for a single combined entity set.
-      Q.all(promises).then (entitySets) ->
-        L.reduce entitySets, reduceFn, {lists: [], templates: []}
+      Q.all(promises).then mergeEntitySets
