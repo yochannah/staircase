@@ -141,8 +141,9 @@
 (def subproject-rows ^:private
   [:tr ;; The branch nodes, ie. the sub-projects
    {:ng-repeat "project in appView.currentProject.child_nodes | orderBy:appView.tableSort"
-    :dropzone "project"
-    :on-drop "appView.dropped(dragged, project)"}
+    :im-dropzone "project"
+    ; :onDrop "alert('test')"}
+    :im-drop-action "appView.dropped(dragged, project)"}
 
    ;; Editable and clickable folder title
    [:td [:i.fa.fa-folder
@@ -198,8 +199,8 @@
    breadcrumbs
    [:table.table.table-hover.project-table
     {:ng-hide "!auth.loggedIn"
-     :dropzone "appView.currentProject"
-     :on-drop "appView.dropped(dragged, appView.currentProject)"}
+     :im-dropzone "appView.currentProject"
+     :im-drop-action "appView.dropped(dragged, appView.currentProject)"}
 
     project-table-head
 

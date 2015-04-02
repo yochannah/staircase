@@ -62,11 +62,11 @@ define (require) ->
         angular.element(element).removeClass "disabled"
         $rootScope.$emit "IM-DRAG-END"
 
-  Directives.directive 'dropzone', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
+  Directives.directive 'imDropzone', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
     restrict: 'A'
     scope:
-      onDrop: '&'
-      dropzone: "="
+      imDropAction: '&'
+      imDropzone: "="
     link: (scope, el, attrs) ->
 
       counter = 0
@@ -78,8 +78,15 @@ define (require) ->
         id = uuid.random()
         el.attr("id", id)
 
+      el.bind 'drop', (e) ->
+        el.removeClass('im-drag-over')
+        e.stopPropagation()
+        # The item that was dragged onto me.
+        data = e.dataTransfer.getData('item')
+        scope.imDropAction({dragged: data, dropzone: scope.dropzone})
+
       el.bind 'dragover', (e) ->
-        e.stopPropagation
+        e.preventDefault()
         e.dataTransfer.dropEffect = 'copy'
         return false
 
@@ -94,13 +101,7 @@ define (require) ->
           el.removeClass('im-drag-over')
           el.addClass('im-drag-target')
 
-      el.bind 'drop', (e) ->
-        console.log "DROP", e
-        el.removeClass('im-drag-over')
-        e.stopPropagation()
-        # The item that was dragged onto me.
-        data = e.dataTransfer.getData('item')
-        scope.onDrop({dragged: data, dropzone: scope.dropzone})
+
 
       $rootScope.$on 'IM-DRAG-START', ->
         counter = 0
