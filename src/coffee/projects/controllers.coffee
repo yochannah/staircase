@@ -158,7 +158,6 @@ define (require, exports) ->
     dropped: (pkg, dest) ->
       pkg = JSON.parse pkg if L.isString pkg
       dest = JSON.parse dest if L.isString dest
-      console.log "DROP", pkg, dest
       return unless dest.type is 'Project'
       @addItem pkg, dest.id
     
