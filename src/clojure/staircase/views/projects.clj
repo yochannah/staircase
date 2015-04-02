@@ -142,7 +142,6 @@
   [:tr ;; The branch nodes, ie. the sub-projects
    {:ng-repeat "project in appView.currentProject.child_nodes | orderBy:appView.tableSort"
     :im-dropzone "project"
-    ; :onDrop "alert('test')"}
     :im-drop-action "appView.dropped(dragged, project)"}
 
    ;; Editable and clickable folder title
