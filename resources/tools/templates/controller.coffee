@@ -76,11 +76,6 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
               getName.then setName p
 
 
-  injectables = [
-    '$scope', '$log', '$timeout', '$q', '$filter', '$location',
-    'connect', 'ClassUtils'
-  ]
-
   validPath = (model, path) ->
     try
       model.makePath path
@@ -115,6 +110,11 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
     if templates and model then (t for t in templates when f t) else []
 
   class TemplatesList
+
+    @$inject = [
+      '$scope', '$log', '$timeout', '$q', '$filter', '$location',
+      'connect', 'ClassUtils'
+    ]
 
     toggleSelected: (template) ->
       if template.title is @template?.title
@@ -164,5 +164,5 @@ define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
       scope.$watch 'serviceName', (name) ->
         scope.tool.heading += " in #{ name }" if name
 
-  return Array injectables..., TemplatesList
+  return TemplatesList
 
