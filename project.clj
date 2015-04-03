@@ -66,6 +66,7 @@
                    :all (constantly true)
                    :database :database
                    :api :api
+                   :projects :projects
                    :default (complement :acceptance)}
   :env {
       :asset-js-engine :v8

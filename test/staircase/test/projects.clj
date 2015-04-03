@@ -67,6 +67,7 @@
 (def expected-tree
   {
    :id 0
+   :parent_id nil
    :title "Root"
    :type "Project"
    :item_count 12
@@ -115,7 +116,7 @@
 (defn get-projects []
   (new-projects-resource @db))
 
-(deftest treeification
+(deftest ^:projects treeification
   (let [no-trees (make-trees [] [])]
     (is (= [] no-trees))) ;; No leaves and no branches means no trees.
   (let [trees (make-trees dummy-branches dummy-leaves)
@@ -123,7 +124,7 @@
     (is (= 1 (count trees)) "We only make one tree")
     (is (= expected-tree tree) "Which has the right form")))
 
-(deftest write-to-projects
+(deftest ^:database write-to-projects
   (binding [staircase.resources/context {:user "nil@nil"}]
     (let [projects (get-projects)
           folder-id (create projects {:title "Test project"})
@@ -159,7 +160,7 @@
           (is (= 1 (count (:child_nodes updated-proj))))))
       )))
 
-(deftest project-default-values
+(deftest ^:database project-default-values
   (binding [staircase.resources/context {:user "nil@nil"}]
     (let [projects (get-projects)
           folder-id-a (create projects {})
@@ -185,9 +186,16 @@
       (update-in [:created_at] normed-times)
       (update-in [:last_modified] normed-times)))
 
+(defn norm-parent
+  [node normed-ids]
+  (if-let [pid (:parent_id node)]
+         (assoc node :parent_id (normed-ids pid))
+         node))
+
 (defn normalise-node
   [normed-times normed-ids project-graph]
   (-> (update-id normed-ids project-graph)
+      (norm-parent normed-ids)
       (update-in [:created_at]    normed-times)
       (update-in [:last_accessed] normed-times)
       (update-in [:last_modified] normed-times)
@@ -211,7 +219,7 @@
 (defn ids-in-graph
   "Get all the ids mentioned in the graph"
   [graph]
-  (concat [(:id graph)]
+  (concat ((juxt :id :parent_id) graph)
           (mapcat ids-in-graph (:child_nodes graph))
           (map :id (:contents graph))))
 
@@ -228,6 +236,7 @@
   {
    :type "Project",
    :id 0,
+   :parent_id nil ;; top-level project.
    :title "root",
    :description nil,
    :created_at 0,
@@ -238,7 +247,7 @@
    :child_nodes
    [{
      :type "Project",
-     :id 1,
+     :id 2,
      :title "sub folder",
      :description nil,
      :created_at 1,
@@ -252,13 +261,13 @@
                  :created_at 2
                  :item_type "thing"
                  :item_id "thangy"
-                 :id 4}],
+                 :id 7}],
      :child_nodes
      [{
        :type "Project",
        :title "sub sub folder",
        :description nil,
-       :id 2,
+       :id 4,
        :created_at 3,
        :last_accessed 3,
        :last_modified 4,
@@ -271,7 +280,7 @@
          :created_at 4
          :item_type "thing",
          :item_id "thingy",
-         :id 3}]
+         :id 6}]
        }]
      }]})
 
@@ -281,7 +290,7 @@
 (def expected-nested-projects-b ;; Need to re-normalise due to the re-rooting.
   (-> (get-in expected-nested-projects [:child_nodes 0])
       normalise
-      (assoc :last_accessed 4)))
+      (assoc :last_accessed 4 :parent_id 1)))
 
 (deftest ^:database writing-nested-projects
   (binding [staircase.resources/context {:user "nil@nil"}]

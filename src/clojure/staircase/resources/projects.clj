@@ -32,21 +32,25 @@
        item
        (first (find-item db project (:user res/context) item))))
 
+(def tree-type "Project") ;; We call the things here "Projects"
+
 ;; Takes two maps and a root node (also a map), recursively
 ;; builds up the nested folder structure.
+;; Elements that are not needed publicly are removed (eg: parent/project ids)
 (defn treeify [branches leaves parent]
-  (let [pid (:id parent)
-        contents (map #(dissoc % :project_id) (get leaves pid)) ;; Not needed publicly.
-        child-nodes (->> (get branches pid)
-                         (map (partial treeify branches leaves)))]
-    (-> parent
-        (dissoc :parent_id) ;; not needed publicly - remove.
-        (assoc
-           ;; Transitive item count.
-           :item_count (+ (count contents) (reduce + (map :item_count child-nodes)))
-           :child_nodes (vec child-nodes) ;; The treeified child nodes
-           :contents (vec contents) ;; The leaves as they are.
-           :type "Project"))))
+  "Construct a nested project from its flattened representation"
+  (let [process (fn [m f] (->> (:id parent) (get m) (map f) vec))
+        contents (process leaves #(dissoc % :project_id)) ;; Not needed publicly.
+        child-nodes (process branches
+                             (comp
+                               #(dissoc % :parent_id) ;; They obviously belong to this node.
+                               (partial treeify branches leaves)))
+        item-count (apply + (count contents) (map :item_count child-nodes))]
+    (assoc parent
+           :item_count item-count ;; The number of items in this node and all sub-nodes.
+           :child_nodes child-nodes ;; The treeified child nodes
+           :contents contents ;; The processed leaves
+           :type tree-type)))
 
 ;; Finds the roots (branches without parents), and then
 ;; tree-ifies them.
