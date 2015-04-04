@@ -16,9 +16,7 @@
 (defn precompile
   "Generate compiled versions of the assets, storing them as they would be accessed."
   []
-  (let [compiled (for [f (all-assets)]
-                   (do (debug "Compiling" (.getPath f))
-                       (compile-asset f)))]
+  (let [compiled (doall (mapcat compile-asset (all-assets)))]
     (info "Success: compiled" (count compiled) "assets")))
 
 (defn clean
@@ -44,17 +42,34 @@
                (not (.exists parent)))
       (.mkdirs parent))))
 
+(defn- created-after
+  "True if file exists and was created after the given time"
+  [mod-time path]
+  (let [f (io/file path)]
+    (and (.exists f)
+         (< mod-time (.lastModified f)))))
+
+(defn- needs-compiling
+  "Return true if the file needs to be generated"
+  [file]
+  (let [mod-time (.lastModified file)]
+    (not-any? (partial created-after mod-time)
+              (possibly-generated-from file))))
+
 (defn- compile-asset
   "Compile an asset, returning the name of the generated file."
   [f]
-  (let [resp (assets/generate-response f)
-        content (:body resp)
-        new-ext (ext-for (get-in resp content-type))
-        new-name (with-new-ext new-ext f)]
-    (ensure-directory-exists new-name)
-    (spit new-name content)
-    (info "Wrote" new-name)
-    new-name)) ;; return the name we wrote the asset to.
+  (when (needs-compiling f)
+    (debug "Compiling" (.getPath f))
+    (let [resp (assets/generate-response f)
+          content (:body resp)
+          new-ext (ext-for (get-in resp content-type))
+          new-name (with-new-ext new-ext f)]
+      (ensure-directory-exists new-name)
+      (spit new-name content)
+      (info "Created" new-name)
+      [new-name]))) ;; return the name we wrote the asset to, if we wrote it.
+                    ;; Return a seq so we can mapcat to count number created.
 
 (def ^:private extensions #{"coffee" "less" "ls"})
 
