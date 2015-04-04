@@ -212,7 +212,7 @@
   (if audience (conj friendly-hosts (re-pattern audience)) friendly-hosts))
 
 (defrecord Router [session-store
-                   asset-pipeline
+                   middlewares
                    config
                    secrets
                    resources
@@ -235,7 +235,7 @@
                           (friend/authenticate auth-conf)
                           (wrap-session {:store session-store})
                           (wrap-cookies)
-                          asset-pipeline
+                          ((apply comp identity middlewares))
                           pm/wrap-persona-resources))
           app (-> handler
                   (wrap-restful-format :formats [:json :edn])
@@ -245,4 +245,7 @@
 
   (stop [this] this))
 
-(defn new-router [] (map->Router {}))
+(defn new-router
+  "Create a new router"
+  []
+  (map->Router {:middlewares []}))

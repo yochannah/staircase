@@ -2,7 +2,7 @@
   :description "The application holding data-flow steps."
   :url "http://steps.herokuapp.org"
   :main staircase.main
-  :aot [staircase.main]
+  :uberjar-name "staircase-standalone.jar"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.2.6"] ;; Logging
                  [org.clojure/tools.reader "0.8.4"] ;; Read edn
@@ -33,10 +33,6 @@
                  [environ "0.4.0"] ;; Settings management.
                  [cheshire "4.0.3"];; JSON serialisation
                  [clj-jgit "0.6.5-d"] ;; Git interface.
-                 [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                 [org.clojars.involans/dieter "0.5.0-SNAPSHOT"
-                    :exclusions [com.google.javascript/closure-compiler]]
-                 [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
                  [jdbc-ring-session "0.2"]
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
@@ -45,17 +41,18 @@
                  [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
+  :hooks [leiningen.compile-assets/hooks]
   :plugins [[lein-bower "0.4.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
-  :ring {:handler staircase.app/handler}
   :prep-tasks ["javac" "compile" "clean-tools" "load-tools"]
   :source-paths ["src/clojure"]
   :resource-paths ["resources" "external"]
   :aliases {
+            "run:dev" ["run" "-m" "staircase.dev-app/start"]
             "run-query" ["run" "-m" "staircase.tasks/run-query"]
             "clean-db" ["run" "-m" "staircase.tasks/clean-db"]
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]

@@ -20,7 +20,7 @@
   (let [port (or port 3000)]
     (stop-server port)
     (swap! servers
-           assoc port (run-server app/handler {:port port}))
+           assoc port (run-server (app/handler) {:port port}))
     (info "Started staircase server on port" port)))
 
 ;; Start a web-server

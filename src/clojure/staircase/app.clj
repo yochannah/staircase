@@ -12,16 +12,17 @@
         [staircase.resources.histories :only (new-history-resource)]
         [staircase.resources.steps :only (new-steps-resource)]
         [staircase.resources.projects :only (new-projects-resource)])
-  (:require [staircase.assets :as assets]
-            [staircase.handler :as routing]
+  (:require [staircase.handler :as routing]
             [com.stuartsierra.component :as component]
             [staircase.sessions :as sessions]
             [staircase.data :as data]))
 
 (declare system)
 
-(defn handler [req]
-  ((get-in @system [:router :handler]) req))
+(defn handler
+  "Get a ring handler"
+  []
+  (get-in (system) [:router :handler]))
 
 (def resource-manager
   (new-resource-manager
@@ -31,19 +32,9 @@
      :projects  new-projects-resource}))
 
 (def dependency-graph
-  {:router        [:config :secrets :session-store :resources :asset-pipeline]
+  {:router        [:config :secrets :session-store :resources]
    :session-store [:db :config]
    :resources     [:db]})
-
-(defn get-asset-pipeline [options]
-  (assets/pipeline :js-dir "/js"
-                   :css-dir "/css"
-                   :engine (:asset-js-engine options)
-                   :max-age (:web-max-age options)
-                   :as-resource "tools"
-                   :coffee "src/coffee"
-                   :ls     "src/ls"
-                   :less   "src/less"))
 
 (defn get-config [options]
   (atom (assoc (app-options options) ;; Allow config to change at run-time by atomising it.
@@ -55,26 +46,22 @@
 ;; basic map from keyword => config value..
 (defn build-app [options]
   ;; Ensure our system is shutdown when the VM does.
-  (. (Runtime/getRuntime)
-     (addShutdownHook (Thread. (fn [] (component/stop @system)))))
-  ;; Return a started system.
-  (component/start
-    (-> (component/system-map
-          :asset-pipeline (get-asset-pipeline options)
-          :config (get-config options)
-          :db (data/new-pooled-db (db-options options))
-          :resources resource-manager
-          :router (routing/new-router)
-          :secrets (secrets options)
-          :session-store (sessions/new-pg-session-store))
-        (component/system-using dependency-graph))))
+  (debug "System settings:" options)
+  (let [sys (-> (component/system-map
+                  :config (get-config options)
+                  :db (data/new-pooled-db (db-options options))
+                  :resources resource-manager
+                  :router (routing/new-router)
+                  :secrets (secrets options)
+                  :session-store (sessions/new-pg-session-store))
+                (component/system-using dependency-graph))]
+    (. (Runtime/getRuntime) ;; Ensure we stop this system.
+       (addShutdownHook (Thread. (fn [] (component/stop sys)))))
+    sys))
 
-;; Todo - should be possible to have multiple instances.
-;; We delay building the system so that we can start faster.
-;; The downside is a slower initial response time.
-(def system
-  (delay
-    (info "Building system")
-    (debug "System settings:" env)
-    (build-app env)))
+(defn system
+  "Create an application"
+  []
+  (info "Building system")
+  (component/start (build-app env)))
 
