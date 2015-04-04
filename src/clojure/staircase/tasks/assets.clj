@@ -35,6 +35,15 @@
 
 ;; Private functions and vars.
 
+(defn- ensure-directory-exists
+  "Make sure that the parent directory exists for a file."
+  [path]
+  (let [f (io/file path)
+        parent (.getParentFile f)]
+    (when (and parent ;; nil if root.
+               (not (.exists parent)))
+      (.mkdirs parent))))
+
 (defn- compile-asset
   "Compile an asset, returning the name of the generated file."
   [f]
@@ -42,6 +51,7 @@
         content (:body resp)
         new-ext (ext-for (get-in resp content-type))
         new-name (with-new-ext new-ext f)]
+    (ensure-directory-exists new-name)
     (spit new-name content)
     (info "Wrote" new-name)
     new-name)) ;; return the name we wrote the asset to.
@@ -77,6 +87,8 @@
   "Get the new filename for this file with the extension changed"
   [ext f]
   (-> (.getPath f)
+      (s/replace #"^src/coffee" "resources/public/js") ;; assets from src go to resources.
+      (s/replace #"^src/less" "resources/public/css")
       (s/replace #"\.\w+$" (str "." ext))))
 
 (def ^:private roots ;; The starting points to look for assets.
