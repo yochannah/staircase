@@ -171,18 +171,23 @@
     (when-let [last-seen (ring-time/parse-date mod-since)]
       (.after last-seen (get-modification-time file)))))
 
-(defn pipeline [& {:keys [strategy] :as options}]
-  "Take options and return a function that will wrap a ring handler in
-  an assets pipeline. Routes served by the handler take precedence. Requests
-  that produce 404 or nil will then be processed as asset-requests."
-
-  (letfn [(serve [req] (settings/with-options options
+(defn serve
+  "Handle a request, given a set of options"
+  [options req]
+  (settings/with-options options
     (when (is-asset-req req)
       (when-let [asset-file (asset-file-for req options)]
         (if (asset-not-modified-since? req asset-file)
           {:status 304 :body ""}
           (serve-asset asset-file options
-                       (get-in req [:headers "if-none-match"])))))))]
+                       (get-in req [:headers "if-none-match"])))))))
+
+(defn pipeline [& {:keys [strategy] :as options}]
+  "Take options and return a function that will wrap a ring handler in
+  an assets pipeline. Routes served by the handler take precedence. Requests
+  that produce 404 or nil will then be processed as asset-requests."
+
+  (let [serve-asset (partial serve options)]
     (case strategy
 
       :prefer-compiled
@@ -190,13 +195,13 @@
         (fn [req]
           (let [response (handler req)]
             (if (or (nil? response) (= 404 (:status response)))
-              (or (serve req) response {:status 404})
+              (or (serve-asset req) response {:status 404})
               response))))
 
       (fn [handler] ;; Tries to find assets first. Prefers live updates.
         (fn [req]
           (or
-            (serve req)
+            (serve-asset req)
             (handler req)
             {:status 404}))))))
 
