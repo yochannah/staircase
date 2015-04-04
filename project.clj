@@ -61,6 +61,8 @@
             "js-deps" ["run" "-m" "staircase.tasks/js-deps"]
             "clean-js" ["run" "-m" "staircase.tasks/clean-js"]
             "load-tools" ["run" "-m" "staircase.tasks/load-tools"]
+            "assets:precompile" ["run" "-m" "staircase.tasks.assets/precompile"]
+            "assets:clean" ["run" "-m" "staircase.tasks.assets/clean"]
             "clean-tools" ["run" "-m" "staircase.tasks/clean-tools"]}
   :test-selectors {
                    :all (constantly true)
