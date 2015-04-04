@@ -1,15 +1,9 @@
 {
  :uberjar {
-           :source-paths ["dev/clojure"]
-           :dependencies [
-                     [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                     [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
-                     [org.clojars.involans/dieter "0.5.0-SNAPSHOT"
-                        :exclusions [com.google.javascript/closure-compiler]]]
-           :aot [staircase.main]}
+    :aot [staircase.main]}
  :dev {
-      :ring {
-         :handler staircase.dev-app/handler}
+      :hooks [leiningen.compile-assets/hooks]
+      :ring {:handler staircase.dev-app/handler}
       :source-paths ["dev/clojure"]
       :dependencies [[peridot "0.2.2"]
                      [org.marianoguerra/clj-rhino "0.2.1"]
@@ -19,7 +13,7 @@
                         :exclusions [com.google.javascript/closure-compiler]]
                      [ring-mock "0.1.5"]]
       :env {
-            :live-asset-reload true
+            :dev true ;; So we know if we are in the dev environment.
             :web-search-placeholder "zen, diabetes, apoptosis"
             :web-project-title "FlyMine"
             :web-contact-email "alex@intermine.org"
