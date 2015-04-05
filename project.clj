@@ -42,10 +42,16 @@
                  [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
-  :plugins [[lein-bower "0.4.0"]
+  :plugins [
+            [funcool/codeina "0.1.0-SNAPSHOT"
+                        :exclusions [org.clojure/clojure]]
+            [lein-bower "0.4.0"]
             [lein-environ "0.4.0"]
             [lein-pprint "1.1.1"]
             [lein-ring "0.8.10"]]
+  :codeina {:sources ["src/clojure"]
+            :output-dir "doc"
+            :language :clojure}
   :lesscss-paths ["src/less"]
   :lesscss-output-path "resources/public/css"
   :prep-tasks ["javac" "compile" "clean-tools" "load-tools"]
