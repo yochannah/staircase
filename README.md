@@ -3,7 +3,10 @@
 [![Build Status][travis-badge]][ci]
 
 The webapp that serves the step-based data-flow interface to the
-[InterMine](http://www.intermine.org) system.
+[InterMine](http://www.intermine.org) system. You can view a running
+version on [Heroku][http://staircase.herokuapp.com] and see the
+documentation
+[here][http://alexkalderimis.github.io/staircase/latest/index.html].
 
 ## Quick Start
 
