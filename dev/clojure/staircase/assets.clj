@@ -205,3 +205,15 @@
             (handler req)
             {:status 404}))))))
 
+(defn default-pipeline
+  "Construct a pipeline with the default values"
+  [options]
+  (pipeline :js-dir "/js"
+            :css-dir "/css"
+            :engine (:asset-js-engine options)
+            :max-age (:web-max-age options)
+            :as-resource "tools"
+            :coffee "src/coffee"
+            :ls     "src/ls"
+            :less   "src/less"))
+

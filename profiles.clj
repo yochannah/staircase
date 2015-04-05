@@ -3,7 +3,6 @@
     :aot [staircase.main]}
  :dev {
       :hooks [leiningen.compile-assets/hooks]
-      :ring {:handler staircase.dev-app/handler}
       :source-paths ["dev/clojure"]
       :dependencies [[peridot "0.2.2"]
                      [org.marianoguerra/clj-rhino "0.2.1"]

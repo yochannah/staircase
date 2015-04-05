@@ -19,10 +19,17 @@
 
 (declare system)
 
-(defn handler
-  "Get a ring handler"
+(defn new-handler
   []
   (get-in (system) [:router :handler]))
+
+(def ^:private handler*
+  (delay (new-handler)))
+
+(defn handler
+  "Ring handler"
+  [req]
+  (@handler* req))
 
 (def resource-manager
   (new-resource-manager
@@ -59,9 +66,20 @@
        (addShutdownHook (Thread. (fn [] (component/stop sys)))))
     sys))
 
+(defn- middlewares
+  [opts]
+  (when (:dev opts)
+    (info "Installing development middleware")
+    (require 'staircase.assets)
+    (let [f (resolve 'staircase.assets/default-pipeline)
+          assets (f opts)]
+      [assets])))
+
 (defn system
   "Create an application"
   []
   (info "Building system")
-  (component/start (build-app env)))
-
+  (-> (build-app env)
+      (update-in [:router :middlewares]
+                 concat (middlewares env))
+      (component/start)))
