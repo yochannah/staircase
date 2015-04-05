@@ -1,2 +1,0 @@
-lein with-profile dev assets:precompile
-lein uberjar
