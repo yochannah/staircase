@@ -1,4 +1,4 @@
-define ['angular', 'lodash', 'app', 'imjs'], (ng, L, app, {Service}) ->
+define ['angular', 'lodash', 'app'], (ng, L, app) ->
 
   app.filters.register 'templateTitle', getTemplateTitle = -> ({title}) ->
     title.replace(/-->/g, '\u21E8').replace(/<--/g, '\u21E6')
