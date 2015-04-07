@@ -8,6 +8,7 @@
      (require '[clojure.tools.logging :refer (info)])
      (require '[staircase.tasks.assets :as assets])
      (info "Precompiling assets...")
+     (assets/clean)
      (assets/precompile)))
 
 (defn precompile-assets [f & [project :as args]]
