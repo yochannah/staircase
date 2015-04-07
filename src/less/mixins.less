@@ -9,8 +9,11 @@
 
 .tones(@n, @m) when (@m > 0) {
     &.palette-@{n}tone@{m} {
-        background-color: ~"@{@{n}tone@{m}}";
-    //    color: spin(~"@{@{n}tone@{m}}", 180);
+        @bgvar: "@{n}tone@{m}";
+        background-color: @@bgvar;
+        &.disabled {
+            background-color: fade(@@bgvar, 30%);
+        }
     }
     .tones(@n, @m - 1);
 }

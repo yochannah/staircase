@@ -123,15 +123,17 @@
         (h req)))))
 
 (defn- build-app-routes [{conf :config :as app}]
-  (let [serve-index #(views/index @conf)]
+  (let [serve-index #(views/index @conf)
+        greedy #".+"]
     (routes 
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
       (GET "/projects" [] (serve-index))
-      (GET ["/projects/:path" :path #".+"] [] (serve-index))
+      (GET ["/projects/:path" :path greedy] [] (serve-index))
       (GET "/history/:id/:idx" [] (serve-index))
       (GET "/starting-point/:tool" [] (serve-index))
       (GET "/starting-point/:tool/:service" [] (serve-index))
+      (GET ["/starting-point/:tool/:service/:args" :args greedy] [] (serve-index))
       (GET "/tools" [capabilities] (response (get-tools @conf capabilities)))
       (GET "/tools/:id" [id] (if-let [tool (get-tool @conf id)]
                               (response tool)

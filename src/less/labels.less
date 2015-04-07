@@ -26,6 +26,17 @@
 }
 
 .badge {
+    &.disabled {
+        background-color: fadeout(@badge-bg, 50%);
+    }
     .tones(5);
 }
 
+.badge-box {
+    padding-top: 1em;
+    padding-left: 1em;
+    .badge {
+        margin-right: 1em;
+        margin-bottom: 1em;
+    }
+}

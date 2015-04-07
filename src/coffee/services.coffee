@@ -123,11 +123,20 @@ define (require, exports, module) ->
   Services.factory 'createConnection', Array 'imjs', ({Service}) -> (conf) ->
     s = Service.connect conf
     s.name = conf.name
+    s.meta = conf.meta
     return s
 
   # Provide a function for connecting to a mine by URL.
   Services.factory 'connectTo', Array 'createConnection', 'Mines', (createConnection, mines) -> (root) ->
     mines.atURL(root).then createConnection
+
+  # () -> Promise<Object<imjs.Service>>
+  # Promises to return a mapping from service name to connection.
+  Services.factory 'connectToAll', Array 'createConnection', 'Mines', (connectTo, Mines) -> ->
+    Mines.all().then (mines) ->
+      services = (connectTo m for m in mines)
+      # Make services available by root *or* name
+      L.merge (L.indexBy services, 'name'), (L.indexBy services, 'root')
 
   # Connect to a mine by name
   Services.factory 'connect', Array 'createConnection', 'Mines', (createConnection, Mines) ->

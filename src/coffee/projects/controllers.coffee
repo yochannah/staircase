@@ -79,7 +79,9 @@ define (require, exports) ->
     getHref: ({source, item_type, item_id}) ->
       switch item_type
         when 'List'
-          "starting-point/choose-list/#{ source }?name=#{ item_id }"
+          "/starting-point/choose-list/#{ source }?name=#{ item_id }"
+        when 'Template'
+          "/starting-point/templates/#{ source }/#{ item_id }"
 
     isEmptyProject: ({child_nodes, contents}) ->
       (not child_nodes?.length) and (not contents?.length)

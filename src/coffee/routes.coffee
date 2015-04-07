@@ -10,6 +10,7 @@ define [], -> (app) ->
     '/projects/:pathToHere*':['ProjectsCtrl',      '/partials/projects.html']
     '/starting-point/:tool': ['StartingPointCtrl', '/partials/starting-point.html']
     '/starting-point/:tool/:service': ['StartingPointCtrl', '/partials/starting-point.html']
+    '/starting-point/:tool/:args*': ['StartingPointCtrl', '/partials/starting-point.html']
 
   # Helper to create a route definition.
   route = (templateUrl, controller) ->

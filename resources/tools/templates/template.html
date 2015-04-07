@@ -10,20 +10,35 @@
     </div>
 </form>
 
+<div class="badge-box">
+    <span class="badge {{c.meta.color}}"
+        ng-repeat="c in connections | values | uniq"
+        ng-click="c.disabled = !c.disabled"
+        ng-class="{disabled: c.disabled}">
+        {{ c.name }}
+        {{ filteredTemplates | fromService:c | count }}
+    </span>
+</div>
+
 <div class="list-group">
     <img class="loading" src="/images/loading.gif" ng-hide="templates">
     <div class="alert alert-info" ng-show="templates && !filteredTemplates.length">
         <p>
             <strong>Sorry</strong>
-            No templates found.
+            No queries found.
         </p>
     </div>
     <div class="list-group-item"
          ng-controller="TemplateListRowController as row"
-         ng-repeat="template in filteredTemplates = (suitableTemplates | filter:templateFilter)"
+         ng-repeat="template in filteredTemplates = (suitableTemplates | filterTemplates:templateFilter:connections | orderBy:'title' )"
          ng-hide="controller.template && (controller.template !== template)">
         <a ng-click="controller.toggleSelected(template)"
             class="list-group-item-heading">
+            <span class="badge"
+                title="{{ template.service.name }}"
+                ng-class="template.service.meta.color">
+                {{ template.service.name | limitTo:1 }}
+            </span>
             {{template | templateTitle}}
         </a>
         <p class="list-group-item-text">{{template.description}}</p>

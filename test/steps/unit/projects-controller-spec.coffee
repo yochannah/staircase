@@ -79,7 +79,15 @@ define ['angularMocks', 'projects/controllers'], (mocks) ->
           source: 'there'
           item_type: 'List'
           item_id: 'that'
-        output = "starting-point/choose-list/there?name=that"
+        output = "/starting-point/choose-list/there?name=that"
+        expect(test.projects.getHref input).toEqual output
+
+      it 'should generate an href for templates', ->
+        input =
+          source: 'there'
+          item_type: 'Template'
+          item_id: 'that'
+        output = "/starting-point/templates/there/that"
         expect(test.projects.getHref input).toEqual output
 
       it 'should not generate an href for anything else', ->
