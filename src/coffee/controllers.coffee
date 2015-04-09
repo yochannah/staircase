@@ -6,9 +6,18 @@ define (require) ->
   require 'angular-cookies'
   require 'services'
   require 'projects'
+  require 'starting-point'
+  require 'facets/controller'
+  require 'auth/controller'
+  require 'quick-search/controller'
 
   Controllers = ng.module('steps.controllers', [
-    'ngCookies', 'steps.services', 'steps.projects.controllers'
+    'ngCookies', 'steps.services',
+    'steps.projects',
+    'steps.starting-point',
+    'steps.facets.controllers',
+    'steps.auth.controllers',
+    'steps.quick-search.controllers'
   ])
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
@@ -26,23 +35,8 @@ define (require) ->
 
   Controllers.controller 'WelcomeCtrl', Array '$scope', (scope) -> scope.showWelcome = true
 
+  # Index does very little just now - but we still need a controller.
   Controllers.controller 'IndexCtrl', ->
-
-  Controllers.controller 'StartingPointCtrl', Array '$scope', '$routeParams', 'historyListener', (scope, params, historyListener) ->
-
-    historyListener.watch scope
-
-    byIdent = ({ident}) -> ident is params.tool
-    if params.service?
-      filter = (sp) -> byIdent(sp) and params.service is sp.args?.service
-    else
-      filter = byIdent
-
-    scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
-      tool = L.find startingPoints, filter
-      if tool
-        scope.tool = Object.create tool
-        scope.tool.state = 'FULL'
 
   Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'historyListener', (http, scope, historyListener) ->
     http.get('/tools', {params: {capabilities: 'initial'}})
@@ -51,28 +45,6 @@ define (require) ->
           scope.tool.expandable = false
 
     historyListener.watch scope
-
-  # Inline controller.
-  Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
-    rs.auth ?= identity: null # TODO: put this somewhere more sensible.
-
-    changeIdentity = (identity) ->
-      scope.auth.identity = identity
-      scope.auth.loggedIn = identity?
-
-    scope.persona = new Persona {changeIdentity, loggedInUser: scope.auth.identity}
-
-  Controllers.controller 'QuickSearchController', Array '$log', '$scope', 'historyListener', (log, scope, {startHistory}) ->
-
-    scope.startQuickSearchHistory = (term) ->
-      startHistory
-        thing: "for #{ term }"
-        verb:
-          ed: "searched"
-          ing: "searching"
-        tool: "keyword-search"
-        data:
-          searchTerm: term
 
   mountController 'StartingPointsController', 'starting-points'
 
@@ -83,6 +55,4 @@ define (require) ->
   mountController 'BrandCtrl', 'brand'
 
   mountController 'NavCtrl', 'brand'
-
-  mountController 'FacetCtrl', 'facets'
 
