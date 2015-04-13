@@ -1,4 +1,10 @@
-define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, ChooseDialogueCtrl) ->
+define (require) ->
+  
+  ng = require 'angular'
+  L = require 'lodash'
+  ga = require 'analytics'
+  require 'services'
+  ChooseDialogueCtrl = require './choose-dialogue'
   
   # Run-time requirements
   injectables = L.pairs
@@ -19,12 +25,6 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
     notify: 'notify'
 
   #--- Functions.
- 
-  # Connect to a service and assign it a name.
-  connectWithName = (conf) ->
-    service = imjs.Service.connect conf
-    service.name = conf.name
-    return service
 
   # Test to see if two strings overlap.
   overlaps = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
@@ -50,9 +50,9 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
     
     conf
 
-  #--- Controller, exported as return value
+  Controllers = ng.module 'steps.history.controllers', ['steps.services']
   
-  class HistoryController
+  Controllers.controller 'HistoryCtrl', class HistoryController
 
     currentCardinal: 0
 
@@ -64,6 +64,8 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
 
       @init()
       @startWatching()
+
+    elide: true
 
     startWatching: ->
       scope = @scope
@@ -154,11 +156,9 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
           if scope.messages[idx]?
             @set ['messages', idx, 'data'], data
           else
-            @mines.then(atURL(data['service:base'] ? data.service.root))
-                  .then(connectWithName)
-                  .then (service) =>
-                    @set ['messages', idx], {tool, data, service, kind: 'msg'}
-                    triggerUpdate()
+            connectTo(data['service:base'] ? data.service.root).then (service) =>
+              @set ['messages', idx], {tool, data, service, kind: 'msg'}
+              triggerUpdate()
         else # delete
           delete scope.messages[idx]
 
@@ -233,4 +233,31 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
             console.debug "Created step #{ appended.id }"
             goTo "/history/#{ history.id }/#{ nextCardinal }"
             ga 'send', 'event', 'history', 'append', step.tool
+
+  Controllers.controller 'HistoryStepCtrl', Array '$scope', '$log', '$modal', (scope, log, modalFactory) ->
+
+    scope.$watch 'appView.elide', ->
+      scope.elide = scope.appView.elide && scope.$middle && (scope.steps.length - scope.$index) > 2
+
+    InputEditCtrl = Array '$scope', '$modalInstance', 'history', 'step', (scope, modal, history, step, index) ->
+
+      scope.data = L.clone step.data, true
+      delete scope.data.service # Not editable
+
+      scope.ok = ->
+        modal.close history.id, index, scope.data
+
+      scope.cancel = ->
+        modal.dismiss 'cancel'
+        scope.data = L.clone step.data, true
+
+    scope.openEditDialogue = ->
+      dialogue = modalFactory.open
+        templateUrl: '/partials/edit-step-data.html'
+        controller: InputEditCtrl
+        size: 'lg'
+        resolve:
+          index: -> scope.$index
+          history: -> scope.history
+          step: -> scope.s
 

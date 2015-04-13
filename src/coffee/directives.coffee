@@ -560,3 +560,17 @@ define (require) ->
       message = attrs.reallyMessage
       if message and confirm(message)
         scope.$apply(attrs.reallyClick)
+
+  Directives.directive 'folded', ->
+    restrict: 'A'
+    scope:
+      folded: '='
+    transclude: true
+    template: """
+      <div ng-hide="folded" ng-transclude></div>
+      <div ng-show="folded">...</div>
+    """
+    link: (scope, element, attrs) -> L.defer ->
+      scope.$watch 'folded', (folded) ->
+        element.toggleClass 'folded-up', folded
+

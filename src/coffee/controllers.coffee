@@ -10,6 +10,7 @@ define (require) ->
   require 'facets/controller'
   require 'auth/controller'
   require 'quick-search/controller'
+  require 'history/controllers'
 
   Controllers = ng.module('steps.controllers', [
     'ngCookies', 'steps.services',
@@ -17,7 +18,8 @@ define (require) ->
     'steps.starting-point',
     'steps.facets.controllers',
     'steps.auth.controllers',
-    'steps.quick-search.controllers'
+    'steps.quick-search.controllers',
+    'steps.history.controllers'
   ])
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
@@ -47,10 +49,6 @@ define (require) ->
     historyListener.watch scope
 
   mountController 'StartingPointsController', 'starting-points'
-
-  mountController 'HistoryStepCtrl', 'history-step'
-
-  mountController 'HistoryCtrl', 'history'
 
   mountController 'BrandCtrl', 'brand'
 
