@@ -237,7 +237,7 @@ define (require) ->
   Controllers.controller 'HistoryStepCtrl', Array '$scope', '$log', '$modal', (scope, log, modalFactory) ->
 
     scope.$watch 'appView.elide', ->
-      scope.elide = scope.appView.elide && scope.$middle && (scope.steps.length - scope.$index) > 2
+      scope.elide = scope.appView.elide && scope.$middle && (scope.steps.length - scope.$index) > 3
 
     InputEditCtrl = Array '$scope', '$modalInstance', 'history', 'step', (scope, modal, history, step, index) ->
 
