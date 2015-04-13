@@ -33,8 +33,10 @@
           :div.panel-body
           [:p [:small [:em "{{history.created_at | roughDate }}"]]]
           (staircase.views.forms/label-input-pair "history.description"))
-    [:div.flex-row.stretched [:a.toggle-elisions {:ng-click "appView.elide = !appView.elide"}
-                              [:small "show all steps"]]]
+   [:div.flex-row.stretched
+    {:ng-if "steps.length > 4"}
+    [:a.toggle-elisions {:ng-click "appView.elide = !appView.elide"}
+     [:small "show all steps"]]]
     [:div.list-group.history-steps
      [:a.list-group-item {:ng-repeat "s in steps"
                           :ng-controller "HistoryStepCtrl as stepCtrl" 
