@@ -2,7 +2,7 @@
   (:require [staircase.views.buttons :as btn]
             [staircase.views.forms :refer (search-form)]
             [hiccup.def :refer (defelem)]
-            [hiccup.element :refer (link-to unordered-list mail-to)]))
+            [hiccup.element :refer (image link-to unordered-list mail-to)]))
 
 (declare nav-list)
 
@@ -31,8 +31,7 @@
         [:span.icon-bar])]
      [:div
       (link-to {:class "navbar-brand"} "/"
-        [:span.app-name (:project-title config)])
-      ]]
+        (image {:alt (:project-title config)} "/images/flattened-helix-right-48px.png"))]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 

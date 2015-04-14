@@ -1,5 +1,7 @@
 define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
 
+  console.log('SHOW LIST CONTROLLER', scope.data)
+
   scope.list = scope.data
 
   scope.activate = ->

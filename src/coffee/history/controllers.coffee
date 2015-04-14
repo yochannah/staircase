@@ -144,6 +144,7 @@ define (require) ->
 
     hasSomething: (what, data, key) ->
       {scope, console, to, Q, mines} = @
+      console.log "Something is available", what, data, key
       if what is 'list'
         return to -> scope.list = data
 
