@@ -86,11 +86,11 @@
      :tool "tool"
      :step "step"
      :state "state"
-     :has-items "controller.setItems(key, type, ids)"
-     :has "controller.hasSomething(what, data, key)"
-     :wants "controller.wantsSomething(what, data)"
-     :next-step "controller.nextStep(data)"
-     :silently "controller.storeHistory(data)"
+     :has-items "appView.setItems(key, type, ids)"
+     :has "appView.hasSomething(what, data, key)"
+     :wants "appView.wantsSomething(what, data)"
+     :next-step "appView.nextStep(data)"
+     :silently "appView.storeHistory(data)"
      :toggle "state.expanded = !state.expanded"} ]])
 
 (defn snippet [config]

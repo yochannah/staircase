@@ -17,6 +17,7 @@ define (require) ->
     console: '$log'
     Q: '$q'
     $modal: '$modal'
+    connectTo: 'connectTo'
     meetRequest: 'meetRequest'
     Histories: 'Histories'
     Mines: 'Mines'
@@ -156,7 +157,7 @@ define (require) ->
           if scope.messages[idx]?
             @set ['messages', idx, 'data'], data
           else
-            connectTo(data['service:base'] ? data.service.root).then (service) =>
+            @connectTo(data['service:base'] ? data.service.root).then (service) =>
               @set ['messages', idx], {tool, data, service, kind: 'msg'}
               triggerUpdate()
         else # delete
