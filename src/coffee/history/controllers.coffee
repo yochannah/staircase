@@ -25,8 +25,6 @@ define (require) ->
     serviceStamp: 'serviceStamp'
     notify: 'notify'
 
-  #--- Functions.
-
   # Test to see if two strings overlap.
   overlaps = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
 
@@ -51,6 +49,12 @@ define (require) ->
     
     conf
 
+  # Decorator to create injecting constructor.
+  inject = (fn) -> (injected...) ->
+    for [name, _], idx in injectables
+      @[name] = injected[idx]
+    fn.call @
+
   Controllers = ng.module 'steps.history.controllers', ['steps.services']
   
   Controllers.controller 'HistoryCtrl', class HistoryController
@@ -59,12 +63,10 @@ define (require) ->
 
     @$inject: (snd for [fst, snd] in injectables)
 
-    constructor: (injected...) ->
-      for [name, _], idx in injectables
-        @[name] = injected[idx]
-
+    constructor: inject ->
       @init()
       @startWatching()
+      console.log @
 
     elide: true
 
