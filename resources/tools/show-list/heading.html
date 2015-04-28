@@ -1,6 +1,6 @@
 <div class="list-group-item show-list" ng-if="list.name">
     <a ng-click="activate()">View {{list.name}}.</a>
 </div>
-<div class="list-group-item show-list" ng-if="data.ids">
+<div class="list-group-item show-list" ng-if="data.ids.length">
     <a ng-click="makeIdList()">Make a list of {{ data.ids.length }} {{ data.type }}s</a>
 </div>

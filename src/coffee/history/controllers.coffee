@@ -118,8 +118,7 @@ define (require) ->
           http.get('/tools/' + tool)
                 .then (({data}) => @scope.tool = data), toolNotFound
           http.get('/tools', params: {capabilities: 'next'})
-              .then ({data}) -> data.filter((t) -> t.ident isnt tool).map toTool
-              .then (tools) => @scope.nextTools = tools
+              .then ({data}) => @scope.nextTools = data.map toTool
       http.get('/tools', params: {capabilities: 'provider'})
           .then ({data}) -> data.map toTool
           .then (providers) => @scope.providers = providers
@@ -146,7 +145,6 @@ define (require) ->
 
     hasSomething: (what, data, key) ->
       {scope, console, to, Q, mines} = @
-      console.log "Something is available", what, data, key
       if what is 'list'
         return to -> scope.list = data
 
