@@ -1,55 +1,85 @@
+;; The purpose of this namespace is to construct the system
+;; from its various parts, wiring them together into a whole.
+;; It is thus the ideal place to declare dependencies and
+;; construct instances of things we need. For details of this
+;; style of doing things, see component and env.
 (ns staircase.app
   (:use [clojure.tools.logging :only (debug info error)]
         [environ.core :only (env)]
         [staircase.config :only (db-options client-options app-options secrets)]
-        staircase.resources.services
-        staircase.resources.histories
-        staircase.resources.steps)
-  (:require [staircase.assets :as assets]
-            [staircase.handler :as routing]
+        [staircase.resources :only (new-resource-manager)]
+        [staircase.resources.services :only (new-services-resource)]
+        [staircase.resources.histories :only (new-history-resource)]
+        [staircase.resources.steps :only (new-steps-resource)]
+        [staircase.resources.projects :only (new-projects-resource)])
+  (:require [staircase.handler :as routing]
             [com.stuartsierra.component :as component]
             [staircase.sessions :as sessions]
             [staircase.data :as data]))
 
 (declare system)
 
+(defn new-handler
+  []
+  (get-in (system) [:router :handler]))
+
+(def ^:private handler*
+  (delay (new-handler)))
+
+(defn handler
+  "Ring handler"
+  [req]
+  (@handler* req))
+
+(def resource-manager
+  (new-resource-manager
+    {:histories new-history-resource
+     :services  new-services-resource
+     :steps     new-steps-resource
+     :projects  new-projects-resource}))
+
+(def dependency-graph
+  {:router        [:config :secrets :session-store :resources]
+   :session-store [:db :config]
+   :resources     [:db]})
+
+(defn get-config [options]
+  (atom (assoc (app-options options) ;; Allow config to change at run-time by atomising it.
+               :client (client-options options))))
+
 ;; Inject dependencies and build up the system.
+;; Usually options are read in from the environment
+;; using a configuration system, but it is just a
+;; basic map from keyword => config value..
 (defn build-app [options]
-  (. (Runtime/getRuntime)
-     (addShutdownHook (Thread. (fn [] (component/stop @system)))))
-  (component/start
-    (let [db (db-options options)]
-      (-> (component/system-map
-            :asset-pipeline (assets/pipeline :js-dir "/js"
-                                             :css-dir "/css"
-                                             :engine :v8
-                                             :max-age (:web-max-age options)
-                                             :as-resource "tools"
-                                             :coffee "src/coffee"
-                                             :ls     "src/ls"
-                                             :less   "src/less")
-            :config (assoc (app-options options)
-                           :client (client-options options))
-            :secrets (secrets options)
-            :session-store (sessions/new-pg-session-store)
-            :db (data/new-pooled-db db)
-            :histories (new-history-resource)
-            :services (new-services-resource)
-            :steps (new-steps-resource)
-            :router (routing/new-router))
-          (component/system-using
-            {:router [:config :secrets :session-store :services :histories :steps :asset-pipeline]
-             :session-store [:db :config]
-             :services [:db]
-             :steps [:db]
-             :histories [:db]})))))
+  ;; Ensure our system is shutdown when the VM does.
+  (debug "System settings:" options)
+  (let [sys (-> (component/system-map
+                  :config (get-config options)
+                  :db (data/new-pooled-db (db-options options))
+                  :resources resource-manager
+                  :router (routing/new-router)
+                  :secrets (secrets options)
+                  :session-store (sessions/new-pg-session-store))
+                (component/system-using dependency-graph))]
+    (. (Runtime/getRuntime) ;; Ensure we stop this system.
+       (addShutdownHook (Thread. (fn [] (component/stop sys)))))
+    sys))
 
-;; Todo - should be possible to have multiple instances.
-(def system
-  (delay
-    (info "Building system with settings: " env)
-    (build-app env)))
+(defn- middlewares
+  [opts]
+  (when (:dev opts)
+    (info "Installing development middleware")
+    (require 'staircase.assets)
+    (let [f (resolve 'staircase.assets/default-pipeline)
+          assets (f opts)]
+      [assets])))
 
-(defn handler [req]
-  ((get-in @system [:router :handler]) req))
-
+(defn system
+  "Create an application"
+  []
+  (info "Building system")
+  (-> (build-app env)
+      (update-in [:router :middlewares]
+                 concat (middlewares env))
+      (component/start)))

@@ -11,7 +11,8 @@
     "npm": "2.7.x"
   },
   "scripts": {
-    "test": "sh script/test.sh",
+    "test": "karma start config/karma.conf.coffee --single-run --browsers PhantomJS",
+    "watch-tests":  "karma start config/karma.conf.coffee --browsers PhantomJS",
     "install-bower-tools": "node ./script/install-bower-tools.js",
     "postinstall": "bower install --allow-root && npm run install-bower-tools"
   },
@@ -21,12 +22,14 @@
   },
   "devDependencies": {
     "coffee-script": "1.7.1",
-    "karma": ">=0.10.4",
+    "jasmine": "^2.2.1",
+    "karma": "~0.12.0",
     "karma-chrome-launcher": "~0.1.0",
+    "karma-cli": "0.0.4",
     "karma-coffee-preprocessor": "~0.1.0",
     "karma-firefox-launcher": "~0.1.0",
     "karma-html2js-preprocessor": "~0.1.0",
-    "karma-jasmine": "~0.1.3",
+    "karma-jasmine": "~0.2.0",
     "karma-mocha": "0.1.3",
     "karma-ng-scenario": "~0.1.0",
     "karma-phantomjs-launcher": "~0.1.0",

@@ -1,4 +1,10 @@
-define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, ChooseDialogueCtrl) ->
+define (require) ->
+  
+  ng = require 'angular'
+  L = require 'lodash'
+  ga = require 'analytics'
+  require 'services'
+  ChooseDialogueCtrl = require './choose-dialogue'
   
   # Run-time requirements
   injectables = L.pairs
@@ -11,20 +17,13 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
     console: '$log'
     Q: '$q'
     $modal: '$modal'
+    connectTo: 'connectTo'
     meetRequest: 'meetRequest'
     Histories: 'Histories'
     Mines: 'Mines'
     silentLocation: '$ngSilentLocation'
     serviceStamp: 'serviceStamp'
     notify: 'notify'
-
-  #--- Functions.
- 
-  # Connect to a service and assign it a name.
-  connectWithName = (conf) ->
-    service = imjs.Service.connect conf
-    service.name = conf.name
-    return service
 
   # Test to see if two strings overlap.
   overlaps = (x, y) -> x && y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0)
@@ -50,20 +49,26 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
     
     conf
 
-  #--- Controller, exported as return value
+  # Decorator to create injecting constructor.
+  inject = (fn) -> (injected...) ->
+    for [name, _], idx in injectables
+      @[name] = injected[idx]
+    fn.call @
+
+  Controllers = ng.module 'steps.history.controllers', ['steps.services']
   
-  class HistoryController
+  Controllers.controller 'HistoryCtrl', class HistoryController
 
     currentCardinal: 0
 
     @$inject: (snd for [fst, snd] in injectables)
 
-    constructor: (injected...) ->
-      for [name, _], idx in injectables
-        @[name] = injected[idx]
-
+    constructor: inject ->
       @init()
       @startWatching()
+      console.log @
+
+    elide: true
 
     startWatching: ->
       scope = @scope
@@ -76,7 +81,7 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
         otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
         scope.nextSteps = otherSteps.concat(exporters)
 
-      scope.$watchCollection 'messages', (msgs) ->
+      scope.$watch 'messages', (msgs) ->
         handlers = L.values msgs
         otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
         scope.nextSteps = otherSteps.concat(handlers)
@@ -113,8 +118,7 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
           http.get('/tools/' + tool)
                 .then (({data}) => @scope.tool = data), toolNotFound
           http.get('/tools', params: {capabilities: 'next'})
-              .then ({data}) -> data.filter((t) -> t.ident isnt tool).map toTool
-              .then (tools) => @scope.nextTools = tools
+              .then ({data}) => @scope.nextTools = data.map toTool
       http.get('/tools', params: {capabilities: 'provider'})
           .then ({data}) -> data.map toTool
           .then (providers) => @scope.providers = providers
@@ -140,20 +144,28 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
       o[key] = value
 
     hasSomething: (what, data, key) ->
-      {scope, console, to, mines} = @
-      console.debug "Anybody want some #{ what }?"
+      {scope, console, to, Q, mines} = @
       if what is 'list'
         return to -> scope.list = data
 
-      for tool in scope.nextTools when tool.handles(what) then do (tool) =>
+      triggerUpdate = -> to -> scope.messages = L.assign {}, scope.messages
+
+      handlers = (tool for tool in scope.nextTools when tool.handles(what))
+
+      for tool in handlers then do (tool) =>
         idx = tool.ident + what + key
-        if scope.messages[idx]?
-          console.debug "replacing message data: #{ data }"
-          @set ['messages', idx, 'data'], data
-        else
-          @mines.then(atURL(data['service:base'] ? data.service.root))
-                .then(connectWithName)
-                .then (service) => @set ['messages', idx], {tool, data, service, kind: 'msg'}
+        if data # set or update
+          if scope.messages[idx]?
+            @set ['messages', idx, 'data'], data
+          else
+            @connectTo(data['service:base'] ? data.service.root).then (service) =>
+              @set ['messages', idx], {tool, data, service, kind: 'msg'}
+              triggerUpdate()
+        else # delete
+          delete scope.messages[idx]
+
+      # trigger the update.
+      triggerUpdate() if handlers.length
 
     letUserChoose: (tools) ->
       dialogue = @$modal.open
@@ -223,4 +235,31 @@ define ['lodash', 'imjs', 'analytics', './choose-dialogue'], (L, imjs, ga, Choos
             console.debug "Created step #{ appended.id }"
             goTo "/history/#{ history.id }/#{ nextCardinal }"
             ga 'send', 'event', 'history', 'append', step.tool
+
+  Controllers.controller 'HistoryStepCtrl', Array '$scope', '$log', '$modal', (scope, log, modalFactory) ->
+
+    scope.$watch 'appView.elide', ->
+      scope.elide = scope.appView.elide && scope.$middle && (scope.steps.length - scope.$index) > 3
+
+    InputEditCtrl = Array '$scope', '$modalInstance', 'history', 'step', (scope, modal, history, step, index) ->
+
+      scope.data = L.clone step.data, true
+      delete scope.data.service # Not editable
+
+      scope.ok = ->
+        modal.close history.id, index, scope.data
+
+      scope.cancel = ->
+        modal.dismiss 'cancel'
+        scope.data = L.clone step.data, true
+
+    scope.openEditDialogue = ->
+      dialogue = modalFactory.open
+        templateUrl: '/partials/edit-step-data.html'
+        controller: InputEditCtrl
+        size: 'lg'
+        resolve:
+          index: -> scope.$index
+          history: -> scope.history
+          step: -> scope.s
 

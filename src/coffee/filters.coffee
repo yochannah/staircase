@@ -1,8 +1,19 @@
-define ['angular', 'services', 'pluralize'], (ng, services, pluralize) ->
+define (require) ->
+
+  ng = require 'angular'
+  L = require 'lodash'
+  require 'services'
+  pluralize = require 'pluralize'
 
   Filters = ng.module('steps.filters', ['steps.services'])
 
   Filters.filter('interpolate', ['version', (v) -> (t) -> String(t).replace(/\%VERSION\%/mg, v)])
+
+  Filters.filter 'count', -> (xs) -> xs?.length or null
+
+  Filters.filter 'values', -> (obj) -> L.values obj
+
+  Filters.filter 'uniq', -> (things) -> L.uniq things
 
   Filters.filter 'pluralize', -> (thing, n) -> pluralize thing, n
 

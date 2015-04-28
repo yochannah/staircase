@@ -1,5 +1,6 @@
 language: clojure
 lein: lein2
+sudo: false # opt in to docker containers for faster builds
 before_script:
 - psql -c 'create database "staircase-test";' -U postgres
 jdk:
@@ -7,16 +8,9 @@ jdk:
 - openjdk7
 - oraclejdk7
 - openjdk6
-install: lein2 with-profile dev,travis deps
-script: lein2 with-profile dev,travis do pprint :env, test
-deploy:
-  provider: heroku
-  buildpack: https://github.com/ddollar/heroku-buildpack-multi.git
-  strategy: git
-  api_key:
-    secure: jgBHonup+xiH/KSZydxb/UWGFyt5vNy/qYyQyelLV+sTmY1Wbb2GmskqelsOdpBPbhhKDqdHVpKfYAD9hRFnkbfuwvuX73BRtErd5hm8PQ+Lpob8k99vFzK9M9/3w5QWG/lbGKXpcrwWPqOOx1Aqv0CSYoBR1HeNzYtTpVoDp8U=
-  app: staircase-staging
-  on:
-    branch: master
-    repo: alexkalderimis/staircase
-    jdk: openjdk7
+install:
+- lein2 with-profile dev,travis deps # Server side deps
+- npm install # Client side deps
+script:
+- lein2 with-profile dev,travis do pprint :env, test
+- npm test

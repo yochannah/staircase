@@ -1,6 +1,6 @@
 (ns staircase.views.about
   (:use [hiccup.core :only (html)]
-        [hiccup.element :only (link-to)])
+        [hiccup.element :only (image link-to)])
   (:require [staircase.views.forms :refer (search-input)]))
 
 (defn about-header [config]
@@ -8,7 +8,9 @@
    [:div.container
     [:div.row
      [:div.col-md-8.col-md-offset-2
-      [:h1 (:project-title config)]]]
+      [:h1
+       (image "/images/flattened-helix-right-128px.png")
+       (:project-title config)]]]
     [:div.row
      [:form.search-form.col-sm-6.col-sm-offset-3 (search-input config)]]
     [:div.row

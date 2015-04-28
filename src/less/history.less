@@ -1,3 +1,28 @@
+.central-panel {
+    &.col-md-offset-2 {
+        @media (min-width: @screen-md) {
+            margin-left: 17%;
+        }
+    }
+}
+
+.current-history {
+    .toggle-elisions {
+        padding: 0.25em 0.5em 0 0.25em;
+        display: block;
+        color: @text-color;
+        border-top: 1px solid @list-group-border;
+        border-right: 1px solid @list-group-border;
+        border-left: 1px solid @list-group-border;
+    }
+}
+
+.history-steps {
+    .list-group-item.folded-up {
+        max-height: 1em;
+        padding: 0.25em;
+    }
+}
 .edit-step-data {
 
     .boolean-control {

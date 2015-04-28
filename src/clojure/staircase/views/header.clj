@@ -2,7 +2,7 @@
   (:require [staircase.views.buttons :as btn]
             [staircase.views.forms :refer (search-form)]
             [hiccup.def :refer (defelem)]
-            [hiccup.element :refer (link-to unordered-list mail-to)]))
+            [hiccup.element :refer (image link-to unordered-list mail-to)]))
 
 (declare nav-list)
 
@@ -31,8 +31,7 @@
         [:span.icon-bar])]
      [:div
       (link-to {:class "navbar-brand"} "/"
-        [:span.app-name (:project-title config)])
-      ]]
+        (image {:alt (:project-title config)} "/images/flattened-helix-right-48px.png"))]]
 
     [:div.collapse.navbar-collapse {:ng-class "{in: showHeaderMenu}"};; Only show if enough space.
 
@@ -61,6 +60,7 @@
 
 (defn nav-list [config]
   [:ul.nav.navbar-nav.navbar-right {:ng-controller "AuthController"}
+   [:li {:ng-show "auth.loggedIn"} (link-to "/projects" "MyMine")]
    [:li.dropdown {:dropdown true}
     [:a.dropdown-toggle {:dropdown-toggle true}
      "Tools " [:b.caret]] [:ul.dropdown-menu (tool-list)]]
@@ -70,5 +70,6 @@
     [:a.dropdown-toggle {:dropdown-toggle true} "Contact " [:b.caret]]
      (unordered-list {:class "dropdown-menu"} (contacts config))]
    [:li {:ng-show "auth.loggedIn"} [:div (btn/logout)]]
-   [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]])
+   [:li {:ng-hide "auth.loggedIn"} [:div (btn/login)]]
+   ])
 

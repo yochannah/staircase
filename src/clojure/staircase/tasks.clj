@@ -1,7 +1,13 @@
 (ns staircase.tasks
   (:import [java.io FileNotFoundException])
-  (use [clojure.tools.logging :only (info warn)]
+  (:require [staircase.data :as data]
+            [clojure.java.jdbc :as jdbc]
+            [staircase.sql :as sql])
+  (:use [clojure.tools.logging :only (info warn)]
        [clojure.java.io :as io]
+       [staircase.config :only (db-options)]
+       [com.stuartsierra.component :only (stop start)]
+       [environ.core :only (env)]
        clojure.java.shell
        staircase.config
        clj-jgit.porcelain))
@@ -75,3 +81,25 @@
           (warn (:err status))))
       (warn (:err status)))))
 
+; Run some bodies within the context of a started component.
+(defmacro with-component
+  [[started component] & bodies]
+  `(let [~started (start ~component)]
+    (try (do ~@bodies)
+         (finally (stop ~started)))))
+
+(defn run-query [& [query]]
+  (if-not query
+    (warn "No query!")
+    (with-component [db (-> env db-options data/new-pooled-db)]
+      (doseq [row (jdbc/query db [query])]
+        (prn row)))))
+
+(defn clean-db [& [force?]]
+  (if-not (= "force" force?)
+    (warn "
+      This is a destructive action!
+      Pass in `force' to make this go through")
+    (let [db-conf (-> env db-options (assoc :migrate false))]
+      (with-component [db (data/new-pooled-db db-conf)]
+        (sql/drop-all-tables db)))))

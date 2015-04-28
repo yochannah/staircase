@@ -107,17 +107,39 @@ define (require, exports, module) ->
         currentName = "#{ baseName } (#{ suffix++ })"
       return currentName
 
-  createConnection = (conf) ->
-    s = imjs.Service.connect conf
+  # Service with no dependencies whose only job is to provide imjs.
+  # Use this in your tests to provide a mocked version of imjs resources.
+  class ImjsProvider
+
+    constructor: ->
+      @impl = imjs
+
+    setImpl: (mock) -> @impl = mock
+
+    $get: -> @impl
+
+  Services.provider 'imjs', ImjsProvider
+
+  Services.factory 'createConnection', Array 'imjs', ({Service}) -> (conf) ->
+    s = Service.connect conf
     s.name = conf.name
+    s.meta = conf.meta
     return s
 
   # Provide a function for connecting to a mine by URL.
-  Services.factory 'connectTo', Array 'Mines', (mines) -> (root) ->
+  Services.factory 'connectTo', Array 'createConnection', 'Mines', (createConnection, mines) -> (root) ->
     mines.atURL(root).then createConnection
 
+  # () -> Promise<Object<imjs.Service>>
+  # Promises to return a mapping from service name to connection.
+  Services.factory 'connectToAll', Array 'createConnection', 'Mines', (connectTo, Mines) -> ->
+    Mines.all().then (mines) ->
+      services = (connectTo m for m in mines)
+      # Make services available by root *or* name
+      L.merge (L.indexBy services, 'name'), (L.indexBy services, 'root')
+
   # Connect to a mine by name
-  Services.factory 'connect', Array 'Mines', (Mines) ->
+  Services.factory 'connect', Array 'createConnection', 'Mines', (createConnection, Mines) ->
     cache = {}
     (name) -> cache[name] ?= Mines.get(name).then createConnection
 
@@ -304,6 +326,11 @@ define (require, exports, module) ->
 
   Services.service 'WebServiceAuth', ['apiTokenPromise', '$rootScope', 'authorizer', WebServiceAuth]
 
+  # This service is not implemented as a $resource because it uses
+  # identifiers, not parameter objects (although that could be changed, albeit
+  # with significant pain), and it does some post-processing on the response
+  # More recent versions of ng-resource allow injectable transformers, so this
+  # second objection is a bit moot now.
   Services.factory 'Mines', Array '$http', '$log', 'WebServiceAuth', (http, logger, auth) ->
     URL = "/api/v1/services"
 
@@ -327,18 +354,22 @@ define (require, exports, module) ->
 
     return {all, get, atURL, put, delete: del}
 
-  Services.factory 'Histories', Array 'WebServiceAuth', '$rootScope', '$http', '$resource', (auth, scope, http, resource) ->
-    headers = auth.headers
+  # API endpoint adapter for Histories
+  Services.factory 'Histories', Array 'WebServiceAuth', '$http', '$resource', (auth, http, resource) ->
+    headers = auth.headers # This object is updated with the latest auth data - DO NOT CLONE.
     resource "/api/v1/histories/:id", {id: '@id'},
       get: {method: 'GET', headers: headers}
       getStep: {method: 'GET', headers: headers, url: '/api/v1/histories/:id/steps/:idx'}
       getSteps: {method: 'GET', headers: headers, isArray: true, url: '/api/v1/histories/:id/steps'}
       query: {method: 'GET', headers: headers, isArray: true}
+      all: {method: 'GET', headers: headers, isArray: true}
       save: {method: 'PUT', headers: headers}
       fork: {method: 'POST', headers: headers, params: {at: '@at'}, url: '/api/v1/histories/:id/steps/:at/fork'}
       create: {method: 'POST', headers: headers}
       delete: {method: 'DELETE', headers: headers}
-      append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
+      remove: {method: 'DELETE', headers: headers}
+      append: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'} # Terrible name: deprecate!
+      addStep: {method: 'POST', headers: headers, url: '/api/v1/histories/:id/steps'}
 
   do (name = 'historyListener', deps = ['Histories', '$log', '$location', 'serviceStamp']) ->
     Services.factory name, Array deps..., (H, console, loc, stamp) ->
@@ -359,35 +390,14 @@ define (require, exports, module) ->
 
       return {watch, startHistory}
 
-  Services.factory 'Persona', Array '$window', '$log', '$http', (win, log, http) ->
-    watch = request = logout = -> log.warn "Persona authentication not available."
-    navId = win.navigator?.id ? {watch, request, logout}
-
-    class Persona
-
-      constructor: (@options) ->
-        navId.watch {loggedInUser: @options.loggedInUser, @onlogin, @onlogout}
-
-      post: (url, data = {}) ->
-        csrfP = http.get("/auth/csrf-token").then ({data}) -> data
-        csrfP.then (token) ->
-          data["__anti-forgery-token"] = token
-          http.post url, data
-
-      request: -> navId.request()
-
-      logout: -> navId.logout()
-
-      onlogin: (assertion) =>
-        loggingIn = @post "/auth/login", {assertion}
-        loggingIn.then ({data}) => @options.changeIdentity data.current
-        loggingIn.then (-> ga 'send', 'event', 'auth', 'login', 'success'), ->
-          ga 'send', 'event', 'auth', 'login', 'failure'
-          navId.logout()
-
-      onlogout: =>
-        loggingOut = @post "/auth/logout"
-        loggingOut.then => @options.changeIdentity null
-        loggingOut.then (-> ga 'send', 'event', 'auth', 'logout', 'success'), ->
-          ga 'send', 'event', 'auth', 'logout', 'failure'
-          log.error "Logout failure"
+  # Generates a random ID that can be used in cases like
+  # drag and drop
+  Services.factory 'uuid', Array ->
+    svc =
+      random: ->
+        _p8 = (s) ->
+          p = (Math.random().toString(16) + '000000000').substr(2, 8)
+          (if s then "-" + p.substr(0, 4) + "-" + p.substr(4, 4) else p)
+        _p8() + _p8(true) + _p8(true) + _p8()
+      empty: ->
+        "00000000-0000-0000-0000-000000000000"

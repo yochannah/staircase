@@ -3,8 +3,7 @@
         staircase.helpers
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
-            staircase.resources
-            [staircase.resources.schema :as schema]
+            [staircase.resources :as res]
             [com.stuartsierra.component :as component]
             [honeysql.helpers :refer (select from where)]
             [honeysql.core :as hsql]
@@ -14,70 +13,65 @@
   (-> staircase.resources/owned-resource
       (from :services)))
 
+(def ONE_DAY (* 24 60 60 1e3)) ;; One day in milli-seconds
+
+(defn one-day-from-now []
+  (java.sql.Timestamp. (+ (System/currentTimeMillis) ONE_DAY)))
+
 (defrecord ServicesResource [db]
-  component/Lifecycle 
-
-  (start [component]
-    (staircase.sql/create-tables
-      (:connection db)
-      schema/services)
-    (let [columns (staircase.sql/get-column-names (:connection db) :services)]
-      (info "Found columns" columns)
-      (when-not (columns "name") ;; TODO BAD! Should have proper migrations. But works for now.
-        (sql/execute! (:connection db) [(str "ALTER TABLE services ADD name " schema/string)])))
-    component)
-
-  (stop [component] component)
 
   Resource
   
-  (get-all [_] (into [] (sql/query (:connection db)
-                                   (-> (select :*)
-                                       (from :services)
-                                       (where [:= :owner :?user])
-                                       (hsql/format :params staircase.resources/context)))))
+  (get-all [_]
+    (sql/query db
+               (res/all-belonging-to :services)
+               :result-set-fn vec))
 
-  (exists? [_ id] (staircase.sql/exists-with-owner :services id (:user staircase.resources/context)))
+  (exists? [_ id]
+    (staircase.sql/exists-with-owner db 
+                                     :services
+                                     (assoc res/context :id id)))
 
   (get-one
     [_ id]
     (when-let [uuid (string->uuid id)]
-      (let [params (merge staircase.resources/context {:uuid uuid})]
-        (sql/query (:connection db)
+      (let [params (assoc res/context :uuid uuid)]
+        (sql/query db
                    (-> get-service
                        (select :*)
                        (hsql/format :params params))
                    :result-set-fn first))))
 
-  (update [_ id doc] (staircase.sql/update-owned-entity
-                       (:connection db)
-                       :services
-                       id (:user staircase.resources/context)
-                       doc))
+  (update [_ id doc]
+    (staircase.sql/update-owned-entity
+      db
+      :services
+      (assoc res/context :id id)
+      (if (:token doc) ;; whenever we set the token, set the expiry.
+        (assoc doc :valid_until (one-day-from-now))
+        doc)))
 
   (delete [_ id]
-    (when-let [uuid (string->uuid id)]
-      (sql/delete! (:connection db)
-                   :services
-                   ["id=? and owner=?" uuid (:user staircase.resources/context)]))
-    nil)
+    (staircase.sql/delete-entity db :services id))
 
   (create [_ doc]
-    (let [id (new-id)
-          owner (:user staircase.resources/context)
-          service (-> doc (dissoc :id "id" :owner) (assoc "id" id "owner" owner))]
-      (sql/insert! (:connection db) :services service)
-      id))
+    (let [owner  (:user res/context)
+          values (-> doc
+                     (dissoc "id" :id :owner :valid_until)
+                     (assoc "valid_until" (one-day-from-now)
+                            "owner" owner))]
+      (-> db (sql/insert! :services values) first :id)))
   
   Searchable
 
   (get-where [_ constraint]
-    (sql/query (:connection db)
+    (sql/query db
                (hsql/format {:select [:*]
                              :from   [:services]
-                             :where  [:and constraint [:= :owner :?user]]}
-                            :params staircase.resources/context)
+                             :where  [:and constraint
+                                           [:= :owner :?user]]}
+                            :params res/context)
                :result-set-fn vec))
   )
 
-(defn new-services-resource [& {:keys [db]}] (map->ServicesResource {:db db}))
+(defn new-services-resource [db] (map->ServicesResource {:db db}))

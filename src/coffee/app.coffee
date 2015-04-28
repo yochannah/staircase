@@ -13,10 +13,11 @@ define (require, exports, module) ->
   require 'angular-notify'
   require 'angular-cookies'
   require 'angular-local-storage'
-  require './filters'
-  require './services'
-  require './directives'
-  require './controllers'
+  require 'angular-xeditable'
+  require 'filters'
+  require 'services'
+  require 'directives'
+  require 'controllers'
   config = require 'json!/api/v1/client-config'
   ga     = require 'analytics'
 
@@ -37,6 +38,7 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
+    'xeditable'
     'cgNotify'
   ]
 

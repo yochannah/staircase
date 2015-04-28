@@ -1,14 +1,14 @@
 (ns staircase.assets
-  (:import org.lesscss.LessCompiler
+  (:import org.lesscss.LessCompiler ;; Uses rhino.
            [java.util Date])
   (:require [dieter.settings :as settings]
+            [dieter.asset.livescript :as ls]
+            [dieter.asset.coffeescript :as coffee]
+            [clojure.tools.logging :refer (info debug warn)]
             [ring.util.time  :as ring-time]
             [clojure.string  :as string]
             [ring.util.codec :as codec]
-            [clojure.java.io :as io])
-  (:use clojure.tools.logging
-        [dieter.asset.livescript   :only (compile-livescript)]
-        [dieter.asset.coffeescript :only (compile-coffeescript)]))
+            [clojure.java.io :as io]))
 
 (def less-c (LessCompiler. [])) ;;"--relative-urls"]))
 
@@ -128,16 +128,18 @@
 
 (defn generate-response [asset-file]
   (case (ext asset-file)
-    :coffee {:body (compile-coffeescript asset-file)
+    :coffee {:body (coffee/compile-coffeescript asset-file)
              :status 200
              :headers {"Content-Type" "text/javascript"}}
-    :ls     {:body (compile-livescript asset-file)
+    :ls     {:body (ls/compile-livescript asset-file)
              :status 200
              :headers {"Content-Type" "text/javascript"}}
     :less {:body (less asset-file)
-            :status 200
-            :headers (assoc cors "Content-Type" "text/css")}
-    {:status 500 :body "Unknown asset type" :content-type "text/plain"})) ;; Should never happen.
+           :status 200
+           :headers (assoc cors "Content-Type" "text/css")}
+    {:status 500 ;; Should never happen.
+     :body "Unknown asset type"
+     :content-type "text/plain"}))
 
 (defn serve-from-cache
   [cksm file]
@@ -169,19 +171,23 @@
     (when-let [last-seen (ring-time/parse-date mod-since)]
       (.after last-seen (get-modification-time file)))))
 
-(defn serve [options req]
+(defn serve
+  "Handle a request, given a set of options"
+  [options req]
   (settings/with-options options
     (when (is-asset-req req)
       (when-let [asset-file (asset-file-for req options)]
         (if (asset-not-modified-since? req asset-file)
           {:status 304 :body ""}
-          (serve-asset asset-file options (get-in req [:headers "if-none-match"])))))))
+          (serve-asset asset-file options
+                       (get-in req [:headers "if-none-match"])))))))
 
 (defn pipeline [& {:keys [strategy] :as options}]
-  "Take options and return a function that will wrap a ring handler in an assets pipeline.
-   Routes served by the handler take precedence. Requests that produce 404 or nil will then
-   be processed as asset-requests."
-  (let [asset-handler (partial serve options)]
+  "Take options and return a function that will wrap a ring handler in
+  an assets pipeline. Routes served by the handler take precedence. Requests
+  that produce 404 or nil will then be processed as asset-requests."
+
+  (let [serve-asset (partial serve options)]
     (case strategy
 
       :prefer-compiled
@@ -189,13 +195,25 @@
         (fn [req]
           (let [response (handler req)]
             (if (or (nil? response) (= 404 (:status response)))
-              (or (asset-handler req) response {:status 404})
+              (or (serve-asset req) response {:status 404})
               response))))
 
       (fn [handler] ;; Tries to find assets first. Prefers live updates.
         (fn [req]
           (or
-            (asset-handler req)
+            (serve-asset req)
             (handler req)
             {:status 404}))))))
+
+(defn default-pipeline
+  "Construct a pipeline with the default values"
+  [options]
+  (pipeline :js-dir "/js"
+            :css-dir "/css"
+            :engine (:asset-js-engine options)
+            :max-age (:web-max-age options)
+            :as-resource "tools"
+            :coffee "src/coffee"
+            :ls     "src/ls"
+            :less   "src/less"))
 

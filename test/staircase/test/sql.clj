@@ -52,18 +52,6 @@
     (testing "No false positives"
       (is (not (current-table "foo"))))))
 
-(deftest ^:database test-create-tables
-  (let [existed-before (get-table-names db-spec)]
-    (create-tables db-spec {:table_a [[:serialno :serial :primary :key] [:productname :varchar]]
-                            :table_b [[:productid :integer] [:tag :text]]})
-    (let [existing-now (get-table-names db-spec)]
-      (testing "Have added tables"
-        (is (< (count existed-before) (count existing-now)) "There should be more tables now"))
-      (testing "Have added the right tables"
-        (are [tname] (existing-now tname)
-             "table_a"
-             "table_b")))))
-
 (deftest ^:database test-count-where
   (testing "No false negatives"
     (dorun (for [[_ value] test-rows]
@@ -94,7 +82,10 @@
 
 (deftest ^:database test-update-owned-entity
   (let [quux-id (get-in test-rows [3 0])
-        updated (update-owned-entity db-spec :owned_entities quux-id "foo@bar.org" {:value "now even quuxier"})]
+        updated (update-owned-entity db-spec
+                                     :owned_entities
+                                     {:id quux-id :user "foo@bar.org"}
+                                     {:value "now even quuxier"})]
     (testing "Return value"
       (is (= "now even quuxier" (:value updated))))
     (testing "There exists an entity of that id"
@@ -106,7 +97,10 @@
 
 (deftest ^:database test-update-owned-entity-wrong-owner
   (let [quux-id (get-in test-rows [3 0])
-        updated (update-owned-entity db-spec :owned_entities quux-id "bar@foo.org" {:value "now even quuxier"})]
+        updated (update-owned-entity db-spec
+                                     :owned_entities
+                                     {:id quux-id :user "bar@foo.org"}
+                                     {:value "now even quuxier"})]
     (testing "Return value"
       (is (= nil updated)))
     (testing "There still exists an entity of that id"

@@ -48,5 +48,8 @@
     (into {} (map json-keys (options opts "client-")))))
 
 (defn app-options [opts]
-  (options opts "web-"))
+  (letfn [(merge-in* [a b] (if (map? a) (merge-with merge-in* a b) b))]
+    (merge-with merge-in*
+                (select-keys @configuration [:strings :exceptions])
+                (options opts "web-"))))
 

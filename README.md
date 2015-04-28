@@ -3,7 +3,10 @@
 [![Build Status][travis-badge]][ci]
 
 The webapp that serves the step-based data-flow interface to the
-[InterMine](http://www.intermine.org) system.
+[InterMine](http://www.intermine.org) system. You can view a running
+version on [Heroku][http://staircase.herokuapp.com] and see the
+documentation
+[here][http://alexkalderimis.github.io/staircase/latest/index.html].
 
 ## Quick Start
 
@@ -69,7 +72,14 @@ installation of the javascript dependencies using [npm][npm] and
 [Bower][bower].
 
 This application also makes use of a postgres database. So you will need
-[postgres][psql] installed and configured.
+[postgres][psql] installed and configured. We use the `uuid-ossp` psql
+extension, which is available by default on Heroku, and needs installing if you
+are setting up your own database. Luckily this is a standard extension, and is
+generally available in the contrib packages from your vendor, eg. in Ubuntu run:
+
+```sh
+sudo apt install postgresql-contrib
+```
 
 ## Configuration
 
@@ -123,7 +133,9 @@ DB_USER=$PSQL_USER
 
 To start a web server for the application, run:
 
-    lein ring server
+```sh
+lein ring server
+```
 
 To run the tests, you will need a test database (by default named
 `staircase-test`) and be able to access it. It is recommended you
@@ -131,7 +143,16 @@ add configuration values to `~/.lein/profiles.clj` for these
 properties, but this can also be configured in environment
 variables - see [Configuration][].
 
-    lein test
+```sh
+lein test
+```
+
+To run the client side tests:
+
+```sh
+npm install
+npm test
+```
 
 ## License
 

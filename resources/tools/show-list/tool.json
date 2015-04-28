@@ -1,7 +1,7 @@
 {
   "capabilities": ["now", "provider", "next"],
   "provides": ["report", "list"],
-  "handles": ["item", "list", "query", "ids"],
+  "handles": ["item", "items", "list", "query", "ids"],
   "type": "IFrame",
   "seamless": true,
   "heading": "Details",

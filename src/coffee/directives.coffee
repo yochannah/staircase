@@ -1,4 +1,17 @@
-require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, Channel) ->
+requirejs = require
+
+define (require) ->
+
+  ng = require 'angular'
+  L = require 'lodash'
+  lines = require 'lines'
+  Channel = require 'jschannel'
+  jQuery = require 'jquery'
+
+  require 'services'
+
+  # Used by drag/drop directives for interacting with native drag and drop API.
+  jQuery.event.props.push('dataTransfer')
 
   Directives = ng.module('steps.directives', ['steps.services'])
 
@@ -7,6 +20,96 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     scope.$watch model, (value) -> if value
       $timeout -> el[0].focus()
     el.bind 'blur', -> scope.$apply model.assign scope, false
+
+  # Compatibility layer for backbone views.
+  # ie. views that have `setElement`, `remove`, and `render` methods.
+  Directives.directive 'backboneView', ->
+    restrict: 'E'
+    scope:
+      component: '='
+      eventHandler: '&'
+    link: (scope, element) ->
+      el = element[0]
+      view = scope.component
+      view.setElement el
+      view.render()
+      element.on '$destroy', -> view.remove()
+      view.on 'all', (evt, args...) -> scope.eventHandler event: evt, data: args
+
+  Directives.directive 'droppable', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
+    restrict: 'A'
+    scope: droppable: "="
+    link: (scope, element) ->
+
+      angular.element(element).attr("draggable", "true")
+
+      # Give the element a unique if it does not already have one
+      id = angular.element(element).attr("id")
+      if !id
+        id = uuid.random()
+        angular.element(element).attr("id", id)
+
+      # Hacky, but works!
+      element.bind 'dragstart', (e) ->
+        setTimeout ->
+          angular.element(element).addClass "disabled"
+        , 1
+
+        e.dataTransfer.setData 'item', JSON.stringify scope.droppable
+        $rootScope.$emit "IM-DRAG-START"
+
+      element.bind 'dragend', (e) ->
+        angular.element(element).removeClass "disabled"
+        $rootScope.$emit "IM-DRAG-END"
+
+  Directives.directive 'imDropzone', Array '$rootScope', 'uuid', ($rootScope, uuid) ->
+    restrict: 'A'
+    scope:
+      imDropAction: '&'
+      imDropzone: "="
+    link: (scope, el, attrs) ->
+
+      counter = 0
+      el = angular.element(el)
+
+      # Give the element a unique if it does not already have one
+      id = el.attr("id")
+      if !id
+        id = uuid.random()
+        el.attr("id", id)
+
+      el.bind 'drop', (e) ->
+        el.removeClass('im-drag-over')
+        e.stopPropagation()
+        # The item that was dragged onto me.
+        data = e.dataTransfer.getData('item')
+        scope.imDropAction({dragged: data, dropzone: scope.dropzone})
+
+      el.bind 'dragover', (e) ->
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+        return false
+
+      el.bind 'dragenter', (e) ->
+        counter++
+        el.addClass('im-drag-over')
+        el.removeClass('im-drag-target')
+
+      el.bind 'dragleave', (e) ->
+        counter--
+        if counter is 0
+          el.removeClass('im-drag-over')
+          el.addClass('im-drag-target')
+
+
+
+      $rootScope.$on 'IM-DRAG-START', ->
+        counter = 0
+        el.addClass('im-drag-target')
+
+      $rootScope.$on 'IM-DRAG-END', ->
+        el.removeClass("im-drag-target")
+        el.removeClass("im-drag-over")
 
   Directives.directive 'blurOn', ->
     restrict: 'A'
@@ -37,7 +140,6 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       service.fetchModel().then (model) ->
         $q.when(model.makePath(scope.type).getDisplayName()).then (name) ->
           scope.displayName = name
-
 
   # Pair of recursive directives for turning any json structure into an editable form.
   Directives.directive 'editableItem', ($compile) ->
@@ -180,10 +282,6 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
     """
     link: (scope, element, attrs) ->
       iframe = element.find('iframe')
-
-      do resize = -> iframe.css height: ng.element(win).height() * 0.85
-
-      win.addEventListener 'resize', resize
 
       console.debug 'connecting to iframe'
 
@@ -397,7 +495,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
         tmpl = scope.tool[turi]
         console.log ctrl, tmpl
 
-        require {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
+        requirejs {baseUrl: '/'}, ['.' + ctrl, "text!#{ tmpl }"], (controller, template) ->
 
           c = injector.instantiate controller, {'$scope': scope}
           compileScope = scope # TODO: scope.$new false
@@ -447,7 +545,7 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
           ctrl = '.' + scope.tool.headingControllerURI
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
-          require {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
+          requirejs {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
             scope.previousStep.$promise.then -> # Resolve the previous step.
 
               $injector.invoke controller, this, {'$scope': scope}
@@ -462,3 +560,17 @@ require ['angular', 'lodash', 'lines', 'jschannel', 'services'], (ng, L, lines, 
       message = attrs.reallyMessage
       if message and confirm(message)
         scope.$apply(attrs.reallyClick)
+
+  Directives.directive 'folded', ->
+    restrict: 'A'
+    scope:
+      folded: '='
+    transclude: true
+    template: """
+      <div ng-hide="folded" ng-transclude></div>
+      <div ng-show="folded">...</div>
+    """
+    link: (scope, element, attrs) -> L.defer ->
+      scope.$watch 'folded', (folded) ->
+        element.toggleClass 'folded-up', folded
+

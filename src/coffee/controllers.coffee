@@ -1,12 +1,31 @@
-define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
+define (require) ->
 
-  Controllers = ng.module('steps.controllers', ['ngCookies', 'steps.services'])
+  ng = require 'angular'
+  L = require 'lodash'
+  imjs = require 'imjs'
+  require 'angular-cookies'
+  require 'services'
+  require 'projects'
+  require 'starting-point'
+  require 'facets/controller'
+  require 'auth/controller'
+  require 'quick-search/controller'
+  require 'history/controllers'
+
+  Controllers = ng.module('steps.controllers', [
+    'ngCookies', 'steps.services',
+    'steps.projects',
+    'steps.starting-point',
+    'steps.facets.controllers',
+    'steps.auth.controllers',
+    'steps.quick-search.controllers',
+    'steps.history.controllers'
+  ])
 
   requiredController = (ident) -> Array '$scope', '$injector', ($scope, injector) ->
     require ['controllers/' + ident], (ctrl) ->
       instance = injector.instantiate(ctrl, {$scope})
       $scope.controller = instance # Working around breakage of controllerAs
-      $scope.foo = 1
       $scope.$apply()
 
   mountController = (name, ident) -> Controllers.controller name, requiredController ident
@@ -18,23 +37,8 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
   Controllers.controller 'WelcomeCtrl', Array '$scope', (scope) -> scope.showWelcome = true
 
+  # Index does very little just now - but we still need a controller.
   Controllers.controller 'IndexCtrl', ->
-
-  Controllers.controller 'StartingPointCtrl', Array '$scope', '$routeParams', 'historyListener', (scope, params, historyListener) ->
-
-    historyListener.watch scope
-
-    byIdent = ({ident}) -> ident is params.tool
-    if params.service?
-      filter = (sp) -> byIdent(sp) and params.service is sp.args?.service
-    else
-      filter = byIdent
-
-    scope.$watch 'startingPoints', (startingPoints) -> if startingPoints
-      tool = L.find startingPoints, filter
-      if tool
-        scope.tool = Object.create tool
-        scope.tool.state = 'FULL'
 
   Controllers.controller 'AboutCtrl', Array '$http', '$scope', 'historyListener', (http, scope, historyListener) ->
     http.get('/tools', {params: {capabilities: 'initial'}})
@@ -44,39 +48,9 @@ define ['angular', 'lodash', 'angular-cookies', 'services'], (ng, L) ->
 
     historyListener.watch scope
 
-  # Inline controller.
-  Controllers.controller 'AuthController', Array '$rootScope', '$scope', 'Persona', (rs, scope, Persona) ->
-    rs.auth ?= identity: null # TODO: put this somewhere more sensible.
-
-    changeIdentity = (identity) ->
-      scope.auth.identity = identity
-      scope.auth.loggedIn = identity?
-
-    scope.persona = new Persona {changeIdentity, loggedInUser: scope.auth.identity}
-
-  Controllers.controller 'QuickSearchController', Array '$log', '$scope', 'historyListener', (log, scope, {startHistory}) ->
-
-    scope.startQuickSearchHistory = (term) ->
-      startHistory
-        thing: "for #{ term }"
-        verb:
-          ed: "searched"
-          ing: "searching"
-        tool: "keyword-search"
-        data:
-          searchTerm: term
-
   mountController 'StartingPointsController', 'starting-points'
-
-  mountController 'HistoryStepCtrl', 'history-step'
-
-  mountController 'HistoryCtrl', 'history'
 
   mountController 'BrandCtrl', 'brand'
 
   mountController 'NavCtrl', 'brand'
-
-  mountController 'FacetCtrl', 'facets'
-
-  return Controllers
 

@@ -23,3 +23,8 @@
     (testing "Collects the right values"
       (is (= {:opt-1 "some option" :opt-2 "another opt"} opts)))))
 
+(deftest text-strings
+  (let [opts (app-options {:web-strings {:projects.add-item "FOO"}})]
+    (testing "Configurable text strings"
+      (is (= "FOO"           (get-in opts [:strings :projects.add-item])))
+      (is (= "Create Folder" (get-in opts [:strings :projects.add-project]))))))

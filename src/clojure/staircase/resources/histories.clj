@@ -4,12 +4,11 @@
         [clojure.tools.logging :only (info)])
   (:require staircase.sql
             staircase.resources
+            [staircase.resources.steps :as steps]
             [honeysql.helpers :refer
               (select merge-select from where merge-where
                left-join group order-by merge-order-by)]
             [honeysql.core :as hsql]
-            [staircase.resources.schema :as schema]
-            [com.stuartsierra.component :as component]
             [clojure.java.jdbc :as sql]))
 
 (defn- build-history [row & rows]
@@ -18,8 +17,6 @@
                  (dissoc :step_id))
         f #(update-in %1 [:steps] conj (:step_id %2))]
     (reduce f init rows)))
-
-(def table-spec (merge schema/histories schema/history-step))
 
 (defn- base-history-query []
   (-> (select :h.id :h.title :h.created_at :h.description :h.owner)
@@ -41,57 +38,80 @@
       (merge-order-by [:hs.created_at :desc])
       (hsql/format :params (assoc staircase.resources/context :history history))))
 
+;; Functions that operate on a history resource, but do
+;; their own direct data access.
+
+(defn add-all-steps [{db :db} hid steps]
+  (apply sql/insert! db :history_step (map #(assoc %1 :history_id hid) steps)))
+
+(defn get-history-steps-of [{db :db} hid limit]
+  (let [query (str "select *
+                    from history_step
+                    where history_id = ?
+                    order by created_at ASC
+                    LIMIT " limit)]
+    (sql/query db [query (string->uuid hid)] :result-set-fn vec)))
+
+(defn get-steps-of [{db :db} id & {:keys [limit] :or {limit nil}}]
+  (when-let [uuid (string->uuid id)]
+    (let [query-base "select s.*
+                     from steps as s
+                     left join history_step as hs on s.id = hs.step_id
+                     left join histories as h on h.id = hs.history_id
+                     where hs.history_id = ? and h.owner = ?
+                     order by hs.created_at ASC"
+          limit-clause (if limit (str " LIMIT " limit) "")
+          query (str query-base limit-clause)]
+        (sql/query db
+                   [query uuid (:user staircase.resources/context)]
+                   :result-set-fn steps/parse-steps))))
+
+;; The history resource definition.
 (defrecord HistoryResource [db]
-  component/Lifecycle
-
-  (start [component]
-    (staircase.sql/create-tables
-      (:connection db)
-      table-spec)
-    component)
-
-  (stop [component] component)
 
   Resource
 
-  (get-all [histories]
-    (sql/query (:connection db) (all-history-query)))
+  (get-all [_]
+    (sql/query db (all-history-query)
+               :result-set-fn vec))
 
-  (exists? [_ id] (staircase.sql/exists-with-owner (:connection db) :histories id (:user staircase.resources/context)))
+  (exists? [_ id]
+    (staircase.sql/exists-with-owner
+      db
+      :histories
+      (assoc staircase.resources/context :id id)))
 
   (get-one [histories id]
     (when-let [uuid (string->uuid id)]
       (sql/query
-        (:connection db)
+        db
         (one-history-query uuid)
         :result-set-fn #(if (empty? %) nil (apply build-history %)))))
 
-  (update [_ id doc] (staircase.sql/update-owned-entity
-                       (:connection db)
-                       :histories
-                       id (:user staircase.resources/context)
-                       (dissoc doc :created_at "created_at")))
+  (update [_ id doc]
+    (staircase.sql/update-owned-entity
+      db
+      :histories
+      (assoc staircase.resources/context :id id)
+      (dissoc doc :created_at "created_at")))
 
   (delete [histories id]
     (when-let [uuid (string->uuid id)]
-      (sql/with-db-transaction [conn (:connection db)]
-        (sql/delete! conn :history_step
+      (sql/with-db-transaction [trs db]
+        (sql/delete! trs :history_step
                      ["history_id=?" uuid])
-        (sql/delete! conn :histories
+        (sql/delete! trs :histories
                      ["id=? and owner=?" uuid (:user staircase.resources/context)])
         ;; TODO - delete orphaned steps?
         ))
     nil)
 
   (create [histories doc]
-    (let [id (new-id)
-          created-at (or (:created_at doc) (sql-now))
-          values (assoc (dissoc doc :owner :created_at)
-                        "id" id
-                        "created_at" created-at
-                        "owner" (:user staircase.resources/context))]
-      (sql/insert! (:connection db) :histories values)
-      id)))
+    (let [owner  (:user staircase.resources/context)
+          values (-> doc
+                     (dissoc :owner "created_at" :created_at)
+                     (assoc "owner" owner))]
+      (-> db (sql/insert! :histories values) first :id))))
 
-(defn new-history-resource [& {:keys [db]}] (map->HistoryResource {:db db}))
+(defn new-history-resource [db] (map->HistoryResource {:db db}))
 

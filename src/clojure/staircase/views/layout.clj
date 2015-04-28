@@ -15,6 +15,7 @@
 
 (defn common
   ([config body] (common config body nil []))
+  ([config body main] (common config body main []))
   ([config body main scripts]
    (let [title (:project-title config)
          js (concat (apply include-js scripts) (entry-point main))]
@@ -25,8 +26,7 @@
         [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1"}]
         [:title title]
         (pv/include-persona)
-        (include-css "/css/style.css")
-        ]
+        (include-css "/css/style.css")]
        [:body {:class "staircase"}
         [:section#content.main body]
         (staircase.views.header/snippet config)
