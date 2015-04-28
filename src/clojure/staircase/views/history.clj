@@ -55,7 +55,7 @@
    current-history
    (staircase.views.facets/snippet)])
 
-(defn centre-column [config]
+(defn right-column [config]
   [:div.sidebar.slide-right.col-xs-12.col-md-2.col-md-offset-10
    {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded}"}
    [:div.panel.panel-default.next-steps
@@ -76,7 +76,7 @@
     [:div.panel-body {:ng-hide "nextSteps.length"}
      [:em "No steps available"]]]])
 
-(defn right-column [config]
+(defn centre-column [config]
   [:div.col-xs-12.slide-left.central-panel.flex-column
    {:ng-class "{'col-md-8': !state.expanded,
               'col-md-offset-2': !state.expanded}"}
@@ -96,4 +96,5 @@
 (defn snippet [config]
   (html [:div.container-fluid.history-view
          (apply vector :div.row.flex-row
-          ((juxt left-column centre-column right-column) config))]))
+          ;; L R C because of column re-ordering.
+          ((juxt left-column right-column centre-column) config))]))
