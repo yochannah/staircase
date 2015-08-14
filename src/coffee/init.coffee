@@ -48,6 +48,7 @@ require.config
   ]
 
   paths:
+    controllers:       '/js/controllers' # fixes js routing in production
     analytics:         '/js/argus' # named after the 100 eyed figure in el. myth.
     'angular-animate': '/vendor/angular-animate/angular-animate'
     'angular-cookies': '/vendor/angular-cookies/angular-cookies'
@@ -79,4 +80,3 @@ require.config
     underscore:        '/vendor/lodash/dist/lodash.underscore'
 
   deps: ['./bootstrap']
-
