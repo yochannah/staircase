@@ -38,7 +38,7 @@
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
                  ;; see: https://github.com/LightTable/LightTable/issues/794
-                 [org.clojure/core.cache "0.6.3"] 
+                 [org.clojure/core.cache "0.6.3"]
                  [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
@@ -101,7 +101,8 @@
         "http://*.labs.intermine.org/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
-        "http://intermine.github.io/**"]
+        "http://intermine.github.io/**"
+        "http://intermine-tools.github.io/**"]
       :client-step-config {
         :show-list {
                     :activeTabs [:enrich]}
