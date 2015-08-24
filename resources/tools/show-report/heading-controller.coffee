@@ -1,7 +1,8 @@
 define [], -> Array '$scope', (scope) ->
 
+
   scope.$watch 'data', (data) ->
-    debugger;
+    console.log "show-report saw data", data
     scope.type = type = data.type
 
     if data.ids?

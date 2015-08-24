@@ -7,14 +7,15 @@
       :dependencies [[peridot "0.2.2"]
                      [org.marianoguerra/clj-rhino "0.2.1"]
                      [org.mozilla/rhino "1.7R4"] ;; We depend on rhino 1.7r4
-                     [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0 
+                     [org.lesscss/lesscss "1.7.0.1.1"] ;; Less 1.7.0
                      [org.clojars.involans/dieter "0.5.0-SNAPSHOT"
                         :exclusions [com.google.javascript/closure-compiler]]
                      [ring-mock "0.1.5"]]
       :env {
             :dev true ;; So we know if we are in the dev environment.
+            :live-asset-reload true
             :web-search-placeholder "zen, diabetes, apoptosis"
-            :web-project-title "FlyMine"
+            :web-project-title "HumanMine"
             :web-contact-email "alex@intermine.org"
             :web-contacts [
                            ["fa-twitter" "https://twitter.com/intermineorg" "@intermineorg"]
@@ -24,7 +25,7 @@
                            ["fa-envelope" "mailto://dev@intermine.org" "Mailing list"]
                            ]
             :web-max-age 300
-            :web-default-service "flymine"
+            :web-default-service "humanmine"
             :web-audience "http://localhost:3000"
 
             :verifier "https://verifier.login.persona.org/verify"

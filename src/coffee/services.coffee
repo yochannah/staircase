@@ -11,6 +11,7 @@ define (require, exports, module) ->
   imjs = require 'imjs'
   Messages = require './messages'
   ga = require 'analytics'
+  imtables = require 'im-tables'
 
   asData = ({data}) -> data
 
@@ -68,7 +69,7 @@ define (require, exports, module) ->
     requireRelativeToBase ['.' + tool.providerURI], (factory) ->
       handleRequest = injector.invoke factory, this
       handleRequest(step, data).then d.resolve, d.reject
-      
+
     return d.promise
 
   do (deps = ['$cacheFactory', 'localStorageService']) ->
@@ -192,7 +193,7 @@ define (require, exports, module) ->
 
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}
-    
+
     maker.fromIds = ({listDetails, objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
       constraint = {path: type, op: 'IN', ids: objectIds}
 
@@ -255,7 +256,7 @@ define (require, exports, module) ->
           endCurrent()
         else
           current.push(char)
-        
+
       endCurrent()
 
     return tokens
@@ -401,3 +402,7 @@ define (require, exports, module) ->
         _p8() + _p8(true) + _p8(true) + _p8()
       empty: ->
         "00000000-0000-0000-0000-000000000000"
+
+  # API endpoint adapter for Projects.
+  Services.factory 'Tables', Array '$http', '$resource', (http, resource) ->
+    return imtables

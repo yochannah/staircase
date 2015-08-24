@@ -55,7 +55,7 @@ define(['angular', 'lodash', 'imjs'], function (ng, L, im) {
     });
 
     fetchingDefaultMine.then(setMineDetails);
-    
+
     var mineInitialised = fetchingDefaultMine.then(connect).then(function (conn) {
       scope.connection = conn;
       conn.fetchModel()

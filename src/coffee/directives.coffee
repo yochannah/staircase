@@ -7,6 +7,8 @@ define (require) ->
   lines = require 'lines'
   Channel = require 'jschannel'
   jQuery = require 'jquery'
+  ims = require 'imjs'
+
 
   require 'services'
 
@@ -350,7 +352,7 @@ define (require) ->
                 for s in services when root.indexOf(s.root) >= 0
                   return s.token
               console.log "TOKEN", token
-          
+
               step.data.service.token = token
               init()
           else
@@ -409,6 +411,42 @@ define (require) ->
           element.append cloned
           compiled = true
 
+  Directives.directive 'imtable', Array 'Tables', 'Mines', (Tables, Mines) ->
+    restrict: 'AE'
+    replace: true,
+    scope:
+      query: "&"
+
+    # controller: ($scope) ->
+    #   console.log "imtable LOADED", @
+    link: (scope, element, attrs) ->
+
+      val = scope.query()
+      # target = element.first('.testing')
+
+      Mines.get('humanmine').then(imjs.Service.connect).then (conn) ->
+        Tables.loadTable(element, {
+          'start': 1
+          'size': 5
+          'limit': 5
+          'DefaultPageSize': 5
+        },
+          service: conn
+          query: val).then ((table) ->
+            table.query.count().then (c) ->
+              if c < 1
+                console.log "hiding element", element
+                element.hide()
+                # element.css display: none;
+          # table.query.count().then (c) -> scope.$apply -> scope.references.push {name: collection, count: c}
+          # return
+        ), (error) ->
+          console.error 'Could not load table', error
+          return
+    #
+    # template: """
+    #   <div class="testing">test</div>
+    # """
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
@@ -573,4 +611,3 @@ define (require) ->
     link: (scope, element, attrs) -> L.defer ->
       scope.$watch 'folded', (folded) ->
         element.toggleClass 'folded-up', folded
-

@@ -38,7 +38,7 @@
                  [hiccup "1.0.5"] ;; Templating
                  ;; Deal with load issues.
                  ;; see: https://github.com/LightTable/LightTable/issues/794
-                 [org.clojure/core.cache "0.6.3"] 
+                 [org.clojure/core.cache "0.6.3"]
                  [org.clojure/core.memoize "0.5.6" :exclusions [org.clojure/core.cache]]
                  [log4j/log4j "1.2.17"]] ;; Logging
   :min-lein-version "2.0.0"
@@ -88,6 +88,7 @@
         "flymine" "http://www.flymine.org/query/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
+        "humanmine" "http://www.humanmine.org/humanmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"}
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
@@ -113,12 +114,13 @@
                      :Style {:icons :fontawesome}}}
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
+                   :show-report
                    :templates
-                   [:choose-list {:service "flymine"}]
+                   [:choose-list {:service "humanmine"}]
                    [:choose-list {:service "mousemine"}]
                    [:new-query {:service "flymine"}]
                    [:new-query {:service "yeastmine"}]
-                   [:upload-list {:service "flymine"}]
+                   [:upload-list {:service "humanmine"}]
                    [:region-search {:service "flymine"}]
                    [:region-search {:service "mousemine"}]
                    :show-table ;; TODO: make the tools below autoconfigure...

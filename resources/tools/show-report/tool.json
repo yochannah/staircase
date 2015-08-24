@@ -1,0 +1,9 @@
+{
+  "capabilities": ["initial", "now", "next"],
+  "handles": ["item", "query"],
+  "type": "native",
+  "heading": "Report",
+  "icon": "fa-file",
+  "expandable": true,
+  "tall": true
+}
