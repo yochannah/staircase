@@ -7,7 +7,6 @@
   "width": 1,
   "action": "Search",
   "resettable": true,
-  "src": "http://alexkalderimis.github.io/region-search-tool/tool.html",
+  "src": "http://intermine-tools.github.io/region-search-tool/tool.html",
   "sampleData": "2L:14615455..14619002\n2R:5866646..5868384\n3R:2578486..2580016"
 }
-
