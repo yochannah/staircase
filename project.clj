@@ -102,7 +102,8 @@
         "http://*.labs.intermine.org/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
-        "http://intermine.github.io/**"]
+        "http://intermine.github.io/**"
+        "http://intermine-tools.github.io/**"]
       :client-step-config {
         :show-list {
                     :activeTabs [:enrich]}

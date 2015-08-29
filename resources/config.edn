@@ -1,7 +1,7 @@
 {
     :bower-tools [
         [keyword-search
-         "https://github.com/alexkalderimis/multimine-search-tool.git"]]
+         "https://github.com/intermine-tools/multimine-search-tool.git"]]
 
     :strings {
               :projects.projects "Folders"
@@ -14,4 +14,3 @@
       {:type :constraint-violation :constraint "projects_title_sluggish"}
       "Project titles must not have slashes in them"}
 }
-

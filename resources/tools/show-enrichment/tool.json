@@ -5,5 +5,5 @@
   "handles": "enrichment",
   "seamless": false,
   "heading": "Enrichment Results",
-  "src": "http://alexkalderimis.github.io/enrichment-tool/tool.html"
+  "src": "http://intermine-tools.github.io/enrichment-tool/tool.html"
 }
