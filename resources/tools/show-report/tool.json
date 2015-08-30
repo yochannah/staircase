@@ -1,6 +1,6 @@
 {
-  "capabilities": ["initial", "now", "next"],
-  "handles": ["item", "query"],
+  "capabilities": ["next"],
+  "handles": "item",
   "type": "native",
   "heading": "Report",
   "icon": "fa-file",

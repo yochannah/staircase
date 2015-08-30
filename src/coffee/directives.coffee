@@ -305,6 +305,10 @@ define (require) ->
       channel.bind 'has-items', (trans, {key, noun, categories, ids}) ->
         scope.hasItems {type: noun, key, ids}
 
+      channel.bind 'has-item', (trans, {key, noun, categories, ids}) ->
+        console.log "**************has item bound"
+        scope.hasItems {type: noun, key, ids}
+
       channel.bind 'has-list', (trans, data) -> scope.has {what: 'list', data}
 
       channel.bind 'has-ids', (trans, data) -> scope.has {what: 'ids', data}
