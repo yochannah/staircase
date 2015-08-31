@@ -1,11 +1,11 @@
 define (require) ->
-  
+
   ng = require 'angular'
   L = require 'lodash'
   ga = require 'analytics'
   require 'services'
   ChooseDialogueCtrl = require './choose-dialogue'
-  
+
   # Run-time requirements
   injectables = L.pairs
     scope: '$scope'
@@ -46,7 +46,7 @@ define (require) ->
       conf.provides = (x) -> x in providers
     else
       conf.provides = (x) -> x is providers
-    
+
     conf
 
   # Decorator to create injecting constructor.
@@ -56,7 +56,7 @@ define (require) ->
     fn.call @
 
   Controllers = ng.module 'steps.history.controllers', ['steps.services']
-  
+
   Controllers.controller 'HistoryCtrl', class HistoryController
 
     currentCardinal: 0
@@ -74,10 +74,12 @@ define (require) ->
       scope = @scope
 
       scope.$watchCollection 'items', ->
+        # debugger;
         exporters = []
         for tool in scope.nextTools when tool.handles 'items'
           for key, data of scope.items when data.ids.length
             exporters.push {key, data, tool}
+            # debugger;
         otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
         scope.nextSteps = otherSteps.concat(exporters)
 
@@ -144,6 +146,7 @@ define (require) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
+      # debugger;
       {scope, console, to, Q, mines} = @
       if what is 'list'
         return to -> scope.list = data
@@ -262,4 +265,3 @@ define (require) ->
           index: -> scope.$index
           history: -> scope.history
           step: -> scope.s
-

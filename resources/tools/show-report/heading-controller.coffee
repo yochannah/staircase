@@ -4,26 +4,21 @@ define [], -> Array '$scope', (scope) ->
   scope.$watch 'data', (data) ->
     console.log "show-report saw data", data
     scope.type = type = data.type
+    scope.josh = "hello josh"
 
-    if data.ids?
-      scope.n = data.ids.length
-      scope.query =
-        select: ['*']
-        from: type
-        where: [{path: type, op: 'IN', ids: scope.data.ids}]
-    else if data.query
-      scope.type = 'result'
-      scope.query = data.query
+
 
   scope.activate = ->
     scope.previousStep.$promise.then ->
 
+      debugger;
+
+
       step =
-        title: "Exported results"
+        title: "Viewed report"
         tool: scope.tool.ident
-        data:
-          query: scope.query
-          service:
-            root: scope.previousStep.data.service.root
+        data: scope.data
+
+      debugger;
 
       scope.appendStep data: step

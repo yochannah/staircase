@@ -1,12 +1,19 @@
-define ['imjs', 'underscore', 'jquery', 'angular-scroll'], ({Service}, _, jquery) ->
+define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
   Array '$scope', 'Mines', 'Tables', '$document', (scope, Mines, Tables, $document) ->
 
     require.loadCss "/vendor/im-tables/dist/main.sandboxed.css"
 
 
+
     scope.getCollectionQuery = (collection) ->
+
+      # query =
+      #   from: scope.step.data.type
+      #   select
+      console.log "OUCH"
+      # debugger;
       query =
-        from: itemtype
+        from: scope.step.data.type
         select: ["#{collection}.*"]
         where: [
           'path': 'id'
@@ -27,18 +34,27 @@ define ['imjs', 'underscore', 'jquery', 'angular-scroll'], ({Service}, _, jquery
 
     scope.references = []
 
+    debugger;
+
     Mines.get('humanmine')
          .then(Service.connect)
          .then (conn) ->
+           console.log "Got item type", itemtype
            conn.makePath itemtype
            .then (pi) ->
+             console.log "got pi", pi
+             debugger;
              queryCollections pi, conn
 
 
-    itemtype = "Protein"
+    itemtype = scope.step.data.type
     scope.itemname = itemname = "1A03_HUMAN"
 
     queryCollections = (pi, conn) ->
+
+      debugger;
+
+
 
       # Get our display name
       pi.getDisplayName().then (dn) -> scope.$apply -> scope.dn = dn
@@ -49,15 +65,25 @@ define ['imjs', 'underscore', 'jquery', 'angular-scroll'], ({Service}, _, jquery
       attributenames = (attribute for attribute of pi.allDescriptors()[0].attributes)
       scope.collections = (collection for collection of pi.allDescriptors()[0].collections)
 
+      debugger;
 
       attributesquery =
-        'from': itemtype
+        'from': "Gene"
         select: attributenames
         where: [
           'op': 'LOOKUP'
-          'value': itemname
+          'value': "test"
           'path': 'Protein'
         ]
+
+      # attributesquery =
+      #   'from': itemtype
+      #   select: attributenames
+      #   where: [
+      #     'op': 'LOOKUP'
+      #     'value': itemname
+      #     'path': 'Protein'
+      #   ]
 
 
 
