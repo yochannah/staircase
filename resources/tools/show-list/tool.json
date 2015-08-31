@@ -5,5 +5,5 @@
   "type": "IFrame",
   "seamless": true,
   "heading": "Details",
-  "src": "http://localhost:9002/tool.html"
+  "src": "http://intermine-tools.github.io/show-list-tool/tool.html"
 }
