@@ -4,55 +4,48 @@ define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
     require.loadCss "/vendor/im-tables/dist/main.sandboxed.css"
 
 
-
+    # Builds a query for each collection
+    # belonging to the target item. This is used to populate
+    # each collection table.
     scope.getCollectionQuery = (collection) ->
-
-      # query =
-      #   from: scope.step.data.type
-      #   select
-      console.log "OUCH"
-      # debugger;
       query =
         from: scope.step.data.type
         select: ["#{collection}.*"]
         where: [
           'path': 'id'
           'op': '='
-          'value': '124467155'
+          'value': scope.step.data.id
         ]
 
-
-    # obj.scrollTo
-
-
-    # debugger;
+    # Configure the tables to be a bit smaller
     Tables.configure 'DefaultPageSize', '5'
     Tables.configure 'TableCell.IndicateOffHostLinks', false
     Tables.configure 'ShowHistory', false
-    # debugger;
+
 
 
     scope.references = []
 
-    debugger;
+    # We need to rebuild our connection to intermine (look into this later)
+    conn = new imjs.Service.connect scope.step.data.service
 
-    Mines.get('humanmine')
-         .then(Service.connect)
-         .then (conn) ->
-           console.log "Got item type", itemtype
-           conn.makePath itemtype
-           .then (pi) ->
-             console.log "got pi", pi
-             debugger;
-             queryCollections pi, conn
+    scope.queryconn = "abc"
 
 
-    itemtype = scope.step.data.type
-    scope.itemname = itemname = "1A03_HUMAN"
+    path = conn.makePath scope.step.data.type
+
+    #
+    path.then (pi) ->
+      queryCollections pi, conn
+
+
+    #
+    # itemtype = scope.step.data.type
+    # scope.itemname = itemname = "1A03_HUMAN"
 
     queryCollections = (pi, conn) ->
 
-      debugger;
+
 
 
 
@@ -65,36 +58,31 @@ define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
       attributenames = (attribute for attribute of pi.allDescriptors()[0].attributes)
       scope.collections = (collection for collection of pi.allDescriptors()[0].collections)
 
-      debugger;
-
       attributesquery =
-        'from': "Gene"
+        'from': scope.step.data.type
         select: attributenames
         where: [
-          'op': 'LOOKUP'
-          'value': "test"
-          'path': 'Protein'
+          'path': 'id'
+          'op': '='
+          'value': scope.step.data.id
         ]
-
-      # attributesquery =
-      #   'from': itemtype
-      #   select: attributenames
-      #   where: [
-      #     'op': 'LOOKUP'
-      #     'value': itemname
-      #     'path': 'Protein'
-      #   ]
-
 
 
       # Gets the items's attributes
       conn.tableRows(attributesquery).then (values) ->
 
+        # debugger;
+
         # Get the first result of the query
         if _.isArray values then values = values.pop()
-
+        scope.item = {}
         values = _.map values, (attr) ->
           attr.human = _.last attr.column.split(".")
+          scope.item[attr.human] = attr.value
           return attr
+
+
+
+
 
         scope.$apply -> scope.attributes = values

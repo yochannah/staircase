@@ -1,6 +1,14 @@
 
 
-<h1>{{dn}}: {{itemname}}</h1>
+<h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
+
+
+<table>
+  <tr ng-repeat="attribute in attributes">
+    <td>{{attribute.human}}</td>
+    <td>{{attribute.value}}</td>
+  </tr>
+</table>
 
 
 

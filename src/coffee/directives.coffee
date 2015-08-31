@@ -420,12 +420,16 @@ define (require) ->
     replace: true,
     scope:
       query: "&"
+      service: "=service"
+
 
     # controller: ($scope) ->
     #   console.log "imtable LOADED", @
     link: (scope, element, attrs) ->
 
       val = scope.query()
+      # debugger;
+      console.log "scope.service", scope.service
       # target = element.first('.testing')
 
       Mines.get('humanmine').then(imjs.Service.connect).then (conn) ->
@@ -440,7 +444,9 @@ define (require) ->
             table.query.count().then (c) ->
               if c < 1
                 console.log "hiding element", element
-                element.hide()
+                # debugger;
+                element.addClass "hide"
+                # element.hide()
                 # element.css display: none;
           # table.query.count().then (c) -> scope.$apply -> scope.references.push {name: collection, count: c}
           # return
