@@ -1,23 +1,24 @@
+<div class="report-tool">
 
 
-<h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
+  <h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
 
 
-<table>
-  <tr ng-repeat="attribute in attributes">
-    <td>{{attribute.human}}</td>
-    <td>{{attribute.value}}</td>
-  </tr>
-</table>
+  <table>
+    <tr ng-repeat="attribute in attributes">
+      <td>{{attribute.human}}</td>
+      <td>{{attribute.value}}</td>
+    </tr>
+  </table>
 
 
 
-<div ng-repeat="collection in collections">
-  <h3>{{collection}}</h3>
-  <imtable query="getCollectionQuery(collection)">replaceme</imtable>
+  <div ng-repeat="collection in collections">
+    <h3>{{collection}}</h3>
+    <imtable query="getCollectionQuery(collection)">replaceme</imtable>
+  </div>
+
 </div>
-
-
 
 <!-- <div class="flex-row-1 flex-row-sm-2 flex-row-md-2 flex-row-lg-2">
   <div class="flex-box bd flexy-container" ng-repeat="item in attributes">
