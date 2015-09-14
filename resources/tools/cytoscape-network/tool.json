@@ -1,0 +1,9 @@
+{
+  "capabilities": ["now", "provider", "next"],
+  "provides": ["report", "list"],
+  "handles": ["item", "ids"],
+  "type": "IFrame",
+  "seamless": true,
+  "heading": "Interaction view",
+  "src": "http://localhost:3001/tool.html"
+}
