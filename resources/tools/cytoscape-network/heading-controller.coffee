@@ -1,6 +1,6 @@
 define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
 
-  scope.list = scope.data
+  scope.item = scope.data
 
   scope.showNetwork = ->
     step =
@@ -8,7 +8,8 @@ define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
       tool: "cytoscape-network"
       data:
         service:
-          root: scope.list.root
-        listName: scope.list.name
+          root: scope.data.service.root
+          token : scope.data.service.root
+        id : scope.data.id
 
     scope.appendStep data: step
