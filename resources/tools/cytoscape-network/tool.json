@@ -5,5 +5,6 @@
   "type": "IFrame",
   "seamless": true,
   "heading": "Interaction view",
-  "src": "http://localhost:3001/tool.html"
+  "src": "http://localhost:3001/tool.html",
+  "tall": true
 }
