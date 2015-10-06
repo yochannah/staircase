@@ -3,7 +3,7 @@
     // bottom: 0;
     // left: 0;
     width: 100%;
-    
+
     ul li {
         list-style-type: none;
     }
@@ -38,8 +38,14 @@
 #cookie-message {
     position: fixed;
     bottom: 0;
+    margin-top:10px;
 
     p {
         color: @text-color;
+        padding-left: 10px; //because it was breshing the left
+    }
+
+    button {
+      margin-right:20px; //because it was glued to the right. 
     }
 }
