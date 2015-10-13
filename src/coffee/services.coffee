@@ -68,7 +68,7 @@ define (require, exports, module) ->
     requireRelativeToBase ['.' + tool.providerURI], (factory) ->
       handleRequest = injector.invoke factory, this
       handleRequest(step, data).then d.resolve, d.reject
-      
+
     return d.promise
 
   do (deps = ['$cacheFactory', 'localStorageService']) ->
@@ -192,7 +192,7 @@ define (require, exports, module) ->
 
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->
     maker = {}
-    
+
     maker.fromIds = ({listDetails, objectIds, type, service}, category) -> connectTo(service.root).then (conn) ->
       constraint = {path: type, op: 'IN', ids: objectIds}
 
@@ -255,7 +255,7 @@ define (require, exports, module) ->
           endCurrent()
         else
           current.push(char)
-        
+
       endCurrent()
 
     return tokens

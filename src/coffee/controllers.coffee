@@ -13,7 +13,7 @@ define (require) ->
   require 'history/controllers'
 
   Controllers = ng.module('steps.controllers', [
-    'ngCookies', 'steps.services',
+    'ngCookies', 'steps.services', 'ngAnimate'
     'steps.projects',
     'steps.starting-point',
     'steps.facets.controllers',
@@ -53,4 +53,3 @@ define (require) ->
   mountController 'BrandCtrl', 'brand'
 
   mountController 'NavCtrl', 'brand'
-

@@ -1,11 +1,11 @@
 define (require) ->
-  
+
   ng = require 'angular'
   L = require 'lodash'
   ga = require 'analytics'
   require 'services'
   ChooseDialogueCtrl = require './choose-dialogue'
-  
+
   # Run-time requirements
   injectables = L.pairs
     scope: '$scope'
@@ -46,7 +46,7 @@ define (require) ->
       conf.provides = (x) -> x in providers
     else
       conf.provides = (x) -> x is providers
-    
+
     conf
 
   # Decorator to create injecting constructor.
@@ -56,7 +56,7 @@ define (require) ->
     fn.call @
 
   Controllers = ng.module 'steps.history.controllers', ['steps.services']
-  
+
   Controllers.controller 'HistoryCtrl', class HistoryController
 
     currentCardinal: 0
@@ -66,35 +66,43 @@ define (require) ->
     constructor: inject ->
       @init()
       @startWatching()
-      console.log @
+      @
 
     elide: true
 
     startWatching: ->
       scope = @scope
 
-      scope.$watchCollection 'items', ->
-        exporters = []
-        for tool in scope.nextTools when tool.handles 'items'
-          for key, data of scope.items when data.ids.length
-            exporters.push {key, data, tool}
-        otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
-        scope.nextSteps = otherSteps.concat(exporters)
+      scope.$watch 'messages', (msgs) -> null # TODO
 
-      scope.$watch 'messages', (msgs) ->
-        handlers = L.values msgs
-        otherSteps = (s for s in scope.nextSteps when s.kind isnt 'msg')
-        scope.nextSteps = otherSteps.concat(handlers)
 
-      scope.$watch 'list', ->
-        listHandlers = []
-        for tool in scope.nextTools when tool.handles 'list'
-          listHandlers.push {tool, data: scope.list}
-        otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'list')
-        scope.nextSteps = otherSteps.concat(listHandlers)
+      scope.$watchCollection 'items', (items) ->
+        null # TODO
+        # exporters = []
+        # for tool in scope.nextTools when tool.handles 'items'
+        #   for key, data of scope.items when data.ids.length
+        #     exporters.push {key, data, tool}
+        # otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
+        # scope.nextSteps = otherSteps.concat(exporters)
+
+      scope.$watch 'list', (val) =>
+        if val?
+          # TODO Refactor this to somewhere else
+          connect = @connectTo scope.step.data.service.root
+          connect.then (s) ->
+            s.fetchList(scope.step.data.listName).then (res) ->
+              scope.list.size = res.size
+
+          listHandlers = []
+          for tool in scope.nextTools when tool.handles 'list'
+            for category in scope.categories
+              if tool.ident in category.tools
+                listHandlers.push {tool, category: category, data: scope.list}
+          scope.nextSteps = listHandlers
+
 
     init: ->
-      {Histories, Mines, params, http} = @
+      {Histories, Mines, params, http, connectTo} = @
 
       # See below for data fetching to fill these.
       @scope.nextTools ?= []
@@ -102,6 +110,8 @@ define (require) ->
       @scope.messages ?= {}
       @scope.nextSteps ?= []
       @scope.items ?= {}
+      @scope.categories ?= []
+      @scope.opennextsteps = false
 
       @scope.collapsed = true # Hide details in reduced real-estate view.
       @scope.state = {expanded: false, nextStepsCollapsed: true}
@@ -110,6 +120,24 @@ define (require) ->
       @scope.steps = Histories.getSteps id: params.id
       @scope.step = Histories.getStep id: params.id, idx: @currentCardinal - 1
       @mines = Mines.all()
+      @connectTo = connectTo
+      # debugger
+
+      @scope.showtools = (val) => @scope.ccat = val
+
+      @scope.clearcc = => @scope.ccat = null
+
+      @scope.showmenu = => @scope.showsubmenu = true
+
+      @scope.hidemenu = => @scope.showsubmenu = false
+
+      @scope.expandhistory = => @scope.openhistory = true
+
+      @scope.shrinkhistory = => @scope.openhistory = false
+
+      @scope.expandnextsteps = => @scope.opennextsteps = true
+
+      @scope.shrinknextsteps = => @scope.opennextsteps = false
 
       toolNotFound = (e) => @to => @scope.error = e
 
@@ -122,6 +150,8 @@ define (require) ->
       http.get('/tools', params: {capabilities: 'provider'})
           .then ({data}) -> data.map toTool
           .then (providers) => @scope.providers = providers
+      http.get('/tool-categories')
+          .then ({data}) => @scope.categories = data;
 
     saveHistory: ->
       @scope.editing = false
@@ -134,6 +164,7 @@ define (require) ->
 
     setItems: -> (key, type, ids) => @set ['items', key], {type, ids}
 
+
     # Set scope values using an array of keys.
     # eg: this.set ['foo', 'bar'], 2 == this.scope.foo.bar = 2
     #       (but in a timeout)
@@ -144,7 +175,7 @@ define (require) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
-      {scope, console, to, Q, mines} = @
+      {scope, console, to, Q, mines, connectTo} = @
       if what is 'list'
         return to -> scope.list = data
 
@@ -236,7 +267,8 @@ define (require) ->
             goTo "/history/#{ history.id }/#{ nextCardinal }"
             ga 'send', 'event', 'history', 'append', step.tool
 
-  Controllers.controller 'HistoryStepCtrl', Array '$scope', '$log', '$modal', (scope, log, modalFactory) ->
+  Controllers.controller 'HistoryStepCtrl', Array '$scope', '$log', '$modal', 'Mines', (scope, log, modalFactory, Mines) ->
+
 
     scope.$watch 'appView.elide', ->
       scope.elide = scope.appView.elide && scope.$middle && (scope.steps.length - scope.$index) > 3
@@ -253,6 +285,7 @@ define (require) ->
         modal.dismiss 'cancel'
         scope.data = L.clone step.data, true
 
+
     scope.openEditDialogue = ->
       dialogue = modalFactory.open
         templateUrl: '/partials/edit-step-data.html'
@@ -262,4 +295,3 @@ define (require) ->
           index: -> scope.$index
           history: -> scope.history
           step: -> scope.s
-

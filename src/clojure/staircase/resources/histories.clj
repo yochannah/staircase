@@ -114,4 +114,3 @@
       (-> db (sql/insert! :histories values) first :id))))
 
 (defn new-history-resource [db] (map->HistoryResource {:db db}))
-

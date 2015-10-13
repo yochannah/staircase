@@ -8,6 +8,7 @@ define (require) ->
   Channel = require 'jschannel'
   jQuery = require 'jquery'
 
+
   require 'services'
 
   # Used by drag/drop directives for interacting with native drag and drop API.
@@ -277,7 +278,7 @@ define (require) ->
     replace: true
     template: """
       <div class="panel-body">
-        <iframe is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
+        <iframe scrollable is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
       </div>
     """
     link: (scope, element, attrs) ->
@@ -350,13 +351,14 @@ define (require) ->
                 for s in services when root.indexOf(s.root) >= 0
                   return s.token
               console.log "TOKEN", token
-          
+
               step.data.service.token = token
               init()
           else
             init()
 
   interpolatedHeading = "<span>{{tool.heading}}</span>"
+
 
   managedHeading = (src) -> """<ng-include src="'#{ src }'"></ng-include>"""
 
@@ -380,7 +382,7 @@ define (require) ->
       </div>
     """
     link: (scope, element, attrs) ->
-      element.addClass('panel panel-default')
+      # element.addClass('panel panel-default')
       console.log 'currentStep.link called'
       compiled = false
       scope.$watch 'tool.type', (toolType) ->
@@ -534,9 +536,13 @@ define (require) ->
       data: '='
       tool: '='
       service: '=?'
+      category: '='
+
     link: (scope, element, attrs) ->
 
       scope.$watch 'tool.headingURI', ->
+
+        # console.log "THIS TOOL IS", @
 
         if scope.tool
 
@@ -573,4 +579,3 @@ define (require) ->
     link: (scope, element, attrs) -> L.defer ->
       scope.$watch 'folded', (folded) ->
         element.toggleClass 'folded-up', folded
-

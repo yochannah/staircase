@@ -10,6 +10,7 @@ require.config
 
   shim:
     angular:
+      deps: ['jquery']
       exports: 'angular'
     underscore:
       exports: '_'
@@ -38,6 +39,10 @@ require.config
     jschannel: # TODO: replace with UMD fork.
       exports: 'Channel'
     priority: [ 'angular' ]
+    'nanoscroller':
+      deps: ['jquery']
+    'angular-nanoscroller':
+      deps: ['angular', 'nanoscroller']
 
   packages: [
     {
@@ -78,5 +83,7 @@ require.config
     select2:           '/vendor/select2/select2'
     text:              "/vendor/requirejs-plugins/lib/text"
     underscore:        '/vendor/lodash/dist/lodash.underscore'
+    'nanoscroller': '/vendor/nanoscroller/bin/javascripts/jquery.nanoscroller'
+    'angular-nanoscroller': "/vendor/angular-nanoscroller/scrollable"
 
   deps: ['./bootstrap']

@@ -14,6 +14,7 @@ define (require, exports, module) ->
   require 'angular-cookies'
   require 'angular-local-storage'
   require 'angular-xeditable'
+  require 'angular-nanoscroller'
   require 'filters'
   require 'services'
   require 'directives'
@@ -38,8 +39,9 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
-    'xeditable'
-    'cgNotify'
+    'xeditable',
+    'cgNotify',
+    'sun.scrollable'
   ]
 
   Steps.config Array '$routeProvider', (routes) -> Steps.routes = routes
@@ -68,4 +70,3 @@ define (require, exports, module) ->
       scope.startingPoints = data.map (tool) -> tool.active = true; tool
 
     ga 'send', 'event', 'init', $loc.path()
-

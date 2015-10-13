@@ -76,23 +76,24 @@
   :env {
       :asset-js-engine :v8
       :web-search-placeholder "enter a search term"
-      :web-gh-repository "https://github.com/alexkalderimis/staircase"
+      :web-gh-repository "https://github.com/intermine/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
       :db-migrate true ;; Set falsy to disable migrations.
       :web-project-title "InterMine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)
-      :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
+      :web-contacts [["fa-github" "https://github.com/intermine/staircase" "GitHub"]]
       :web-services {
-        "flymine" "http://www.flymine.org/query/service"
+        "flymine-beta" "http://beta.flymine.org/beta/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
-        "mousemine" "http://www.mousemine.org/mousemine/service"}
+        "mousemine" "http://www.mousemine.org/mousemine/service"
+        "human" "http://www.humanmine.org/humanmineokay/service"}
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
-                    "flymine"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
+                    "flymine-beta"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
                     "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
                     "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
                     "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
@@ -112,24 +113,63 @@
                                  :PreviewTrigger :click}
                      :ShowHistory false
                      :Style {:icons :fontawesome}}}
+
+      :web-tool-categories [
+        {:label "Gene Ontology"
+        :icon "fa fa-database"
+        :tools [:list-templates]}
+        {:label "Pathways"
+        :icon "fa fa-code-fork"
+        :tools [:list-templates]}
+        {:label "Protein Domain"
+        :icon "fa fa-bar-chart"
+        :tools [:tool1 :tool2 :tool3]}
+        {:label "Literature"
+        :icon "fa fa-book"
+        :tools [:tool1 :tool2 :tool3]}
+        {:label "Expression"
+        :icon "fa fa-briefcase"
+        :tools [:list-templates]}
+        {:label "Homology"
+        :icon "fa fa-tree"
+        :tools [:convert-list :list-templates]}
+        {:label "Interactions"
+        :icon "fa fa-share-alt"
+        :tools [:tool1 :tool2 :tool3]}
+        {:label "Regulation"
+        :icon "fa fa-gears"
+        :tools [:list-templates]}
+        {:label "Diseases"
+        :icon "fa fa-medkit"
+        :tools [:tool1 :tool2 :tool3]}
+        {:label "Genomics"
+        :icon "fa fa-heart"
+        :tools [:tool1 :tool2 :tool3]}
+        {:label "Proteins"
+        :icon "fa fa-send"
+        :tools [:list-templates]}
+        {:label "Function"
+        :icon "fa fa-cube"
+        :tools [:tool1 :tool2 :tool3]}]
+
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
-                   [:choose-list {:service "flymine"}]
+                   [:choose-list {:service "flymine-beta"}]
                    [:choose-list {:service "mousemine"}]
-                   [:new-query {:service "flymine"}]
+                   [:new-query {:service "flymine-beta"}]
                    [:new-query {:service "yeastmine"}]
-                   [:upload-list {:service "flymine"}]
-                   [:region-search {:service "flymine"}]
-                   [:region-search {:service "mousemine"}]
+                   [:upload-list {:service "flymine-beta"}]
+                   [:region-search {:service "flymine-beta"}]
+                   [:region-search {:service "mousemine" :categories ["1" "2"]}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
-                   :convert-list
+                   [:convert-list {:category "Homology"}]
                    :list-templates
-                   :export
+                   [:export {:category ["Export"]}]
                    :id-handler
                    :keyword-search ;; From resources/config - really must auto-configure this list...
                    ]

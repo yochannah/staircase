@@ -31,7 +31,7 @@
             [cemerick.drawbridge :as drawbridge]
             [cemerick.friend :as friend] ;; auth.
             [cemerick.friend.workflows :as workflows]
-            [staircase.tools :refer (get-tools get-tool)]
+            [staircase.tools :refer (get-tools get-tool get-categories)]
             [staircase.data :as data] ;; Data access routines that don't map nicely to resources.
             [staircase.views :as views] ;; HTML templating.
             [compojure.route :as route]
@@ -125,7 +125,7 @@
 (defn- build-app-routes [{conf :config :as app}]
   (let [serve-index #(views/index @conf)
         greedy #".+"]
-    (routes 
+    (routes
       (GET "/" [] (serve-index))
       (GET "/about" [] (serve-index))
       (GET "/projects" [] (serve-index))
@@ -135,6 +135,7 @@
       (GET "/starting-point/:tool/:service" [] (serve-index))
       (GET ["/starting-point/:tool/:service/:args" :args greedy] [] (serve-index))
       (GET "/tools" [capabilities] (response (get-tools @conf capabilities)))
+      (GET "/tool-categories" [] (response (get-categories @conf)))
       (GET "/tools/:id" [id] (if-let [tool (get-tool @conf id)]
                               (response tool)
                               {:status 404}))

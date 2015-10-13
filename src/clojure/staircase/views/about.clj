@@ -9,15 +9,14 @@
     [:div.row
      [:div.col-md-8.col-md-offset-2
       [:h1
-       (image "/images/flattened-helix-right-128px.png")
+       (image "")
        (:project-title config)]]]
     [:div.row
      [:form.search-form.col-sm-6.col-sm-offset-3 (search-input config)]]
     [:div.row
-     [:p "The data-flow interface to InterMine data-warehouses,
+     [:p {:antiscroll "autoHide:false"} "The data-flow interface to InterMine data-warehouses,
          providing an extensible, programmable work-bench for
-         scientists."]]
-    ]])
+         scientists."]]]])
 
 (defn snippet [config]
   (html [:div.container-fluid
@@ -63,4 +62,3 @@
           [:td
            "This button restores the component to its orginal state, removing any filters you may have applied."]]]]
         ]]]]]))
-
