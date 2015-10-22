@@ -1,4 +1,4 @@
-define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
+define ['imjs'], ({Service}) -> Array '$scope', 'Mines', 'makeList', (scope, mines, makeList) ->
 
   scope.list = scope.data
 
@@ -12,3 +12,15 @@ define ['imjs'], ({Service}) -> Array '$scope', 'Mines', (scope, mines) ->
         listName: scope.list.name
 
     scope.appendStep data: step
+
+
+  scope.queryList = ->
+    makeList.fromQuery(scope.list.query, scope.list.service).then (list) ->
+      step =
+        title: "Created list #{ list.name }"
+        tool: 'show-list'
+        data:
+          listName: list.name
+          service: scope.list.service
+          
+      scope.appendStep data: step
