@@ -336,7 +336,7 @@ define (require) ->
             channel.call
               method: 'init'
               params: step.data
-              error: -> console.error "initialization failed"
+              error: (e) -> console.error "initialization failed", e
               success: ->
                 console.log "Initialized"
                 initialised = true
@@ -350,7 +350,7 @@ define (require) ->
                 for s in services when root.indexOf(s.root) >= 0
                   return s.token
               console.log "TOKEN", token
-          
+
               step.data.service.token = token
               init()
           else
@@ -573,4 +573,3 @@ define (require) ->
     link: (scope, element, attrs) -> L.defer ->
       scope.$watch 'folded', (folded) ->
         element.toggleClass 'folded-up', folded
-
