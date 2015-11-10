@@ -76,14 +76,14 @@
   :env {
       :asset-js-engine :v8
       :web-search-placeholder "enter a search term"
-      :web-gh-repository "https://github.com/alexkalderimis/staircase"
+      :web-gh-repository "https://github.com/intermine/staircase"
       :db-classname "org.postgresql.Driver"
       :db-subprotocol "postgresql"
       :db-migrate true ;; Set falsy to disable migrations.
       :web-project-title "InterMine"
       :web-max-session-age ~(* 60 60 24)
       :web-max-age ~(* 30 24 60 60)
-      :web-contacts [["fa-github" "https://github.com/alexkalderimis/staircase" "GitHub"]]
+      :web-contacts [["fa-github" "https://github.com/intermine/staircase" "GitHub"]]
       :web-services {
         "flymine" "http://www.flymine.org/query/service"
         "zfin" "http://www.zebrafishmine.org/service"

@@ -15,6 +15,7 @@ CREATE TABLE histories (
 CREATE TABLE steps (
     id    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(1024),
+    description VARCHAR(1024),
     tool  VARCHAR(1024) NOT NULL,
     stamp VARCHAR(1024), -- Intended for identifying against which version/release a step was run.
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
