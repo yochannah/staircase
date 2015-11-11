@@ -1,11 +1,11 @@
+<div class="showReport">
+  <h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
 
 
-<h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
-
-
-<table>
-  <tr ng-repeat="attribute in attributes">
-    <td>{{attribute.human}}</td>
-    <td>{{attribute.value}}</td>
-  </tr>
-</table>
+  <table class="table">
+    <tr ng-repeat="attribute in attributes">
+      <td class="propName">{{attribute.propName}}</td>
+      <td>{{attribute.value}}</td>
+    </tr>
+  </table>
+</div>

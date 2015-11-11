@@ -42,18 +42,17 @@ define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
           'value': scope.step.data.id
         ]
 
-
       # Gets the items's attributes
       conn.tableRows(attributesquery).then (values) ->
-
         # debugger;
 
         # Get the first result of the query
         if _.isArray values then values = values.pop()
         scope.item = {}
         values = _.map values, (attr) ->
-          attr.human = _.last attr.column.split(".")
-          scope.item[attr.human] = attr.value
+          console.log(attr.column, attr.column.split("."));
+          attr.propName = _.last attr.column.split(".")
+          scope.item[attr.propName] = attr.value
           return attr
 
         scope.$apply -> scope.attributes = values
