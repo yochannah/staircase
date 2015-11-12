@@ -1,5 +1,10 @@
 <div class="showReport">
-  <h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier}}</h1>
+  <h1>{{dn}}: {{item.symbol}} {{item.primaryIdentifier ||
+    item.name || item.identifier}}</h1>
+
+    <div class="description" ng-show="description">
+     {{description.value}}
+   </div>
 
 
   <table class="table">
@@ -8,4 +13,8 @@
       <td>{{attribute.value}}</td>
     </tr>
   </table>
+
+  <div class="loader" ng-show="showLoader">
+  </div>
+
 </div>
