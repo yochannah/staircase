@@ -100,7 +100,7 @@
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
         "http://*.labs.intermine.org/**"
-        "http://localhost:9002/**"
+        "http://localhost:*/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
         "http://intermine.github.io/**"
@@ -131,6 +131,7 @@
                    :resolve-ids
                    :combine-lists
                    :convert-list
+                   :protein-viewer
                    :list-templates
                    :export
                    :id-handler
