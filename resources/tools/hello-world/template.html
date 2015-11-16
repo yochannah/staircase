@@ -1,5 +1,13 @@
 <p class="block-text">
     This is steps <code>{{stepsVersion}}</code>
     in staircase version <code>{{staircaseVersion}}</code>.
-</p>
 
+    <section class="bob">
+
+        <section class="list" mb-scrollbar="scrollbar('vertical', true)">
+            <div class="item" ng-repeat="item in items">
+              {{item.name}}
+            </div>
+        </section>
+    </section>
+</p>

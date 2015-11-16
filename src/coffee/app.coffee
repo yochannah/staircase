@@ -20,6 +20,7 @@ define (require, exports, module) ->
   require 'controllers'
   config = require 'json!/api/v1/client-config'
   ga     = require 'analytics'
+  require 'mb-scrollbar'
 
   # Whitelist the sources of any tools we plan on using.
   whiteList = ['self'].concat(config.whitelist)
@@ -38,6 +39,7 @@ define (require, exports, module) ->
     'ui.select2',
     'LocalStorageModule',
     'headroom',
+    'mb-scrollbar'
     'xeditable'
     'cgNotify'
   ]
@@ -68,4 +70,3 @@ define (require, exports, module) ->
       scope.startingPoints = data.map (tool) -> tool.active = true; tool
 
     ga 'send', 'event', 'init', $loc.path()
-

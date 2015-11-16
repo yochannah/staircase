@@ -38,6 +38,8 @@ require.config
     jschannel: # TODO: replace with UMD fork.
       exports: 'Channel'
     priority: [ 'angular' ]
+    'mb-scrollbar':
+      deps: ['angular']
 
   packages: [
     {
@@ -71,6 +73,7 @@ require.config
     jquery:            '/vendor/jquery/dist/jquery.min' # Used for dataTransfer in drag-drop.
     jschannel:         '/vendor/jschannel'
     json:              "/vendor/requirejs-plugins/src/json"
+    'mb-scrollbar':    "/vendor/mb-scrollbar/mb-scrollbar.min"
     markdownConverter: "/vendor/requirejs-plugins/lib/Markdown.Converter"
     mdown:             "/vendor/requirejs-plugins/src/mdown.js"
     'ng-headroom':     '/vendor/headroom.js/dist/angular.headroom'

@@ -1,6 +1,7 @@
 {
   "capabilities": ["initial"],
   "type": "native",
-  "heading": "Hello World"
-}
+  "heading": "Hello World",
+  "style": "./style.less"
 
+}
