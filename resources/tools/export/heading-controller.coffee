@@ -1,7 +1,6 @@
 define [], -> Array '$scope', (scope) ->
 
   scope.$watch 'data', (data) ->
-    debugger
     scope.type = type = data.type
 
     if data.ids?
@@ -16,7 +15,6 @@ define [], -> Array '$scope', (scope) ->
 
   scope.activate = ->
     scope.previousStep.$promise.then ->
-
       step =
         title: "Export"
         tool: scope.tool.ident
@@ -24,7 +22,5 @@ define [], -> Array '$scope', (scope) ->
           query: scope.query
           service:
             root: scope.previousStep.data.service.root
-
-      debugger
 
       scope.appendStep data: step
