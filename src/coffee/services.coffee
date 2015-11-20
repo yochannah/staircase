@@ -176,8 +176,8 @@ define (require, exports, module) ->
 
   # Provide a function of the form:
   # :: (ConnectionArgs, {type :: string, ids :: [integer]}) -> Promise<Object<string, [string]>>
-  do (name = 'identifyItems', deps = ['$q', 'connectTo']) ->
-    Services.factory name, Array deps..., (Q, connectTo) -> (service, items) ->
+  do (name = 'identifyItems', deps = ['$q', 'connectTo', 'getIdQuery']) ->
+    Services.factory name, Array deps..., (Q, connectTo, getIdQuery) -> (service, items) ->
       getService = connectTo service.root
       getQuery = getService.then getIdQuery items.type, items.ids
 
@@ -185,9 +185,8 @@ define (require, exports, module) ->
         service.rows(query).then (rows) ->
           fields = L.zipObject query.select, query.select.map -> []
           for row in rows
-            for value, i in row when cell?
-              fields[query.select[i]].push String(value)
-
+            for value, index in row
+              fields[query.select[index]].push String(value)
           L.mapValues fields, (values) -> L.uniq(values)
 
   Services.factory 'makeList', Array '$q', 'connectTo', 'generateListName', (Q, connectTo, genName) ->

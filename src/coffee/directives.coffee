@@ -278,7 +278,7 @@ define (require) ->
     replace: true
     template: """
       <div class="panel-body">
-        <iframe scrollable is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
+        <iframe is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
       </div>
     """
     link: (scope, element, attrs) ->
@@ -549,6 +549,7 @@ define (require) ->
           loadStyle $window, scope.tool
 
           ctrl = '.' + scope.tool.headingControllerURI
+          console.log "LOADING CONTROLLER", ctrl
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
           requirejs {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->

@@ -1,10 +1,26 @@
+define ['lodash', 'imjs'], (L, {Query}) ->
 
-ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-TOO_MANY_CONS = "Cannot add this constraint - the query would exceed the maximum number off constraints"
+  getParsedTitle = ({title, name}) -> (title or name).replace /.*--> /, ''
 
-define ['lodash'], (L) ->
+  isSuitableForType = (type, model) -> (template) ->
+    query = new Query L.extend {}, template, {model}
+    return false if not query.views.length
+    [con, conN] = editables = L.where(query.constraints, editable: true)
+    return false if (not con)
 
+    if conN # We can handle some classes of multiple constraints.
+      lookups = L.where(editables, op: 'LOOKUP')
+      if lookups.length isnt 1
+        console.log "Template #{ template.name } isnt suitable because it doesn't have one lookup", template
+        return false
+      others = (c for c in editables when c.op isnt 'LOOKUP')
+      unless L.all(others, (c) -> c.switchable)
+        console.log  "Template #{ template.name } isnt suitable because the other editable are not switchable", template
+        return false
 
+    path = query.makePath con.path
+    path = path.getParent() if path.isAttribute()
+    path.isa type
 
   decap = (str) -> str.replace /^[^\.]*/, ''
 
@@ -78,31 +94,5 @@ define ['lodash'], (L) ->
       q.addConstraints newCons
       q.constraintLogic = newLogic
 
-  inject = ['$timeout', '$log', '$q', '$scope', 'identifyItem', 'identifyItems']
-  Array inject..., (to, console, Q, scope, identifyItem, identifyItems) ->
 
-    scope.runTemplate = ->
-      console.log "this is", @
-      scope.run scope.query if scope.query?
-
-
-    getReplacementConstraints = if scope.list?
-      console.debug "Running over #{ scope.list.name }"
-      Q.when [{op: 'IN', value: scope.list.name}]
-    else if scope.items?.ids
-      console.debug "Identifying items at #{ scope.service.root }"
-      if scope.items.ids.length is 1
-        identifyItem(scope.service, type: scope.items.type, id: scope.items.ids[0]).then (fields) ->
-          ({path: decap(path), op: '==', value} for path, value of fields)
-      else
-        identifyItems(scope.service, scope.items).then (fields) ->
-          ({path: decap(path), op: 'ONE OF', values} for path, values of fields)
-    else
-      Q.reject 'Cannot generate constraints - list or items are required'
-
-    Q.all([scope.service.query(scope.template), getReplacementConstraints]).then ([q, cons]) ->
-      console.debug "Constraints are", cons
-      applyConstraintsToQuery q, cons
-
-      to -> scope.query = q
-      q.count().then (n) -> to -> scope.count = n
+  return {isSuitableForType, getParsedTitle}

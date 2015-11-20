@@ -75,31 +75,26 @@ define (require) ->
 
       scope.$watch 'messages', (msgs) -> null # TODO
 
+      scope.$watchCollection 'items', (items) -> null # TODO
 
-      scope.$watchCollection 'items', (items) ->
-        null # TODO
-        # exporters = []
-        # for tool in scope.nextTools when tool.handles 'items'
-        #   for key, data of scope.items when data.ids.length
-        #     exporters.push {key, data, tool}
-        # otherSteps = (s for s in scope.nextSteps when not s.tool.handles 'items')
-        # scope.nextSteps = otherSteps.concat(exporters)
+      scope.$watch 'lastemitted', (val) =>
 
-      scope.$watch 'list', (val) =>
         if val?
-          # TODO Refactor this to somewhere else
-          connect = @connectTo scope.step.data.service.root
-          connect.then (s) ->
-            s.fetchList(scope.step.data.listName).then (res) ->
-              scope.list.size = res.size
+          if val.what == "list"
+            connect = @connectTo scope.step.data.service.root
+            connect.then (s) ->
+              s.fetchList(scope.step.data.listName).then (res) =>
+                scope.datainfo = "#{res.size} #{val.type}s"
+
+          if val.what == "ids"
+            scope.datainfo = "#{val.ids.length} #{val.type}s"
 
           listHandlers = []
-          for tool in scope.nextTools when tool.handles 'list'
+          for tool in scope.nextTools when tool.handles val.what
             for category in scope.categories
               if tool.ident in category.tools
-                listHandlers.push {tool, category: category, data: scope.list}
+                listHandlers.push {tool, category: category, data: val}
           scope.nextSteps = listHandlers
-
 
     init: ->
       {Histories, Mines, params, http, connectTo} = @
@@ -121,7 +116,6 @@ define (require) ->
       @scope.step = Histories.getStep id: params.id, idx: @currentCardinal - 1
       @mines = Mines.all()
       @connectTo = connectTo
-      # debugger
 
       @scope.showtools = (val) => @scope.ccat = val
 
@@ -175,9 +169,12 @@ define (require) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
+
+      if data? then data.what = what
+
       {scope, console, to, Q, mines, connectTo} = @
-      if what is 'list'
-        return to -> scope.list = data
+
+      return to -> scope.lastemitted = data
 
       triggerUpdate = -> to -> scope.messages = L.assign {}, scope.messages
 
