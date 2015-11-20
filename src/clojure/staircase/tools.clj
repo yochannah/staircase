@@ -64,10 +64,14 @@
   [config ident]
   (first (filter #(= ident (:ident %)) (map get-tool-conf (:tools config)))))
 
+(defn get-categories
+  [config]
+  (:tool-categories config))
+
 (defn get-tools
   [config capability]
-  (debug "Getting tools with the" capability "capability")
+  ; (println (clojure.pprint/pprint (:tool-categories config)))
+  ; (println "Getting tools with the" capability "capability")
   (->> (:tools config)
         (map get-tool-conf)
         (filter (partial has-capability capability))))
-

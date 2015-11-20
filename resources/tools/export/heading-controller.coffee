@@ -18,11 +18,11 @@ define [], -> Array '$scope', (scope) ->
     scope.previousStep.$promise.then ->
 
       step =
-        title: "Exported results"
+        title: "Export"
         tool: scope.tool.ident
         data:
           query: scope.query
           service:
             root: scope.previousStep.data.service.root
-
+            
       scope.appendStep data: step

@@ -137,7 +137,8 @@
             }
             return _results;
           })();
-          return scope.nextSteps = otherSteps.concat(exporters);
+          scope.nextSteps = otherSteps.concat(exporters);
+          return console.log("NEXT STEPS (items)", scope.nextSteps);
         });
         scope.$watch('messages', function(msgs) {
           var handlers, otherSteps, s;
@@ -154,10 +155,11 @@
             }
             return _results;
           })();
-          return scope.nextSteps = otherSteps.concat(handlers);
+          scope.nextSteps = otherSteps.concat(handlers);
+          return console.log("NEXT STEPS (msg)", scope.nextSteps);
         });
         return scope.$watch('list', function() {
-          var listHandlers, otherSteps, s, tool, _i, _len, _ref;
+          var categories, listHandlers, otherSteps, s, tool, _i, _j, _len, _len1, _ref, _ref1, _ref2;
           listHandlers = [];
           _ref = scope.nextTools;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -181,7 +183,21 @@
             }
             return _results;
           })();
-          return scope.nextSteps = otherSteps.concat(listHandlers);
+          console.log("listHandlers", listHandlers);
+          scope.nextSteps = otherSteps.concat(listHandlers);
+          categories = [];
+          scope.nextSteps2 = [];
+          _ref1 = scope.nextTools;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            tool = _ref1[_j];
+            if ((tool.category != null) && (_ref2 = tool.category, __indexOf.call(categories, _ref2) < 0)) {
+              categories.push(tool.category);
+              scope.nextSteps2.push(tool);
+            }
+          }
+          categories.push("Other");
+          console.log("nextsteps2", scope.nextSteps2);
+          return scope.categories = categories;
         });
       };
 
@@ -220,6 +236,72 @@
           idx: this.currentCardinal - 1
         });
         this.mines = Mines.all();
+        this.scope.showtools = (function(_this) {
+          return function(val) {
+            var item, s, _i, _len, _ref;
+            console.log("SHOWING TOOLS");
+            console.log(_this.scope.nextSteps);
+            console.log("SCOPE.STEPS", _this.scope.steps);
+            console.log("SCOPE.HISTORIES", _this.scope.steps);
+            if (val !== "Other") {
+              _this.scope.nextSteps2 = (function() {
+                var _i, _len, _ref, _results;
+                _ref = this.scope.nextSteps;
+                _results = [];
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                  s = _ref[_i];
+                  if (s.tool.category === val) {
+                    _results.push(s);
+                  }
+                }
+                return _results;
+              }).call(_this);
+            } else {
+              _ref = _this.scope.nextSteps;
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                item = _ref[_i];
+                console.log("val", item.tool.category);
+              }
+              _this.scope.nextSteps2 = (function() {
+                var _j, _len1, _ref1, _results;
+                _ref1 = this.scope.nextSteps;
+                _results = [];
+                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                  s = _ref1[_j];
+                  if (s.tool.category == null) {
+                    _results.push(s);
+                  }
+                }
+                return _results;
+              }).call(_this);
+            }
+            return console.log("next steps is now", _this.scope.nextSteps2);
+          };
+        })(this);
+        this.scope.showmenu = (function(_this) {
+          return function() {
+            console.log("showing menu");
+            return _this.scope.showsubmenu = true;
+          };
+        })(this);
+        this.scope.hidemenu = (function(_this) {
+          return function() {
+            console.log("hiding menu");
+            return _this.scope.showsubmenu = false;
+          };
+        })(this);
+        this.scope.expandhistory = (function(_this) {
+          return function() {
+            console.log("showing history");
+            return _this.scope.openhistory = true;
+          };
+        })(this);
+        this.scope.shrinkhistory = (function(_this) {
+          return function() {
+            console.log("hiding history");
+            return _this.scope.openhistory = false;
+          };
+        })(this);
         toolNotFound = (function(_this) {
           return function(e) {
             return _this.to(function() {

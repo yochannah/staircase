@@ -19,6 +19,8 @@ define (require) ->
 
   Filters.filter 'pluralizeWithNum', -> (thing, n) -> pluralize thing, n, true
 
+  Filters.filter 'reverse', -> (items) -> items.slice().reverse()
+
   Filters.filter 'mappingToArray', -> (obj) ->
     return obj unless obj instanceof Object
     (Object.defineProperty v, '$key', {__proto__: null, value: k} for k, v of obj)

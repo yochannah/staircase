@@ -3,5 +3,6 @@
   "handles": ["items", "query"],
   "type": "IFrame",
   "heading": "Export",
-  "src": "http://intermine-tools.github.io/steps-export-tool/tool.html"
+  "src": "http://intermine-tools.github.io/steps-export-tool/tool.html",
+  "category": "CatB"
 }

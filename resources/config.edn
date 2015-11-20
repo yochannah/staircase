@@ -1,4 +1,17 @@
 {
+    :tool-categories {
+      "Gene Ontology" {:icon "fa-search"}
+      "Expression" {:icon "fa-test"}
+      "Homologue" {:icon "fa-search"}
+      "Interactions" {:icon "fa-search"}
+      "Regulation" {:icon "fa-search"}
+      "Diseases" {:icon "fa-search"}
+      "Proteins" {:icon "fa-search"}
+      "Literature" {:icon "fa-search"}
+      "Protein Domains" {:icon "fa-search"}
+      "Pathways" {:icon "fa-search"}
+    }
+
     :bower-tools [
         [keyword-search
          "https://github.com/intermine-tools/multimine-search-tool.git"]]

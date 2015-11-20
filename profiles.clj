@@ -25,11 +25,12 @@
                            ["fa-envelope" "mailto://dev@intermine.org" "Mailing list"]
                            ]
             :web-max-age 300
-            :web-default-service "humanmine"
+            :web-default-service "flymine-beta"
             :web-audience "http://localhost:3000"
 
             :verifier "https://verifier.login.persona.org/verify"
-            :db-subname "//localhost/staircase" }
+            :db-subname "//localhost/staircase"
+          :db-user "josh"}
  }
  :test {
         :bower-dependencies [[angular-scenario "~1.2.9"]

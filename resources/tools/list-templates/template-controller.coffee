@@ -52,7 +52,7 @@ define ['lodash'], (L) ->
     console.log '----', q.name
     con = getTargetConstraint q
     path = q.makePath con.path
-    
+
     conPath = if path.isAttribute() then path.getParent().toString() else con.path
     if cons.length is 1
       # Fortunate case - just replace the values of the actual constraint.
@@ -75,11 +75,14 @@ define ['lodash'], (L) ->
       q.removeConstraint con.code
       q.addConstraints newCons
       q.constraintLogic = newLogic
-  
+
   inject = ['$timeout', '$log', '$q', '$scope', 'identifyItem', 'identifyItems']
   Array inject..., (to, console, Q, scope, identifyItem, identifyItems) ->
 
-    scope.runTemplate = -> scope.run scope.query if scope.query?
+    scope.runTemplate = ->
+      console.log scope
+      debugger
+      scope.run scope.query if scope.query?
 
     getReplacementConstraints = if scope.list?
       console.debug "Running over #{ scope.list.name }"
@@ -94,11 +97,10 @@ define ['lodash'], (L) ->
           ({path: decap(path), op: 'ONE OF', values} for path, values of fields)
     else
       Q.reject 'Cannot generate constraints - list or items are required'
-  
+
     Q.all([scope.service.query(scope.template), getReplacementConstraints]).then ([q, cons]) ->
       console.debug "Constraints are", cons
       applyConstraintsToQuery q, cons
 
       to -> scope.query = q
       q.count().then (n) -> to -> scope.count = n
-

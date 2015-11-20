@@ -7,7 +7,7 @@
         [hiccup.element :only (mail-to)]))
 
 (defelem tool-not-found [{contact :contact-email}]
-  [:div.alert.alert-danger 
+  [:div.alert.alert-danger
    [:h3 "Error"]
    [:p
     " The required tool for this step could not be found. Check with the site
@@ -39,49 +39,76 @@
      [:small "show all steps"]]]
     [:div.list-group.history-steps
      [:a.list-group-item {:ng-repeat "s in steps"
-                          :ng-controller "HistoryStepCtrl as stepCtrl" 
+                          :ng-controller "HistoryStepCtrl as stepCtrl"
                           :ng-class "{active: step.id == s.id}"
                           :href "/history/{{history.id}}/{{$index + 1}}"
                           :folded "elide"}
       [:i.pull-right.fa.fa-edit
        {:ng-click "openEditDialogue()"
         :ng-show "step.id == s.id"}]
-      "{{s.title}}"]]
-    ])
+      "{{s.title}}"]]])
 
 (defn left-column [config]
-  [:div.sidebar.slide-left.col-xs-12.col-md-2
-   {:ng-class "{minimised: state.expanded, collapsed: collapsed}"}
-   current-history
-   (staircase.views.facets/snippet)])
+ [:div.blind.left
+  {:ng-class "{open: openhistory}"
+  :ng-mouseleave "shrinkhistory()"
+  :ng-mouseenter "expandhistory()"
+  :scrollable ""}
+  [:div.contents-container
+   [:div.steps
+    [:a
+      [:div.step.hot
+       [:div.summary
+        [:div.step-header "Previous Steps"]]]]
+    [:a {:ng-href "/history/{{history.id}}/{{steps.length - $index}}"
+        :ng-repeat "s in steps | reverse"
+         :ng-controller "HistoryStepCtrl as stepCtrl"}
+    [:div.step
+      ; {:ng-class "{hot: step.id == s.id}"}
+     [:div.summary
+      [:span.badge.numbering "{{steps.indexOf(s) + 1}}"]
+      [:i.fa.fa-cubes.fa-2x]
+      [:div "{{s.title}}"]]
+     [:div.details {:ng-class "{transparent: !openhistory}"} "{{s.description}}"]]]]]])
 
-(defn right-column [config]
-  [:div.sidebar.slide-right.col-xs-12.col-md-2.col-md-offset-10
-   {:ng-class "{onscreen: !state.expanded, offscreen: state.expanded}"}
-   [:div.panel.panel-default.next-steps
-    [:div.panel-heading
-     {:ng-click "state.nextStepsCollapsed = !state.nextStepsCollapsed"}
-     [:i.fa.fa-fw {:ng-class "{'fa-caret-right': state.nextStepsCollapsed, 'fa-caret-down': !state.nextStepsCollapsed}"}]
-     "Next steps"]
-    [:div.list-group.steps.animated
-     {:ng-class "{expanded: (nextSteps.length && !state.nextStepsCollapsed)}"}
-     [:next-step
-      {:ng-repeat "ns in nextSteps"
-       :previous-step "step"
-       :append-step "appView.nextStep(data)"
-       :tool "ns.tool"
-       :service "ns.service"
-       :data "ns.data"}
-      ]]
-    [:div.panel-body {:ng-hide "nextSteps.length"}
-     [:em "No steps available"]]]])
+ (defn right-column [config]
+  [:div.blind.right
+   {:ng-class "{open: opennextsteps}"
+   :ng-mouseleave "shrinknextsteps(); clearcc()"
+   :scrollable ""
+   }
+   [:div.contents-container
+   [:div.step.hot
+    [:div.summary [:div.step-header "Using {{list.size}} {{list.type}}(s)"]]]
+    [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
+    [:div.details.right
+        [:next-step
+         {:ng-repeat "ns in nextSteps"
+          :previous-step "step"
+          :append-step "appView.nextStep(data)"
+          :tool "ns.tool"
+          :category "ns.category"
+          :service "ns.service"
+          :ng-show "ns.category.label==ccat.label"
+          :data "ns.data"}]]
+     [:a {:ng-href "#"
+         :ng-repeat "category in categories"
+         :ng-mouseenter "showtools(category)"}
+          ; :ng-controller "HistoryStepCtrl as stepCtrl"}
+     [:div.step.empty {:ng-class "{hot: step.id == s.id}"}
+    ;  [:div.details {:ng-class "{transparent: !opennextsteps}"} "{{category.label}}"]
+    ;  [:div.details.transparent "{{s.label}}"]
+      [:div.summary {:ng-class "{highlighted: category.label == ccat.label}"}
+      ;  [:span.badge.numbering "{{category.tools.length}}"]
+       [:i.fa-2x {:class "{{category.icon}}"}]
+       [:div "{{category.label}}"]]]]]]])
+
+
 
 (defn centre-column [config]
-  [:div.col-xs-12.slide-left.central-panel.flex-column
-   {:ng-class "{'col-md-8': !state.expanded,
-              'col-md-offset-2': !state.expanded}"}
+  [:div.central-panel
    (tool-not-found {:ng-show "error.status === 404"} config)
-   [:div.current-step.flex-box
+   [:div.current-step
     {:ng-hide "error.status === 404"
      :tool "tool"
      :step "step"
@@ -96,5 +123,4 @@
 (defn snippet [config]
   (html [:div.container-fluid.history-view
          (apply vector :div.row.flex-row
-          ;; L R C because of column re-ordering.
-          ((juxt left-column right-column centre-column) config))]))
+          ((juxt left-column centre-column right-column) config))]))

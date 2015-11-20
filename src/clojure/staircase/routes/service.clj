@@ -89,9 +89,11 @@
                }))))))
 
 (defn build-service-routes [{{:keys [services]} :resources config :config}]
+    ; (clojure.pprint/pprint "CONFIG" @config)
   (let [real-id #(if (= "default" %) (:default-service @config) %)]
     (routes ;; Routes for getting service information.
             (GET "/" []
+
                  (get-services services @config))
             (context "/:ident" [ident]
                      (GET "/" []

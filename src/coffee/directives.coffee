@@ -10,6 +10,7 @@ define (require) ->
   ims = require 'imjs'
 
 
+
   require 'services'
 
   # Used by drag/drop directives for interacting with native drag and drop API.
@@ -279,7 +280,7 @@ define (require) ->
     replace: true
     template: """
       <div class="panel-body">
-        <iframe is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
+        <iframe scrollable is-seamless="tool.seamless" src="{{tool.src}}" width="100%">
       </div>
     """
     link: (scope, element, attrs) ->
@@ -364,6 +365,7 @@ define (require) ->
 
   interpolatedHeading = "<span>{{tool.heading}}</span>"
 
+
   managedHeading = (src) -> """<ng-include src="'#{ src }'"></ng-include>"""
 
   Directives.directive 'currentStep', Array '$compile', ($compile) ->
@@ -386,7 +388,7 @@ define (require) ->
       </div>
     """
     link: (scope, element, attrs) ->
-      element.addClass('panel panel-default')
+      # element.addClass('panel panel-default')
       console.log 'currentStep.link called'
       compiled = false
       scope.$watch 'tool.type', (toolType) ->
@@ -582,9 +584,13 @@ define (require) ->
       data: '='
       tool: '='
       service: '=?'
+      category: '='
+
     link: (scope, element, attrs) ->
 
       scope.$watch 'tool.headingURI', ->
+
+        # console.log "THIS TOOL IS", @
 
         if scope.tool
 

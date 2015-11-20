@@ -39,6 +39,6 @@ define ['lodash', 'imjs', './template-controller'], (L, {Query}, TemplateControl
       template.parsedTitle = getParsedTitle template
     scope.templates = templates.filter isSuitable
     scope.cancel = -> modal.dismiss 'cancel'
-    scope.run = (template) -> modal.close template
-  
+    scope.run = (template) -> debugger; modal.close template
+
   return [inject..., controller]

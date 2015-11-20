@@ -1,5 +1,20 @@
-<div class="list-group-item" ng-if="listName">
-    <a ng-click="showTemplates()">
-        Use {{listName}} in a structured search
-    </a>
+<span class="heading-text list-group-item">Templates</span>
+<div class="list-group-item lists" ng-repeat="list in listnames">
+
+
+        <!-- <a ng-click="showTemplates()"> -->
+        <a ng-click="runTemplate(list)">
+            <!-- <i class="fa fa-circle-o-notch fa-spin"></i> -->
+            <!-- <i ng-show="!list.count" class="fa fa-circle-o-notch fa-spin"></i> -->
+
+
+            <i class=""
+               ng-class="{'fa fa-fw fa-circle-o-notch fa-spin': !list.count && list.count != 0}"></i>
+
+                          <span class="badge">{{list.count}}</span>
+                          {{list.readable}}
+
+        </a>
+
+
 </div>
