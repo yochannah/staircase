@@ -104,6 +104,7 @@
         "http://localhost:*/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
+        "http://yochannah.github.io/**"
         "http://intermine.github.io/**"
         "http://intermine-tools.github.io/**"
         "http://localhost:8081/**"]
@@ -150,7 +151,7 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Proteins"
         :icon "fa fa-send"
-        :tools [:list-templates]}
+        :tools [:list-templates :protein-viewer]}
         {:label "Function"
         :icon "fa fa-cube"
         :tools [:export :tool2 :tool3]}]
