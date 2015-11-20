@@ -148,10 +148,10 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Genomics"
         :icon "fa fa-heart"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:show-report :tool1 :tool2 :tool3]}
         {:label "Proteins"
         :icon "fa fa-send"
-        :tools [:list-templates :protein-viewer]}
+        :tools [:list-templates :protein-viewer :show-report]}
         {:label "Function"
         :icon "fa fa-cube"
         :tools [:export :tool2 :tool3]}]

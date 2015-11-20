@@ -38,7 +38,7 @@ define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
         where: [
           'path': 'id'
           'op': '='
-          'value': scope.step.data.id
+          'value': scope.step.data.ids[0]
         ]
 
       # Gets the items's attributes

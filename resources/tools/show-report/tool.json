@@ -1,6 +1,6 @@
 {
   "capabilities": ["next"],
-  "handles": "item",
+  "handles": "ids",
   "type": "native",
   "heading": "Report",
   "icon": "fa-file",
