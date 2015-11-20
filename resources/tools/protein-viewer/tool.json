@@ -3,6 +3,6 @@
   "type": "IFrame",
   "handles": ["item"],
   "seamless": false,
-  "src": "http://localhost:9999/tool.html",
+  "src": "http://mynock:9999/tool.html",
   "heading": "Protein Viewer"
 }
