@@ -1,7 +1,6 @@
 define [], -> Array '$scope', (scope) ->
 
   scope.$watch 'data', (data) ->
-    # debugger;
     scope.type = type = data.type
 
     if data.id?
@@ -24,5 +23,5 @@ define [], -> Array '$scope', (scope) ->
           query: scope.query
           service:
             root: scope.previousStep.data.service.root
-            
+
       scope.appendStep data: step

@@ -30,7 +30,7 @@
 
             :verifier "https://verifier.login.persona.org/verify"
             :db-subname "//localhost/staircase"
-          :db-user "josh"}
+          }
  }
  :test {
         :bower-dependencies [[angular-scenario "~1.2.9"]

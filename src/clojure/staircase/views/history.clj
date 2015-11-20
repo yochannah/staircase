@@ -79,7 +79,7 @@
    }
    [:div.contents-container
    [:div.step.hot
-    [:div.summary [:div.step-header "Using {{list.size}} {{list.type}}(s)"]]]
+    [:div.summary [:div.step-header "{{datainfo}}"]]]
     [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
     [:div.details.right
         [:next-step

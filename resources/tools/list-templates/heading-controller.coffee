@@ -1,4 +1,4 @@
-define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-controller'], (L, Ctrl, View, tc) ->
+define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-controller', './helpers'], (L, Ctrl, View, tc, H) ->
 
   controller = (console, scope, Modals, Q, connectTo) ->
 
@@ -8,24 +8,39 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-con
     scope.service = root: scope.data.root ? scope.data.service.root
     connect = connectTo scope.service.root
     scope.listnames = []
-    scope.templatecontroller = tc
+    scope.TemplateController = tc
 
-    getParsedTitle = ({title, name}) -> (title or name).replace /.*--> /, ''
+    scope.descLimit = 120 # characters. Tweet sized is best.
+    scope.service = root: scope.data.root ? scope.data.service.root
+    connect = connectTo scope.service.root
+    model = connect.then (s) -> s.fetchModel()
+    templates = connect.then (s) -> s.fetchTemplates()
 
     if scope.listName?
-      connect.then (s) -> s.fetchTemplates().then (ts) ->
-        limit = 0
-        for listname, values of ts
-            if "im:aspect:#{scope.category.label}" in values.tags
-              if limit < 5
-                do (scope, listname, values) ->
-                  values.readable = getParsedTitle values
-                  scope.listnames.push values
-                  do (values) ->
-                    s.count(values).then (res) ->
-                      scope.$apply -> values.count = res
-              limit++
-    scope.runTemplate = (selectedTemplate) ->
+      scope.list = scope.data
+      scope.items = null
+    else if scope.ids?
+      scope.list = null
+      scope.items = {ids: scope.data.ids, type: scope.type}
+
+    Q.all([connect, model, templates]).then ([service, model, templates]) ->
+
+      scope.service = service
+
+      isSuitable = H.isSuitableForType (scope.list ? scope.items).type, model
+
+      templates = L.values templates
+      for template in templates
+        template.parsedTitle = H.getParsedTitle template
+      suitable = templates.filter isSuitable
+
+      filtered = L.filter suitable, (tpl) ->
+        if "im:aspect:#{scope.category.label}" in tpl.tags then return true
+
+      # Take just five
+      scope.templates = filtered.slice 0, 5
+
+    scope.run = (selectedTemplate) ->
       step =
         title: "Structured Search"
         description: "Using List #{ selectedTemplate.name } over #{ scope.listName }"
@@ -35,7 +50,6 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-con
             root: scope.service.root
           query: selectedTemplate
       scope.appendStep data: step
-
 
     scope.showTemplates = ->
       console.log "showing templates at #{ scope.service.root }"
@@ -59,15 +73,7 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-con
         size: 'lg'
         resolve: injected
 
-      modalInstance.result.then (selectedTemplate) ->
-        step =
-          title: "Structured Search"
-          description: "Using List #{ selectedTemplate.name } over #{ scope.listName }"
-          tool: 'show-table'
-          data:
-            service:
-              root: scope.service.root
-            query: selectedTemplate
-        scope.appendStep data: step
+
+
 
   ['$log', '$scope', '$modal', '$q', 'connectTo', controller]

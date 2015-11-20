@@ -105,7 +105,8 @@
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
         "http://intermine.github.io/**"
-        "http://intermine-tools.github.io/**"]
+        "http://intermine-tools.github.io/**"
+        "http://localhost:8081/**"]
       :client-step-config {
         :show-list {
                     :activeTabs [:enrich]}
@@ -152,7 +153,7 @@
         :tools [:list-templates]}
         {:label "Function"
         :icon "fa fa-cube"
-        :tools [:tool1 :tool2 :tool3]}]
+        :tools [:export :tool2 :tool3]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
