@@ -75,11 +75,18 @@ define (require) ->
 
       scope.$watch 'messages', (msgs) -> null # TODO
 
+      scope.$watchCollection 'idlists', (idlists) ->
+        if idlists? and idlists.length > 0
+          debugger
+
       scope.$watchCollection 'items', (items) -> null # TODO
+
+      scope.$watch 'queries', (items) -> null # TODO
 
       scope.$watch 'lastemitted', (val) =>
 
         if val?
+
           if val.what == "list"
             connect = @connectTo scope.step.data.service.root
             connect.then (s) ->
@@ -87,7 +94,13 @@ define (require) ->
                 scope.datainfo = "#{res.size} #{val.type}s"
 
           if val.what == "ids"
+            debugger
             scope.datainfo = "#{val.ids.length} #{val.type}s"
+
+          if val.what == "query"
+            @unquery val
+
+
 
           listHandlers = []
           for tool in scope.nextTools when tool.handles val.what
@@ -95,6 +108,46 @@ define (require) ->
               if tool.ident in category.tools
                 listHandlers.push {tool, category: category, data: val}
           scope.nextSteps = listHandlers
+
+    unquery: (qu) ->
+
+      connection = @connectTo qu.service.root
+      connection.then (service) =>
+
+        # For our query into an intermine query
+        query = service.query(qu.query).then (imquery) =>
+
+          classviews = []
+          queries = []
+
+          # Get each class of the query
+          for node in imquery.getQueryNodes()
+            if node.isClass()
+
+              if node.allDescriptors().length == 1
+                idpath = node.allDescriptors().pop().name + ".id"
+              else
+                idpath = (L.map node.allDescriptors(), (part) -> part.name).join(".") + ".id"
+
+              do (idpath, @scope) ->
+
+                service.query(qu.query).then (newquery) ->
+                  newquery.select(idpath)
+                  newquery.values().then (values) ->
+                    filteredIds = L.uniq L.without values, null
+                    type = newquery.makePath(idpath).getParent().getType()
+                    console.log "new scope is", @scope
+                    debugger
+                    @scope.$apply ->
+                      has =
+                        ids: filteredIds
+                        type: type
+                        what: "ids"
+                        service: newquery.service
+                      @scope.idlists.push has
+
+
+
 
     init: ->
       {Histories, Mines, params, http, connectTo} = @
@@ -105,8 +158,10 @@ define (require) ->
       @scope.messages ?= {}
       @scope.nextSteps ?= []
       @scope.items ?= {}
+      @scope.queries ?= []
       @scope.categories ?= []
       @scope.opennextsteps = false
+      @scope.idlists ?= []
 
       @scope.collapsed = true # Hide details in reduced real-estate view.
       @scope.state = {expanded: false, nextStepsCollapsed: true}
@@ -146,6 +201,11 @@ define (require) ->
           .then (providers) => @scope.providers = providers
       http.get('/tool-categories')
           .then ({data}) => @scope.categories = data;
+
+      @scope.step.$promise.then (res) =>
+        if res.data.query? then res.data.what = "query"
+        @scope.lastemitted = res.data
+
 
     saveHistory: ->
       @scope.editing = false
