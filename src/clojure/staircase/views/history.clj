@@ -67,7 +67,7 @@
       ; {:ng-class "{hot: step.id == s.id}"}
      [:div.summary
       [:span.badge.numbering "{{steps.indexOf(s) + 1}}"]
-      [:i.fa.fa-cubes.fa-2x]
+      [:i.fa.fa-clock-o.fa-2x]
       [:div "{{s.title}}"]]
      [:div.details {:ng-class "{transparent: !openhistory}"} "{{s.description}}"]]]]]])
 
@@ -78,8 +78,8 @@
    :scrollable ""
    }
    [:div.contents-container
-   [:div.step.hot
-    [:div.summary [:div.step-header "{{datainfo}}"]]]
+    [:div.step.hot
+     [:div.summary [:div.step-header "{{datainfo}}"]]]
     [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
     [:div.details.right
         [:next-step
@@ -90,7 +90,24 @@
           :category "ns.category"
           :service "ns.service"
           :ng-show "ns.category.label==ccat.label"
-          :data "ns.data"}]]
+          :data "ns.data"}]
+
+        [:div
+         {:ng-repeat "idlist in idlists"
+          :ng-show "ccat.label == null"
+          :ng-click "makeactive(idlist)"}
+         [:h4 "{{idlist.ids.length}} {{idlist.type}}s"]
+         "{{idlist.label}}"]]
+
+
+
+    [:a {:ng-href "#" :ng-mouseenter "showdata()"}
+    [:div.step.empty {:ng-class "{hot: step.id == s.id}"}
+     [:div.summary {:ng-class "{highlighted: category.label == ccat.label}"}
+      [:i.fa.fa-2x.fa-cubes]
+      [:div "My Data"]]]]
+
+
      [:a {:ng-href "#"
          :ng-repeat "category in categories"
          :ng-mouseenter "showtools(category)"}

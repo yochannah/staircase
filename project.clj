@@ -136,22 +136,22 @@
         :tools [:convert-list :list-templates]}
         {:label "Interactions"
         :icon "fa fa-share-alt"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Regulation"
         :icon "fa fa-gears"
         :tools [:list-templates]}
         {:label "Diseases"
         :icon "fa fa-medkit"
         :tools [:tool1 :tool2 :tool3]}
-        {:label "Genomics"
+        {:label "Genes"
         :icon "fa fa-heart"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Proteins"
         :icon "fa fa-send"
         :tools [:list-templates]}
         {:label "Function"
         :icon "fa fa-cube"
-        :tools [:export :tool2 :tool3]}]
+        :tools [:list-templates :tool2 :tool3]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories

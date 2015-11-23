@@ -41,9 +41,16 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-con
       scope.templates = filtered.slice 0, 5
 
     scope.run = (selectedTemplate) ->
+      if scope.ids?
+        over = "#{scope.ids.length} #{scope.type}s"
+      else if scope.listName?
+        over = scope.listName
+
+      parsed = H.getParsedTitle selectedTemplate
+
       step =
-        title: "Structured Search"
-        description: "Using List #{ selectedTemplate.name } over #{ scope.listName }"
+        title: "Ran Template"
+        description: "Using template #{ parsed } over " + over
         tool: 'show-table'
         data:
           service:

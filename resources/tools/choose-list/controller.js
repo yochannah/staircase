@@ -46,11 +46,12 @@ define(['angular', 'imjs', 'lodash'], function (ng, im, L) {
     function viewList (list) {
       scope.$emit('start-history', {
         verb: {
-          ed: "chose",
-          ing: "choosing"
+          ed: "Chose",
+          ing: "Choosing"
         },
-        thing: "list " + list.title,
+        thing: "List",
         tool: "show-list",
+        description: list.title,
         data: {
           service: {
             root: scope.connection.root
