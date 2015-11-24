@@ -87,17 +87,17 @@
       :web-services {
         "FlyMine" "http://beta.flymine.org/beta/service"
         "HumanMine" "http://beta.humanmine.org/beta/service"
+        ; "MouseMine" "http://www.mousemine.org/mousemine/service"
         ; "zfin" "http://www.zebrafishmine.org/service"
         ; "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
-        ; "mousemine" "http://www.mousemine.org/mousemine/service"
         }
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
                     "FlyMine"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
                     "HumanMine"   {:color "palette-5tone2" :covers ["H. sapiens"]}}
+                    ; "MouseMine" {:color "palette-5tone3" :covers ["M. musculus"]}}
                     ; "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
-                    ; "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
                     ; "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
@@ -117,6 +117,9 @@
                      :Style {:icons :fontawesome}}}
 
       :web-tool-categories [
+        ; {:label "Data Tools"
+        ;  :icon "fa fa-wrench"
+        ;  :tools [:combine-lists]}
         {:label "Gene Ontology"
         :icon "fa fa-database"
         :tools [:list-templates]}
@@ -128,7 +131,7 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Literature"
         :icon "fa fa-book"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Expression"
         :icon "fa fa-briefcase"
         :tools [:list-templates]}
@@ -146,13 +149,13 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Genes"
         :icon "fa fa-heart"
-        :tools [:list-templates :tool2 :tool3]}
+        :tools [:list-templates :region-search :tool3]}
         {:label "Proteins"
         :icon "fa fa-send"
         :tools [:list-templates]}
         {:label "Function"
         :icon "fa fa-cube"
-        :tools [:list-templates :tool2 :tool3]}]
+        :tools [:list-templates :tool3]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
@@ -169,7 +172,7 @@
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
-                   [:convert-list {:category "Homology"}]
+                   :convert-list
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
