@@ -72,14 +72,26 @@
      [:div.details {:ng-class "{transparent: !openhistory}"} "{{s.description}}"]]]]]])
 
  (defn right-column [config]
+
+  [:div
+
+  [:div.dropdown.currentdata {:dropdown true}
+   [:div.dropdown-toggle.currentdata-toggle {:dropdown-toggle true} "{{datainfo}}This is data" [:b.caret]]
+    [:ul.dropdown-menu.dropdown-menu-right
+    [:li
+     {:ng-repeat "idlist in idlists"
+      :ng-show "ccat.label == null"
+      :ng-click "makeactive(idlist)"}
+     [:h4 "{{idlist.ids.length}} {{idlist.type}}s"]
+     "{{idlist.label}}"]]]
+
   [:div.blind.right
+
    {:ng-class "{open: opennextsteps}"
    :ng-mouseleave "shrinknextsteps(); clearcc()"
-   :scrollable ""
-   }
+   :scrollable ""}
+
    [:div.contents-container
-    [:div.step.hot
-     [:div.summary [:div.step-header "{{datainfo}}"]]]
     [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
     [:div.details.right
         [:next-step
@@ -99,26 +111,13 @@
          [:h4 "{{idlist.ids.length}} {{idlist.type}}s"]
          "{{idlist.label}}"]]
 
-
-
-    [:a {:ng-href "#" :ng-mouseenter "showdata()"}
-    [:div.step.empty {:ng-class "{hot: step.id == s.id}"}
-     [:div.summary {:ng-class "{highlighted: category.label == ccat.label}"}
-      [:i.fa.fa-2x.fa-cubes]
-      [:div "My Data"]]]]
-
-
      [:a {:ng-href "#"
          :ng-repeat "category in categories"
          :ng-mouseenter "showtools(category)"}
-          ; :ng-controller "HistoryStepCtrl as stepCtrl"}
      [:div.step.empty {:ng-class "{hot: step.id == s.id}"}
-    ;  [:div.details {:ng-class "{transparent: !opennextsteps}"} "{{category.label}}"]
-    ;  [:div.details.transparent "{{s.label}}"]
       [:div.summary {:ng-class "{highlighted: category.label == ccat.label}"}
-      ;  [:span.badge.numbering "{{category.tools.length}}"]
        [:i.fa-2x {:class "{{category.icon}}"}]
-       [:div "{{category.label}}"]]]]]]])
+       [:div "{{category.label}}"]]]]]]]])
 
 
 

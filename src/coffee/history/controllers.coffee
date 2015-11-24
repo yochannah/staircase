@@ -93,14 +93,11 @@ define (require) ->
                 scope.datainfo = "#{res.size} #{val.type}s"
 
           if val.what == "ids"
-            debugger
             scope.datainfo = "#{val.ids.length} #{val.type}s"
 
           if val.what == "query"
 
             @unquery val
-
-
 
           listHandlers = []
           for tool in scope.nextTools when tool.handles val.what
@@ -206,7 +203,7 @@ define (require) ->
 
 
 
-        @storeHistory tmpstep
+        # @storeHistory tmpstep
         @scope.lastemitted = val
 
 
@@ -303,18 +300,16 @@ define (require) ->
         console.error err
         notify err.message
 
-    storeHistory: (step) -> debugger; @nextStep step, true
+    storeHistory: (step) -> @nextStep step, true
 
     stampStep: (step) ->
       {Q, serviceStamp} = @
       if not step.data.service? # Nothing to stamp.
         Q.when step
       else
-        debugger
         serviceStamp(step.data.service).then (stamp) -> L.assign {stamp}, step
 
     nextStep: (step, silently = false) =>
-      debugger
       {Histories, scope, currentCardinal, console, location, silentLocation} = @
       console.debug "Next step:", step
       console.log "storing - silently? #{ silently }"

@@ -16,19 +16,15 @@
 @sz-blind-closed: 100px;
 @sz-blind-open: 300px;
 
-
 .heading-text {
   text-transform: uppercase;
   font-size: 0.8em;
   font-weight: bold;
 }
 
-
 .folded {
   display: flex;
 }
-
-
 
 .list-group-item {
   border: none;
@@ -48,6 +44,7 @@
 
   &.right {
     right: 0;
+    top: 126px;
     // text-align: right;
 
     &.open {
@@ -146,15 +143,31 @@
           background: @clr-menu-bg-highlight2;
           color: black
         }
-
-
-
-
-
-
       }
     }
   }
+}
+
+.dropdown-menu {
+  white-space: nowrap;
+  padding: 10px;
+  background: black;
+}
+
+.currentdata {
+  width: 100px;
+  height: 70px;
+  right: 0;
+  top: 56px;
+  background: black;
+  color: white;
+  position: absolute;
+  text-align: center;
+}
+
+.currentdata-toggle {
+  width: 100%;
+  height: 100%;
 }
 
 .highlighted {
