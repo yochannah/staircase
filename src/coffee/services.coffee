@@ -11,6 +11,7 @@ define (require, exports, module) ->
   imjs = require 'imjs'
   Messages = require './messages'
   ga = require 'analytics'
+  imtables = require 'im-tables'
 
   asData = ({data}) -> data
 
@@ -400,3 +401,7 @@ define (require, exports, module) ->
         _p8() + _p8(true) + _p8(true) + _p8()
       empty: ->
         "00000000-0000-0000-0000-000000000000"
+
+  # API endpoint adapter for Projects.
+  Services.factory 'Tables', Array '$http', '$resource', (http, resource) ->
+    return imtables

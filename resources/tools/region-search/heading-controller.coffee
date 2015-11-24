@@ -3,12 +3,12 @@ define ['imjs', 'lodash'], ({Service}, L) ->
   # We need to specify the taxon-id for each segment, otherwise the results _will_ be wrong.
   toFullRegions = (rows) -> ("#{chr}:#{s}..#{e}" for [chr, s, e, taxon] in rows)
 
-  
+
   Array '$q', '$log', '$scope', 'connectTo', '$filter', 'ClassUtils', (Q, console, scope, connectTo, filter, ClassUtils) ->
 
     # :: RegionSet {root :: string,
     #               targetClass :: {name :: string, path :: Path},
-    #               summary :: string, 
+    #               summary :: string,
     #               fetch :: () -> Promise [[object]]}
     scope.regionset = {}
     # :: [RegionSet]
@@ -96,4 +96,3 @@ define ['imjs', 'lodash'], ({Service}, L) ->
             service: { root: regionset.root }
             request: request
         scope.appendStep data: nextStep
-

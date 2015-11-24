@@ -7,6 +7,8 @@ define (require) ->
   lines = require 'lines'
   Channel = require 'jschannel'
   jQuery = require 'jquery'
+  ims = require 'imjs'
+
 
 
   require 'services'
@@ -304,6 +306,10 @@ define (require) ->
       channel.bind 'has-items', (trans, {key, noun, categories, ids}) ->
         scope.hasItems {type: noun, key, ids}
 
+      channel.bind 'has-item', (trans, {key, noun, categories, ids}) ->
+        console.log "**************has item bound"
+        scope.hasItems {type: noun, key, ids}
+
       channel.bind 'has-list', (trans, data) -> scope.has {what: 'list', data}
 
       channel.bind 'has-ids', (trans, data) -> scope.has {what: 'ids', data}
@@ -411,6 +417,48 @@ define (require) ->
           element.append cloned
           compiled = true
 
+  Directives.directive 'imtable', Array 'Tables', 'Mines', (Tables, Mines) ->
+    restrict: 'AE'
+    replace: true,
+    scope:
+      query: "&"
+      service: "=service"
+
+
+    # controller: ($scope) ->
+    #   console.log "imtable LOADED", @
+    link: (scope, element, attrs) ->
+
+      val = scope.query()
+      # debugger;
+      console.log "scope.service", scope.service
+      # target = element.first('.testing')
+
+      Mines.get('humanmine').then(imjs.Service.connect).then (conn) ->
+        Tables.loadTable(element, {
+          'start': 1
+          'size': 5
+          'limit': 5
+          'DefaultPageSize': 5
+        },
+          service: conn
+          query: val).then ((table) ->
+            table.query.count().then (c) ->
+              if c < 1
+                console.log "hiding element", element
+                # debugger;
+                element.addClass "hide"
+                # element.hide()
+                # element.css display: none;
+          # table.query.count().then (c) -> scope.$apply -> scope.references.push {name: collection, count: c}
+          # return
+        ), (error) ->
+          console.error 'Could not load table', error
+          return
+    #
+    # template: """
+    #   <div class="testing">test</div>
+    # """
 
   Directives.directive 'filterTerm', ->
     restrict: 'AE'
@@ -549,7 +597,7 @@ define (require) ->
           loadStyle $window, scope.tool
 
           ctrl = '.' + scope.tool.headingControllerURI
-          console.log "LOADING CONTROLLER", ctrl
+          #console.log "LOADING CONTROLLER", ctrl
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
           requirejs {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->

@@ -21,7 +21,7 @@
 (def db (atom (data/new-pooled-db db-spec)))
 
 ;; We set up and tear down by deleting everything in the database.
-(defn drop-tables [] 
+(defn drop-tables []
   (debug "Dropping tables...")
   (staircase.sql/drop-all-tables db-spec))
 
@@ -63,6 +63,7 @@
           doc-1 {:history_id my-history
                  :title "step 1"
                  :tool "quicksearch"
+                 :description "created slave1 with boba fett"
                  :stamp "testing"
                  :data {"foo" "bar" "quuxibility" 1.23}
                  }
@@ -75,7 +76,7 @@
         (is (instance? java.util.Date (:created_at got))
             (str (pr-str (:created_at got)) " should be a date"))
         (is (instance? java.util.UUID id-1)))
-      (testing "retrieved record" 
+      (testing "retrieved record"
         (is (=
              (dissoc got :created_at) ;; Ignore created at in this comparison.
              (-> doc-1 ;; We expect the following transformations on the document:
@@ -102,4 +103,3 @@
           (is (= "changed the title" (:title retrieved))))
         (testing "Changed, and did not add a step"
           (is (= 2 (count all))))))))
-

@@ -205,9 +205,12 @@
         (handler request)))))
 
 ;; Move to config! TODO
-(def friendly-hosts [ #"http://localhost:"
+(def friendly-hosts [ #"http://localhost:" ;; iframe tools will not be allowed to access fonts if the iframe source is not configure in this list
+                                           ;; the primary symptom of this is crazy icons which are defaulting to system wierdness, and cors font
+                                           ;; errors in the console.
                      #"http://[^/]*labs.intermine.org"
                      #"http://intermine.github.io"
+                     #"http://intermine-tools.github.io"
                      #"http://alexkalderimis.github.io"])
 
 (defn allowed-origins

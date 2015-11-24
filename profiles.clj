@@ -13,8 +13,9 @@
                      [ring-mock "0.1.5"]]
       :env {
             :dev true ;; So we know if we are in the dev environment.
+            :live-asset-reload true
             :web-search-placeholder "zen, diabetes, apoptosis"
-            :web-project-title "FlyMine"
+            :web-project-title "HumanMine"
             :web-contact-email "alex@intermine.org"
             :web-contacts [
                            ["fa-twitter" "https://twitter.com/intermineorg" "@intermineorg"]
@@ -28,8 +29,9 @@
             :web-audience "http://localhost:3000"
 
             :verifier "https://verifier.login.persona.org/verify"
-            :db-subname "//localhost/staircase"}
- }
+            :db-subname "//localhost/staircase"
+          }
+        }
  :test {
         :bower-dependencies [[angular-scenario "~1.2.9"]
                              [angular-mocks "~1.2.9"]

@@ -1,0 +1,8 @@
+{
+  "capabilities": ["now","next"],
+  "type": "IFrame",
+  "handles": ["ids", "list"],
+  "seamless": false,
+  "src": "http://localhost:9999/tool.html",
+  "heading": "Protein Features Viewer"
+}

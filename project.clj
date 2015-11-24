@@ -88,6 +88,7 @@
         "flymine-beta" "http://beta.flymine.org/beta/service"
         "zfin" "http://www.zebrafishmine.org/service"
         "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
+        "humanmine" "http://www.humanmine.org/humanmine/service"
         "mousemine" "http://www.mousemine.org/mousemine/service"
         "human" "http://www.humanmine.org/humanmineokay/service"}
       ;; The section below should be replaced by pulling these values from branding.
@@ -100,8 +101,10 @@
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
         "http://*.labs.intermine.org/**"
+        "http://localhost:*/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
+        "http://yochannah.github.io/**"
         "http://intermine.github.io/**"
         "http://intermine-tools.github.io/**"
         "http://localhost:8081/**"]
@@ -145,21 +148,26 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Genomics"
         :icon "fa fa-heart"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:show-report :tool1 :tool2 :tool3]}
         {:label "Proteins"
         :icon "fa fa-send"
-        :tools [:list-templates]}
+        :tools [:list-templates :protein-viewer :show-report]}
         {:label "Function"
         :icon "fa fa-cube"
         :tools [:export :tool2 :tool3]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
+                   :show-report
                    :templates
+                   [:choose-list {:service "humanmine"}]
                    [:choose-list {:service "flymine-beta"}]
                    [:choose-list {:service "mousemine"}]
                    [:new-query {:service "flymine-beta"}]
                    [:new-query {:service "yeastmine"}]
+                   [:upload-list {:service "humanmine"}]
+                   [:region-search {:service "flymine"}]
+                   [:region-search {:service "mousemine"}]
                    [:upload-list {:service "flymine-beta"}]
                    [:region-search {:service "flymine-beta"}]
                    [:region-search {:service "mousemine" :categories ["1" "2"]}]
@@ -168,6 +176,8 @@
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
+                   :convert-list
+                   :protein-viewer
                    [:convert-list {:category "Homology"}]
                    :list-templates
                    [:export {:category ["Export"]}]

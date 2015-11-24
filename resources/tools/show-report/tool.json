@@ -1,0 +1,10 @@
+{
+  "capabilities": ["next"],
+  "handles": "ids",
+  "type": "native",
+  "heading": "Report",
+  "icon": "fa-file",
+  "expandable": true,
+  "tall": true,
+  "style": "./show-report.css"
+}

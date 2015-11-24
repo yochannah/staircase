@@ -8,6 +8,8 @@ require.loadCss = loadCss = (url) -> # Helper for css dependencies.
 require.config
   baseUrl: '/js',
 
+  map: '*': 'require-css/css'
+
   shim:
     angular:
       deps: ['jquery']
@@ -31,6 +33,8 @@ require.config
     'angular-ui-select2':
       deps: ['angular', 'select2']
       init: -> loadCss "/vendor/select2/select2.css"
+    'angular-scroll':
+      deps: ['angular']
     select2:
       deps: ['jquery']
     'angular-mocks':
@@ -60,6 +64,7 @@ require.config
     'angular-local-storage': '/vendor/angular-local-storage/dist/angular-local-storage.min'
     'angular-mocks':   '/vendor/angular-mocks/angular-mocks'
     'angular-notify':  '/vendor/angular-notify/dist/angular-notify',
+    'im-tables':       '/vendor/im-tables/dist/imtables.min',
     'angular-resource': '/vendor/angular-resource/angular-resource'
     'angular-route':   '/vendor/angular-route/angular-route'
     'angular-silent':  '/vendor/angular-silent/ngSilent'

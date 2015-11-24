@@ -1,6 +1,6 @@
 {
-  "capabilities": ["initial"],
+  "capabilities": ["initial", "now", "next"],
   "type": "native",
+  "handles": ["item"],
   "heading": "Hello World"
 }
-

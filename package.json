@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "karma start config/karma.conf.coffee --single-run --browsers PhantomJS",
-    "watch-tests":  "karma start config/karma.conf.coffee --browsers PhantomJS",
+    "watch-tests": "karma start config/karma.conf.coffee --browsers PhantomJS",
     "install-bower-tools": "node ./script/install-bower-tools.js",
     "postinstall": "bower install --allow-root && npm run install-bower-tools"
   },
