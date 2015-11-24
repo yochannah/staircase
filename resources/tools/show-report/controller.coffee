@@ -7,7 +7,24 @@ define ['imjs', 'underscore', 'jquery'], ({Service}, _, jquery) ->
     # Builds a query for each collection
     # belonging to the target item. This is used to populate
     # each collection table.
+
+    scope.hasIds = (service, path, type, ids, categories) ->
+      categories = categories || ['selected']
+      message =
+        what: 'ids',
+        data:
+          ids: ids,
+          key: (categories.join(',') + '-' + type),
+          type: type,
+          categories: categories,
+          service:
+            root: service.root
+      scope.has message
+
+    scope.hasIds scope.step.data.service, scope.step.data.type, scope.step.data.type, scope.step.data.ids
+
     scope.getCollectionQuery = (collection) ->
+
 
     scope.references = []
 
