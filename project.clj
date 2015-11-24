@@ -177,7 +177,7 @@
                    :combine-lists
                    :convert-list
                    :protein-viewer
-                   [:convert-list {:category "Homology"}]
+                   :convert-list
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
