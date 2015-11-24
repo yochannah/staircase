@@ -24,7 +24,7 @@
                            ["fa-envelope" "mailto://dev@intermine.org" "Mailing list"]
                            ]
             :web-max-age 300
-            :web-default-service "flymine-beta"
+            :web-default-service "FlyMine"
             :web-audience "http://localhost:3000"
 
             :verifier "https://verifier.login.persona.org/verify"
