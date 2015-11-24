@@ -6,9 +6,13 @@ define [], -> Array '$scope', (scope) ->
 
   scope.activate = ->
     scope.previousStep.$promise.then ->
+      scope
       step =
-        title: "Viewed Protein"
+        title: "Protein Features"
+        description: "Viewed protein features for " + scope.data.type
         tool: scope.tool.ident
         data: scope.data
 
       scope.appendStep data: step
+
+      #todo: add gene/protein name to the description
