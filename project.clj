@@ -85,26 +85,27 @@
       :web-max-age ~(* 30 24 60 60)
       :web-contacts [["fa-github" "https://github.com/intermine/staircase" "GitHub"]]
       :web-services {
-        "flymine-beta" "http://beta.flymine.org/beta/service"
-        "zfin" "http://www.zebrafishmine.org/service"
-        "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
-        "mousemine" "http://www.mousemine.org/mousemine/service"
-        "human" "http://www.humanmine.org/humanmineokay/service"}
+        "FlyMine" "http://beta.flymine.org/beta/service"
+        "HumanMine" "http://beta.humanmine.org/beta/service"
+        ; "zfin" "http://www.zebrafishmine.org/service"
+        ; "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
+        ; "mousemine" "http://www.mousemine.org/mousemine/service"
+        }
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
-                    "flymine-beta"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
-                    "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
-                    "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
-                    "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
+                    "FlyMine"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
+                    "HumanMine"   {:color "palette-5tone2" :covers ["H. sapiens"]}}
+                    ; "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
+                    ; "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
+                    ; "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
         "http://*.labs.intermine.org/**"
         "http://tools.intermine.org/**"
         "http://alexkalderimis.github.io/**"
         "http://intermine.github.io/**"
-        "http://intermine-tools.github.io/**"
-        "http://localhost:8081/**"]
+        "http://intermine-tools.github.io/**"]
       :client-step-config {
         :show-list {
                     :activeTabs [:enrich]}
