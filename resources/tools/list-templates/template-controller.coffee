@@ -22,7 +22,6 @@ define ['lodash'], (L) ->
   # This means adjusting their paths, and giving them suitable codes.
   adjustForQuery = (cons, unavailableCodes, conPath) ->
     highestCode = unavailableCodes.slice().sort().pop()
-    #console.log "Highest code:", unavailableCodes, highestCode
     if unavailableCodes.length and not highestCode?
       debugger
     nextIdx = ALPHABET.indexOf(highestCode) + 1
@@ -51,7 +50,11 @@ define ['lodash'], (L) ->
 
   applyConstraintsToQuery = (q, cons) ->
     # Get the only editable constraint - part of the contract.
+<<<<<<< HEAD
     #console.log '----', q.name
+=======
+    # console.log '----', q.name
+>>>>>>> nextsteps
     con = getTargetConstraint q
     path = q.makePath con.path
 
@@ -70,8 +73,13 @@ define ['lodash'], (L) ->
       newCons = adjustForQuery cons, unavailableCodes, conPath
       codesAdded = (c.code for c in newCons)
       newLogic = replaceCode q.constraintLogic, con.code, codesAdded
+<<<<<<< HEAD
       #console.log q.name, "The new constraints are", newCons
       #console.log q.name, "The new codes are", codesAdded
+=======
+      # console.log q.name, "The new constraints are", newCons
+      # console.log q.name, "The new codes are", codesAdded
+>>>>>>> nextsteps
 
       # Apply changes
       q.removeConstraint con.code
@@ -82,7 +90,11 @@ define ['lodash'], (L) ->
   Array inject..., (to, console, Q, scope, identifyItem, identifyItems) ->
 
     scope.runTemplate = ->
+<<<<<<< HEAD
       #console.log "this is", @
+=======
+      # console.log "this is", @
+>>>>>>> nextsteps
       scope.run scope.query if scope.query?
 
 

@@ -5,7 +5,7 @@ define (require, module, exports) ->
   DialogueTempl = require 'text!./dialogue.html'
 
   Array '$scope', '$modal', '$q', 'connectTo', (scope, Modals, Q, connectTo) ->
-    
+
     scope.type = scope.data.type
     scope.listName = scope.data.name
     scope.services = []
@@ -36,4 +36,3 @@ define (require, module, exports) ->
             listName: list.name
 
         scope.appendStep data: step
-

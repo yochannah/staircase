@@ -374,13 +374,13 @@ define (require, exports, module) ->
   do (name = 'historyListener', deps = ['Histories', '$log', '$location', 'serviceStamp']) ->
     Services.factory name, Array deps..., (H, console, loc, stamp) ->
 
-      startHistory = ({thing, verb, tool, data}) ->
+      startHistory = ({thing, verb, tool, data, description}) ->
         historyTitle = "Started by #{ verb.ing } #{ thing }"
         history = H.create {title: historyTitle}, ->
           stepTitle = "#{ verb.ed } #{ thing }"
           stamp(data?.service).then (stamp) ->
             console.debug "Stamp: #{ stamp }", data
-            step = H.append {id: history.id}, {title: stepTitle, tool, data, stamp}, ->
+            step = H.append {id: history.id}, {title: stepTitle, tool, data, stamp, description}, ->
               console.debug "Created history #{ history.id } and step #{ step.id }"
               loc.url "/history/#{ history.id }/1"
 

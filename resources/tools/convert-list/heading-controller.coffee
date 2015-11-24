@@ -3,9 +3,9 @@
 # fail if identifiers have commas in them. We desperately need a better
 # federation mechanism.
 define ['imjs', 'lodash'], ({Service}, L) ->
-  
+
   Array '$scope', '$q', 'notify', 'Mines', 'connectTo', 'makeList', (scope, Q, notify, mines, connectTo, makeList) ->
-    
+
     scope.type = scope.data.type
     currentList = scope.data.name
 
@@ -35,6 +35,8 @@ define ['imjs', 'lodash'], ({Service}, L) ->
       service.running = true
       targetSpecies = service.meta.covers
       targetService = Service.connect service
+
+      scope.targetspecies = service.meta.covers
 
       contentQ =
         select: ['primaryIdentifier', 'organism.shortName']
@@ -90,7 +92,8 @@ define ['imjs', 'lodash'], ({Service}, L) ->
       done = (list) ->
         service.running = false
         scope.appendStep data:
-          title: "Converted #{ currentList } to a list in #{ service.name }"
+          title: "Converted to #{scope.targetspecies}"
+          description: "Using #{ currentList } in #{ service.name }"
           tool: 'show-list'
           data:
             listName: list.name
@@ -101,4 +104,3 @@ define ['imjs', 'lodash'], ({Service}, L) ->
         service.running = false
 
       Q.when(ret).then done, failed
-

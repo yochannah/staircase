@@ -75,9 +75,8 @@ define (require) ->
 
       scope.$watch 'messages', (msgs) -> null # TODO
 
-      scope.$watchCollection 'idlists', (idlists) ->
-        if idlists? and idlists.length > 0
-          debugger
+      scope.$watchCollection 'idlists', (idlists) =>
+        if !scope.datainfo? and idlists.length > 0 then scope.makeactive idlists[0]
 
       scope.$watchCollection 'items', (items) -> null # TODO
 
@@ -94,13 +93,11 @@ define (require) ->
                 scope.datainfo = "#{res.size} #{val.type}s"
 
           if val.what == "ids"
-            debugger
             scope.datainfo = "#{val.ids.length} #{val.type}s"
 
           if val.what == "query"
+
             @unquery val
-
-
 
           listHandlers = []
           for tool in scope.nextTools when tool.handles val.what
@@ -110,6 +107,8 @@ define (require) ->
           scope.nextSteps = listHandlers
 
     unquery: (qu) ->
+
+      @scope.idlists = []
 
       connection = @connectTo qu.service.root
       connection.then (service) =>
@@ -129,6 +128,7 @@ define (require) ->
               else
                 idpath = (L.map node.allDescriptors(), (part) -> part.name).join(".") + ".id"
 
+
               do (idpath, @scope) ->
 
                 service.query(qu.query).then (newquery) ->
@@ -136,18 +136,19 @@ define (require) ->
                   newquery.values().then (values) ->
                     filteredIds = L.uniq L.without values, null
                     type = newquery.makePath(idpath).getParent().getType()
-                    console.log "new scope is", @scope
-                    debugger
+                    parts = newquery.makePath(idpath).allDescriptors()
+                    parts = parts.slice 0, parts.length - 1
+                    strings = L.map parts, (part) -> part.name
+                    label = strings.join " > "
+
                     @scope.$apply ->
                       has =
+                        label: label
                         ids: filteredIds
-                        type: type
+                        type: type.name
                         what: "ids"
                         service: newquery.service
                       @scope.idlists.push has
-
-
-
 
     init: ->
       {Histories, Mines, params, http, connectTo} = @
@@ -187,6 +188,22 @@ define (require) ->
       @scope.expandnextsteps = => @scope.opennextsteps = true
 
       @scope.shrinknextsteps = => @scope.opennextsteps = false
+
+      @scope.showdata = => @scope.ccat = null
+
+      @scope.makeactive = (val) =>
+
+        tmpstep =
+          title: "Selected #{val.ids.length} #{val.type}s"
+          description: val.label
+          data:
+            ids: val.ids
+            service: val.service
+          tool: "show-list"
+
+        # @storeHistory tmpstep
+        @scope.lastemitted = val
+
 
       toolNotFound = (e) => @to => @scope.error = e
 

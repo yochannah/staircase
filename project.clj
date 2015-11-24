@@ -85,19 +85,20 @@
       :web-max-age ~(* 30 24 60 60)
       :web-contacts [["fa-github" "https://github.com/intermine/staircase" "GitHub"]]
       :web-services {
-        "flymine-beta" "http://beta.flymine.org/beta/service"
-        "zfin" "http://www.zebrafishmine.org/service"
-        "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
-        "humanmine" "http://www.humanmine.org/humanmine/service"
-        "mousemine" "http://www.mousemine.org/mousemine/service"
-        "human" "http://www.humanmine.org/humanmineokay/service"}
+        "FlyMine" "http://beta.flymine.org/beta/service"
+        "HumanMine" "http://beta.humanmine.org/beta/service"
+        ; "MouseMine" "http://www.mousemine.org/mousemine/service"
+        ; "zfin" "http://www.zebrafishmine.org/service"
+        ; "yeastmine" "http://yeastmine.yeastgenome.org/yeastmine/service"
+        }
       ;; The section below should be replaced by pulling these values from branding.
       ;; and ultimately by a template based solution.
       :web-service-meta {
-                    "flymine-beta"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
-                    "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
-                    "mousemine" {:color "palette-5tone3" :covers ["M. musculus"]}
-                    "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
+                    "FlyMine"   {:color "palette-5tone1" :covers ["D. melanogaster"]}
+                    "HumanMine"   {:color "palette-5tone2" :covers ["H. sapiens"]}}
+                    ; "MouseMine" {:color "palette-5tone3" :covers ["M. musculus"]}}
+                    ; "zfin"      {:color "palette-5tone2" :covers ["D. rerio"]}
+                    ; "yeastmine" {:color "palette-5tone4" :covers ["S. cerevisiae"]}}
       :client-ga-token nil ;; Supply a token to use analytics
       :client-whitelist [
         "http://*.labs.intermine.org/**"
@@ -106,8 +107,7 @@
         "http://alexkalderimis.github.io/**"
         "http://yochannah.github.io/**"
         "http://intermine.github.io/**"
-        "http://intermine-tools.github.io/**"
-        "http://localhost:8081/**"]
+        "http://intermine-tools.github.io/**"]
       :client-step-config {
         :show-list {
                     :activeTabs [:enrich]}
@@ -119,6 +119,9 @@
                      :Style {:icons :fontawesome}}}
 
       :web-tool-categories [
+        ; {:label "Data Tools"
+        ;  :icon "fa fa-wrench"
+        ;  :tools [:combine-lists]}
         {:label "Gene Ontology"
         :icon "fa fa-database"
         :tools [:list-templates]}
@@ -130,7 +133,7 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Literature"
         :icon "fa fa-book"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Expression"
         :icon "fa fa-briefcase"
         :tools [:list-templates]}
@@ -139,27 +142,32 @@
         :tools [:convert-list :list-templates]}
         {:label "Interactions"
         :icon "fa fa-share-alt"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Regulation"
         :icon "fa fa-gears"
         :tools [:list-templates]}
         {:label "Diseases"
         :icon "fa fa-medkit"
         :tools [:tool1 :tool2 :tool3]}
-        {:label "Genomics"
+        {:label "Genes"
         :icon "fa fa-heart"
+<<<<<<< HEAD
         :tools [:show-report :tool1 :tool2 :tool3]}
+=======
+        :tools [:list-templates :region-search :tool3]}
+>>>>>>> nextsteps
         {:label "Proteins"
         :icon "fa fa-send"
         :tools [:list-templates :protein-viewer :show-report]}
         {:label "Function"
         :icon "fa fa-cube"
-        :tools [:export :tool2 :tool3]}]
+        :tools [:list-templates :tool3]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :show-report
                    :templates
+<<<<<<< HEAD
                    [:choose-list {:service "humanmine"}]
                    [:choose-list {:service "flymine-beta"}]
                    [:choose-list {:service "mousemine"}]
@@ -171,14 +179,26 @@
                    [:upload-list {:service "flymine-beta"}]
                    [:region-search {:service "flymine-beta"}]
                    [:region-search {:service "mousemine" :categories ["1" "2"]}]
+=======
+                   [:choose-list {:service "FlyMine"}]
+                   [:choose-list {:service "HumanMine"}]
+                   [:new-query {:service "FlyMine"}]
+                   [:new-query {:service "HumanMine"}]
+                   [:upload-list {:service "FlyMine"}]
+                   [:region-search {:service "FlyMine"}]
+                   [:region-search {:service "HumanMine" :categories ["1" "2"]}]
+>>>>>>> nextsteps
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
                    :convert-list
+<<<<<<< HEAD
                    :protein-viewer
                    [:convert-list {:category "Homology"}]
+=======
+>>>>>>> nextsteps
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler

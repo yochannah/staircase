@@ -14,3 +14,5 @@ install:
 script:
 - lein2 with-profile dev,travis do pprint :env, test
 - npm test
+node_js:
+- "0.12"

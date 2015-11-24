@@ -58,7 +58,7 @@
    [:div.steps
     [:a
       [:div.step.hot
-       [:div.summary
+       [:div.summary.highlighted
         [:div.step-header "Previous Steps"]]]]
     [:a {:ng-href "/history/{{history.id}}/{{steps.length - $index}}"
         :ng-repeat "s in steps | reverse"
@@ -67,19 +67,34 @@
       ; {:ng-class "{hot: step.id == s.id}"}
      [:div.summary
       [:span.badge.numbering "{{steps.indexOf(s) + 1}}"]
-      [:i.fa.fa-cubes.fa-2x]
+      [:i.fa.fa-clock-o.fa-2x]
       [:div "{{s.title}}"]]
      [:div.details {:ng-class "{transparent: !openhistory}"} "{{s.description}}"]]]]]])
 
  (defn right-column [config]
+
+  [:div
+
+  [:div.dropdown.currentdata {:dropdown true}
+   [:div.dropdown-toggle.currentdata-toggle
+     {:ng-if "idlists.length > 0" :ng-attr-dropdown-toggle true} [:span "{{datainfo}}" [:b.caret]]]
+   [:div.dropdown-toggle.currentdata-toggle
+     {:ng-if "idlists.length < 1"} [:span "{{datainfo}}"]]
+    [:ul.dropdown-menu.dropdown-menu-right
+    [:li
+     {:ng-repeat "idlist in idlists"
+      :ng-show "ccat.label == null"
+      :ng-click "makeactive(idlist)"}
+     [:h4 "{{idlist.ids.length}} {{idlist.type}}s"]
+     "{{idlist.label}}"]]]
+
   [:div.blind.right
+
    {:ng-class "{open: opennextsteps}"
    :ng-mouseleave "shrinknextsteps(); clearcc()"
-   :scrollable ""
-   }
+   :scrollable ""}
+
    [:div.contents-container
-   [:div.step.hot
-    [:div.summary [:div.step-header "{{datainfo}}"]]]
     [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
     [:div.details.right
         [:next-step
@@ -90,18 +105,22 @@
           :category "ns.category"
           :service "ns.service"
           :ng-show "ns.category.label==ccat.label"
-          :data "ns.data"}]]
+          :data "ns.data"}]
+
+        [:div
+         {:ng-repeat "idlist in idlists"
+          :ng-show "ccat.label == null"
+          :ng-click "makeactive(idlist)"}
+         [:h4 "{{idlist.ids.length}} {{idlist.type}}s"]
+         "{{idlist.label}}"]]
+
      [:a {:ng-href "#"
          :ng-repeat "category in categories"
          :ng-mouseenter "showtools(category)"}
-          ; :ng-controller "HistoryStepCtrl as stepCtrl"}
      [:div.step.empty {:ng-class "{hot: step.id == s.id}"}
-    ;  [:div.details {:ng-class "{transparent: !opennextsteps}"} "{{category.label}}"]
-    ;  [:div.details.transparent "{{s.label}}"]
       [:div.summary {:ng-class "{highlighted: category.label == ccat.label}"}
-      ;  [:span.badge.numbering "{{category.tools.length}}"]
        [:i.fa-2x {:class "{{category.icon}}"}]
-       [:div "{{category.label}}"]]]]]]])
+       [:div "{{category.label}}"]]]]]]]])
 
 
 
