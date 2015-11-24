@@ -3,6 +3,6 @@
   "type": "IFrame",
   "handles": ["ids", "list"],
   "seamless": false,
-  "src": "http://yochannah.github.io/tool.html",
+  "src": "http://intermine-tools.github.io/proteinviewer/tool.html",
   "heading": "Protein Features Viewer"
 }

@@ -87,16 +87,20 @@ define (require) ->
         if val?
 
           if val.what == "list"
-            connect = @connectTo scope.step.data.service.root
+
+            # TODO Straighten out the API for lists.
+            if val.root? then root = val.root
+            if val.service?.root? then root = val.service.root
+
+            connect = @connectTo root
             connect.then (s) ->
-              s.fetchList(scope.step.data.listName).then (res) =>
+              s.fetchList(val.name).then (res) =>
                 scope.datainfo = "#{res.size} #{val.type}s"
 
           if val.what == "ids"
             scope.datainfo = "#{val.ids.length} #{val.type}s"
 
           if val.what == "query"
-
             @unquery val
 
           listHandlers = []
@@ -246,7 +250,6 @@ define (require) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
-
       if data? then data.what = what
 
       {scope, console, to, Q, mines, connectTo} = @
