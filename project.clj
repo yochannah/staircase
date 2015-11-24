@@ -157,13 +157,13 @@
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
                    :templates
-                   [:choose-list {:service "flymine-beta"}]
-                   [:choose-list {:service "mousemine"}]
-                   [:new-query {:service "flymine-beta"}]
-                   [:new-query {:service "yeastmine"}]
-                   [:upload-list {:service "flymine-beta"}]
-                   [:region-search {:service "flymine-beta"}]
-                   [:region-search {:service "mousemine" :categories ["1" "2"]}]
+                   [:choose-list {:service "FlyMine"}]
+                   [:choose-list {:service "HumanMine"}]
+                   [:new-query {:service "FlyMine"}]
+                   [:new-query {:service "HumanMine"}]
+                   [:upload-list {:service "FlyMine"}]
+                   [:region-search {:service "FlyMine"}]
+                   [:region-search {:service "HumanMine" :categories ["1" "2"]}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
