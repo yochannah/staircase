@@ -58,7 +58,7 @@
    [:div.steps
     [:a
       [:div.step.hot
-       [:div.summary
+       [:div.summary.highlighted
         [:div.step-header "Previous Steps"]]]]
     [:a {:ng-href "/history/{{history.id}}/{{steps.length - $index}}"
         :ng-repeat "s in steps | reverse"
@@ -76,7 +76,10 @@
   [:div
 
   [:div.dropdown.currentdata {:dropdown true}
-   [:div.dropdown-toggle.currentdata-toggle {:dropdown-toggle true} "{{datainfo}}This is data" [:b.caret]]
+   [:div.dropdown-toggle.currentdata-toggle
+     {:ng-if "idlists.length > 0" :ng-attr-dropdown-toggle true} [:span "{{datainfo}}" [:b.caret]]]
+   [:div.dropdown-toggle.currentdata-toggle
+     {:ng-if "idlists.length < 1"} [:span "{{datainfo}}"]]
     [:ul.dropdown-menu.dropdown-menu-right
     [:li
      {:ng-repeat "idlist in idlists"

@@ -75,8 +75,8 @@ define (require) ->
 
       scope.$watch 'messages', (msgs) -> null # TODO
 
-      scope.$watchCollection 'idlists', (idlists) ->
-        console.log "idlists", idlists
+      scope.$watchCollection 'idlists', (idlists) =>
+        if !scope.datainfo? and idlists.length > 0 then scope.makeactive idlists[0]
 
       scope.$watchCollection 'items', (items) -> null # TODO
 
@@ -200,8 +200,6 @@ define (require) ->
             ids: val.ids
             service: val.service
           tool: "show-list"
-
-
 
         # @storeHistory tmpstep
         @scope.lastemitted = val
