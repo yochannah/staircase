@@ -3,6 +3,6 @@
   "type": "IFrame",
   "handles": ["ids", "list"],
   "seamless": false,
-  "src": "http://localhost:9999/tool.html",
+  "src": "http://yochannah.github.io/tool.html",
   "heading": "Protein Features Viewer"
 }

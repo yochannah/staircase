@@ -151,11 +151,7 @@
         :tools [:tool1 :tool2 :tool3]}
         {:label "Genes"
         :icon "fa fa-heart"
-<<<<<<< HEAD
-        :tools [:show-report :tool1 :tool2 :tool3]}
-=======
-        :tools [:list-templates :region-search :tool3]}
->>>>>>> nextsteps
+        :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa fa-send"
         :tools [:list-templates :protein-viewer :show-report]}
@@ -167,19 +163,6 @@
                    :histories
                    :show-report
                    :templates
-<<<<<<< HEAD
-                   [:choose-list {:service "humanmine"}]
-                   [:choose-list {:service "flymine-beta"}]
-                   [:choose-list {:service "mousemine"}]
-                   [:new-query {:service "flymine-beta"}]
-                   [:new-query {:service "yeastmine"}]
-                   [:upload-list {:service "humanmine"}]
-                   [:region-search {:service "flymine"}]
-                   [:region-search {:service "mousemine"}]
-                   [:upload-list {:service "flymine-beta"}]
-                   [:region-search {:service "flymine-beta"}]
-                   [:region-search {:service "mousemine" :categories ["1" "2"]}]
-=======
                    [:choose-list {:service "FlyMine"}]
                    [:choose-list {:service "HumanMine"}]
                    [:new-query {:service "FlyMine"}]
@@ -187,18 +170,14 @@
                    [:upload-list {:service "FlyMine"}]
                    [:region-search {:service "FlyMine"}]
                    [:region-search {:service "HumanMine" :categories ["1" "2"]}]
->>>>>>> nextsteps
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
                    :resolve-ids
                    :combine-lists
                    :convert-list
-<<<<<<< HEAD
                    :protein-viewer
                    [:convert-list {:category "Homology"}]
-=======
->>>>>>> nextsteps
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
