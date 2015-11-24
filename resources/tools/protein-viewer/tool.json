@@ -1,8 +1,8 @@
 {
   "capabilities": ["now","next"],
   "type": "IFrame",
-  "handles": ["ids"],
+  "handles": ["ids", "list"],
   "seamless": false,
-  "src": "http://yochannah.github.io/proteinviewer/tool.html",
-  "heading": "Protein Viewer"
+  "src": "http://localhost:9999/tool.html",
+  "heading": "Protein Features Viewer"
 }

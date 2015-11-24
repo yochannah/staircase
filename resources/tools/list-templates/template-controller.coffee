@@ -22,7 +22,7 @@ define ['lodash'], (L) ->
   # This means adjusting their paths, and giving them suitable codes.
   adjustForQuery = (cons, unavailableCodes, conPath) ->
     highestCode = unavailableCodes.slice().sort().pop()
-    console.log "Highest code:", unavailableCodes, highestCode
+    #console.log "Highest code:", unavailableCodes, highestCode
     if unavailableCodes.length and not highestCode?
       debugger
     nextIdx = ALPHABET.indexOf(highestCode) + 1
@@ -51,7 +51,7 @@ define ['lodash'], (L) ->
 
   applyConstraintsToQuery = (q, cons) ->
     # Get the only editable constraint - part of the contract.
-    console.log '----', q.name
+    #console.log '----', q.name
     con = getTargetConstraint q
     path = q.makePath con.path
 
@@ -70,8 +70,8 @@ define ['lodash'], (L) ->
       newCons = adjustForQuery cons, unavailableCodes, conPath
       codesAdded = (c.code for c in newCons)
       newLogic = replaceCode q.constraintLogic, con.code, codesAdded
-      console.log q.name, "The new constraints are", newCons
-      console.log q.name, "The new codes are", codesAdded
+      #console.log q.name, "The new constraints are", newCons
+      #console.log q.name, "The new codes are", codesAdded
 
       # Apply changes
       q.removeConstraint con.code
@@ -82,15 +82,15 @@ define ['lodash'], (L) ->
   Array inject..., (to, console, Q, scope, identifyItem, identifyItems) ->
 
     scope.runTemplate = ->
-      console.log "this is", @
+      #console.log "this is", @
       scope.run scope.query if scope.query?
 
 
     getReplacementConstraints = if scope.list?
-      console.debug "Running over #{ scope.list.name }"
+      #console.debug "Running over #{ scope.list.name }"
       Q.when [{op: 'IN', value: scope.list.name}]
     else if scope.items?.ids
-      console.debug "Identifying items at #{ scope.service.root }"
+      #console.debug "Identifying items at #{ scope.service.root }"
       if scope.items.ids.length is 1
         identifyItem(scope.service, type: scope.items.type, id: scope.items.ids[0]).then (fields) ->
           ({path: decap(path), op: '==', value} for path, value of fields)
@@ -101,7 +101,7 @@ define ['lodash'], (L) ->
       Q.reject 'Cannot generate constraints - list or items are required'
 
     Q.all([scope.service.query(scope.template), getReplacementConstraints]).then ([q, cons]) ->
-      console.debug "Constraints are", cons
+      #console.debug "Constraints are", cons
       applyConstraintsToQuery q, cons
 
       to -> scope.query = q

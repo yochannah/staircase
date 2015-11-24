@@ -597,7 +597,7 @@ define (require) ->
           loadStyle $window, scope.tool
 
           ctrl = '.' + scope.tool.headingControllerURI
-          console.log "LOADING CONTROLLER", ctrl
+          #console.log "LOADING CONTROLLER", ctrl
           tmpl = $window.location.origin + scope.tool.headingTemplateURI
 
           requirejs {baseUrl: '/'}, [ctrl, "text!#{ tmpl }"], (controller, template) ->
