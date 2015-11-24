@@ -15,7 +15,6 @@ define [], -> Array '$scope', (scope) ->
 
   scope.activate = ->
     scope.previousStep.$promise.then ->
-
       step =
         title: "Export"
         tool: scope.tool.ident

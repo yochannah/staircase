@@ -31,7 +31,7 @@
             :verifier "https://verifier.login.persona.org/verify"
             :db-subname "//localhost/staircase"
           }
- }
+        }
  :test {
         :bower-dependencies [[angular-scenario "~1.2.9"]
                              [angular-mocks "~1.2.9"]
