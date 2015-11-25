@@ -128,9 +128,9 @@
         {:label "Pathways"
         :icon "fa fa-code-fork"
         :tools [:list-templates]}
-        {:label "Protein Domain"
+        {:label "Protein Domains"
         :icon "fa fa-bar-chart"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Literature"
         :icon "fa fa-book"
         :tools [:list-templates :tool2 :tool3]}
@@ -148,7 +148,7 @@
         :tools [:list-templates]}
         {:label "Diseases"
         :icon "fa fa-medkit"
-        :tools [:tool1 :tool2 :tool3]}
+        :tools [:list-templates :tool2 :tool3]}
         {:label "Genes"
         :icon "fa fa-heart"
         :tools [:show-report :list-templates :region-search]}
