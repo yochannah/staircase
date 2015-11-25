@@ -8,8 +8,8 @@
    [:div.container
     [:div.row
      [:div.col-md-8.col-md-offset-2
-      [:h1
-       (image "")
+      [:h1 {:style "white-space: nowrap"}
+       (image "/images/flattened-helix-right-128px.png")
        (:project-title config)]]]
     [:div.row
      [:form.search-form.col-sm-6.col-sm-offset-3 (search-input config)]]
