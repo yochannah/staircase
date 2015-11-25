@@ -123,37 +123,37 @@
         ;  :icon "fa fa-wrench"
         ;  :tools [:combine-lists]}
         {:label "Gene Ontology"
-        :icon "fa fa-database"
+        :icon "fa icon-gene-ontology"
         :tools [:list-templates]}
         {:label "Pathways"
         :icon "fa fa-code-fork"
         :tools [:list-templates]}
         {:label "Protein Domains"
-        :icon "fa fa-bar-chart"
+        :icon "fa icon-protein-domains"
         :tools [:list-templates :tool2 :tool3]}
         {:label "Literature"
         :icon "fa fa-book"
         :tools [:list-templates :tool2 :tool3]}
         {:label "Expression"
-        :icon "fa fa-briefcase"
+        :icon "fa icon-traffic-signal"
         :tools [:list-templates]}
         {:label "Homology"
         :icon "fa fa-tree"
         :tools [:convert-list :list-templates]}
         {:label "Interactions"
-        :icon "fa fa-share-alt"
+        :icon "fa icon-interaction"
         :tools [:list-templates :tool2 :tool3]}
         {:label "Regulation"
-        :icon "fa fa-gears"
+        :icon "fa fa-3x icon-dna-cog"
         :tools [:list-templates]}
         {:label "Diseases"
         :icon "fa fa-medkit"
         :tools [:list-templates :tool2 :tool3]}
         {:label "Genes"
-        :icon "fa fa-heart"
+        :icon "fa fa-3x icon-dna"
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
-        :icon "fa fa-send"
+        :icon "fa icon-protein"
         :tools [:list-templates :protein-viewer :show-report]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
