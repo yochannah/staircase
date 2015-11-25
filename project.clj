@@ -154,10 +154,7 @@
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa fa-send"
-        :tools [:list-templates :protein-viewer :show-report]}
-        {:label "Function"
-        :icon "fa fa-cube"
-        :tools [:list-templates :tool3]}]
+        :tools [:list-templates :protein-viewer :show-report]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
