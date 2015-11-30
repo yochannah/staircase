@@ -43,8 +43,10 @@
   }
 
   &.right {
+    @blind-top-offset: 126px;
     right: 0;
-    top: 126px;
+    top: @blind-top-offset;
+    padding-bottom: @blind-top-offset;
     // text-align: right;
 
     &.open {
