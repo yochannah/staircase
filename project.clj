@@ -154,7 +154,7 @@
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa icon-protein"
-        :tools [:list-templates :protein-viewer :show-report]}]
+        :tools [:list-templates :protein-viewer :complex-viewer :show-report]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
@@ -178,6 +178,7 @@
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
+                   :complex-viewer
                    :keyword-search ;; From resources/config - really must auto-configure this list...
                    ]
   }
