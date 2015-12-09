@@ -16,7 +16,6 @@ define ['imjs', 'lodash'], ({Service}, L) ->
     origin = (step.data.url or step.data.root or step.data.service.root)
 
     mines.all().then (services) ->
-      debugger
       scope.services = (Object.create(s) for s in services \
                                         when Service.connect(s).root isnt origin)
 
