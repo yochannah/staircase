@@ -114,45 +114,53 @@ define (require) ->
 
       @scope.idlists = []
 
+      {Q} = @
+
       connection = @connectTo qu.service.root
       connection.then (service) =>
 
         # For our query into an intermine query
         query = service.query(qu.query).then (imquery) =>
 
-          classviews = []
-          queries = []
+          classes = []
 
           # Get each class of the query
           for node in imquery.getQueryNodes()
             if node.isClass()
-
               if node.allDescriptors().length == 1
                 idpath = node.allDescriptors().pop().name + ".id"
               else
                 idpath = (L.map node.allDescriptors(), (part) -> part.name).join(".") + ".id"
 
+            classes.push idpath
 
-              do (idpath, @scope) ->
+          getCount = (idpath) ->
 
-                service.query(qu.query).then (newquery) ->
-                  newquery.select(idpath)
-                  newquery.values().then (values) ->
-                    filteredIds = L.uniq L.without values, null
-                    type = newquery.makePath(idpath).getParent().getType()
-                    parts = newquery.makePath(idpath).allDescriptors()
-                    parts = parts.slice 0, parts.length - 1
-                    strings = L.map parts, (part) -> part.name
-                    label = strings.join " > "
+            deferred = Q.defer()
 
-                    @scope.$apply ->
-                      has =
-                        label: label
-                        ids: filteredIds
-                        type: type.name
-                        what: "ids"
-                        service: newquery.service
-                      @scope.idlists.push has
+            service.query(qu.query).then (newquery) ->
+              newquery.select(idpath)
+              newquery.values().then (values) ->
+                filteredIds = L.uniq L.without values, null
+                type = newquery.makePath(idpath).getParent().getType()
+                parts = newquery.makePath(idpath).allDescriptors()
+                parts = parts.slice 0, parts.length - 1
+                strings = L.map parts, (part) -> part.name
+                label = strings.join " > "
+                has =
+                  label: label
+                  ids: filteredIds
+                  type: type.name
+                  what: "ids"
+                  service: newquery.service
+                deferred.resolve has
+
+            deferred.promise
+
+          Q.all( (getCount imclass for imclass in classes) ).then (results) =>
+            @scope.idlists.push result for result in results
+            console.log @scope.idlists
+
 
     init: ->
       {Histories, Mines, params, http, connectTo} = @
