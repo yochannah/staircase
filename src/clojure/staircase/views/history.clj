@@ -57,14 +57,14 @@
   [:div.contents-container
    [:div.steps
     [:a
-      [:div.step.hot
+      [:div.step
        [:div.summary.highlighted
         [:div.step-header "Previous Steps"]]]]
     [:a {:ng-href "/history/{{history.id}}/{{steps.length - $index}}"
         :ng-repeat "s in steps | reverse"
          :ng-controller "HistoryStepCtrl as stepCtrl"}
     [:div.step
-      ; {:ng-class "{hot: step.id == s.id}"}
+      {:ng-class "{hot: step.id == s.id}"}
      [:div.summary
       [:span.badge.numbering "{{steps.indexOf(s) + 1}}"]
       [:i.fa.fa-clock-o.fa-2x]
