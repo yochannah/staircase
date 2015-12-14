@@ -1,6 +1,6 @@
 {
   "capabilities": ["now", "next"],
-  "handles": ["items", "query"],
+  "handles": ["items", "ids", "query"],
   "type": "IFrame",
   "heading": "Export",
   "src": "http://intermine-tools.github.io/steps-export-tool/tool.html",

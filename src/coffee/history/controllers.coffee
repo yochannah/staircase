@@ -159,8 +159,6 @@ define (require) ->
 
           Q.all( (getCount imclass for imclass in classes) ).then (results) =>
             @scope.idlists.push result for result in results
-            console.log @scope.idlists
-
 
     init: ->
       {Histories, Mines, params, http, connectTo} = @
@@ -212,7 +210,6 @@ define (require) ->
             ids: val.ids
             service: val.service
           tool: "show-list"
-
         # @storeHistory tmpstep
         @scope.lastemitted = val
 
@@ -265,7 +262,7 @@ define (require) ->
 
       return to -> scope.lastemitted = data
 
-      triggerUpdate = -> to -> scope.messages = L.assign {}, scope.messages
+      triggerUpdate = -> to -> debugger; scope.messages = L.assign {}, scope.messages
 
       handlers = (tool for tool in scope.nextTools when tool.handles(what))
 

@@ -154,8 +154,8 @@
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa icon-protein"
-        :tools [:list-templates :protein-viewer :complex-viewer :show-report]}
-        {:label "Data Operations"
+        :tools [:list-templates :protein-viewer :show-report]}
+        {:label "Utilies"
         :icon "fa fa-wrench"
         :tools [:combine-lists :export]}]
 
@@ -181,7 +181,6 @@
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
-                   :complex-viewer
                    :keyword-search ;; From resources/config - really must auto-configure this list...
                    ]
   }
