@@ -154,7 +154,10 @@
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa icon-protein"
-        :tools [:list-templates :protein-viewer :complex-viewer :show-report]}]
+        :tools [:list-templates :protein-viewer :complex-viewer :show-report]}
+        {:label "Data Operations"
+        :icon "fa fa-wrench"
+        :tools [:combine-lists :export]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories

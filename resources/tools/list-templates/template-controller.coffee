@@ -81,10 +81,7 @@ define ['lodash'], (L) ->
   Array inject..., (to, console, Q, scope, identifyItem, identifyItems) ->
 
     scope.runTemplate = ->
-      # console.log "this is", @
-
       scope.run scope.query if scope.query?
-
 
     getReplacementConstraints = if scope.list?
       #console.debug "Running over #{ scope.list.name }"
