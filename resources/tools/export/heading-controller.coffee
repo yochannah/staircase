@@ -12,6 +12,11 @@ define [], -> Array '$scope', (scope) ->
     else if data.query
       scope.type = 'result'
       scope.query = data.query
+    else if data.what?= "list"
+      scope.query =
+        select: ['*']
+        from: type
+        where: [{path: type, op: 'IN', value: scope.data.name}]
 
   scope.activate = ->
     scope.previousStep.$promise.then ->

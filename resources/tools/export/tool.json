@@ -1,8 +1,7 @@
 {
   "capabilities": ["now", "next"],
-  "handles": ["items", "ids", "query"],
+  "handles": ["items", "ids", "query", "list"],
   "type": "IFrame",
   "heading": "Export",
-  "src": "http://intermine-tools.github.io/steps-export-tool/tool.html",
-  "category": "CatB"
+  "src": "http://intermine-tools.github.io/steps-export-tool/tool.html"
 }
