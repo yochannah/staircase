@@ -169,7 +169,7 @@
                    [:new-query {:service "HumanMine"}]
                    [:upload-list {:service "FlyMine"}]
                    [:region-search {:service "FlyMine"}]
-                   [:region-search {:service "HumanMine" :categories ["1" "2"]}]
+                   [:region-search {:service "HumanMine"}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
