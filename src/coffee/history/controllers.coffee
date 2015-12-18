@@ -250,7 +250,6 @@ define (require) ->
       o[key] = value
 
     hasSomething: (what, data, key) ->
-
       if data? then data.what = what
 
       {scope, console, to, Q, mines, connectTo} = @
