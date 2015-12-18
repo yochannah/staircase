@@ -154,7 +154,10 @@
         :tools [:show-report :list-templates :region-search]}
         {:label "Proteins"
         :icon "fa icon-protein"
-        :tools [:list-templates :protein-viewer :complex-viewer :show-report]}]
+        :tools [:list-templates :protein-viewer :show-report]}
+        {:label "Utilies"
+        :icon "fa fa-wrench"
+        :tools [:combine-lists :export]}]
 
       :web-tools [ ;; Needs to be listed so we know what order these should be shown in.
                    :histories
@@ -166,7 +169,7 @@
                    [:new-query {:service "HumanMine"}]
                    [:upload-list {:service "FlyMine"}]
                    [:region-search {:service "FlyMine"}]
-                   [:region-search {:service "HumanMine" :categories ["1" "2"]}]
+                   [:region-search {:service "HumanMine"}]
                    :show-table ;; TODO: make the tools below autoconfigure...
                    :show-list  ;;  - these are not front page, so their order is not important.
                    :show-enrichment
@@ -178,7 +181,6 @@
                    :list-templates
                    [:export {:category ["Export"]}]
                    :id-handler
-                   :complex-viewer
                    :keyword-search ;; From resources/config - really must auto-configure this list...
                    ]
   }

@@ -8,11 +8,17 @@
   ng-controller="TemplateController">
 
   <a ng-click="runTemplate()">
-  <i ng-class="{'fa fa-fw fa-circle-o-notch fa-spin': !count && count != 0}"></i>
+    <i ng-class="{'fa fa-fw fa-circle-o-notch fa-spin': !count && count != 0}"></i>
 
-
-     <span class="badge">{{count}}</span>
+     <span class="badge">{{count}} rows</span>
      {{template.parsedTitle}}
    </a>
 
+</div>
+
+<div
+  class="list-group-item lists">
+  <a class="standout" ng-click="showTemplates()">
+    Show more templates.
+  </a>
 </div>

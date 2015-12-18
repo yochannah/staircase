@@ -80,6 +80,7 @@ define ['lodash', './dialogue', 'text!./template-dialogue.html', './template-con
         size: 'lg'
         resolve: injected
 
+      modalInstance.result.then (selectedTemplate) -> scope.run selectedTemplate
 
 
 

@@ -1,9 +1,0 @@
-{
-  "capabilities": ["next"],
-  "provides": "id",
-  "handles": ["ids", "list", "query"],
-  "type": "IFrame",
-  "seamless": false,
-  "heading": "Complex Viewer",
-  "src": "http://localhost:9001/app/steps.html"
-}
