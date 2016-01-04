@@ -155,7 +155,7 @@
         {:label "Proteins"
         :icon "fa icon-protein"
         :tools [:list-templates :protein-viewer :show-report]}
-        {:label "Utilies"
+        {:label "Utilites"
         :icon "fa fa-wrench"
         :tools [:combine-lists :export]}]
 
