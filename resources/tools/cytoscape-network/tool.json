@@ -4,6 +4,6 @@
   "type": "IFrame",
   "seamless": true,
   "heading": "Interaction view",
-  "src": "http://yochannah.github.io/cytoscape-intermine/tool.html",
+  "src": "http://intermine-tools.github.io/cytoscape-intermine/tool.html",
   "tall": true
 }

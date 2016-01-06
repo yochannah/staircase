@@ -2,6 +2,6 @@
     "capabilities": ["now"],
     "type": "IFrame",
     "seamless": false,
-    "src": "http://mynock:3456/tool.html",
+    "src": "http://intermine-tools.github.io/multimine-search-tool/tool.html",
     "heading": "Keyword search"
 }
