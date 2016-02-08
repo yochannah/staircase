@@ -17,7 +17,7 @@
 @sz-blind-open: 300px;
 
 .fadeHistory{
-  @solidColor:rgba(250,250,250,0.86);
+  @solidColor:rgba(80,80,80,0.86);
   @midColor:fadeOut(@solidColor, 0.3);
   @translucent:rgba(255,255,255,0);
   background: -moz-linear-gradient(top, @translucent 0%, @midColor 80%, @solidColor 100%); /* FF3.6-15 */
@@ -226,4 +226,21 @@
 
 .empty {
   color: #D3D3D3;
+}
+
+//quick user testing fixes
+.list-group-item,.blind, .blind .contents-container .summary {
+background:#444;
+color:#fff;
+&.highlighted {
+  background: #2c79be;
+}
+}
+
+.blind.left {
+box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.3);
+}
+
+.blind.right, .currentdata {
+box-shadow: -5px 5px 5px 0px rgba(0,0,0,0.3);
 }
