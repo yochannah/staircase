@@ -83,7 +83,7 @@
   height: 100%;
   top: @navheight;
   width: @sz-blind-closed;
-  background: @clr-menu-bg;
+//  background: @clr-menu-bg;
   z-index: 999;
   overflow-x: hidden;
 
@@ -126,7 +126,7 @@
         right: @sz-blind-closed;
         width: @sz-blind-open - @sz-blind-closed;
         background: lighten(@clr-menu-bg, 5%);
-        background: white;
+        background: #444;
         // height: 100%;
       }
     }
@@ -229,13 +229,15 @@
 }
 
 //quick user testing fixes
-.list-group-item,.blind, .blind .contents-container .summary {
+.blind, .blind .contents-container .summary {
 background:#444;
 color:#fff;
-&.highlighted {
-  background: #2c79be;
+ &.highlighted {
+   background: #999;
+ }
 }
-}
+
+.list-group-item {background:#999; }
 
 .blind.left {
 box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.3);
@@ -243,4 +245,16 @@ box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.3);
 
 .blind.right, .currentdata {
 box-shadow: -5px 5px 5px 0px rgba(0,0,0,0.3);
+}
+
+.right {
+  @border-summary:#ccc;
+  .summary {
+    border-left: solid 1px @border-summary;
+  }
+  .summary.highlighted {
+    border-left: 0;
+    border-top: solid 1px @border-summary;
+    border-bottom: solid 1px @border-summary;
+  }
 }

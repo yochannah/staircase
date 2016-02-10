@@ -183,7 +183,9 @@ define (require) ->
       @mines = Mines.all()
       @connectTo = connectTo
 
-      @scope.showtools = (val) => @scope.ccat = val
+      @scope.showtools = (val) =>
+        @scope.ccat = val
+        console.log "fff", val;
 
       @scope.clearcc = => @scope.ccat = null
 

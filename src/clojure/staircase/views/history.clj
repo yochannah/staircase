@@ -73,12 +73,13 @@
  (defn right-column [config]
 
   [:div
-
   [:div.dropdown.currentdata {:dropdown true}
    [:div.dropdown-toggle.currentdata-toggle
      {:ng-if "idlists.length > 0" :ng-attr-dropdown-toggle true} [:span "{{datainfo}}" [:b.caret]]]
    [:div.dropdown-toggle.currentdata-toggle
      {:ng-if "idlists.length < 1"} [:span "{{datainfo}}"]]
+     [:div.ns "Next Steps"]
+
     [:ul.dropdown-menu.dropdown-menu-right
     [:li
      {:ng-repeat "idlist in idlists"
@@ -95,16 +96,17 @@
 
    [:div.contents-container
     [:div.steps.right {:ng-mouseenter "expandnextsteps()"}
-    [:div.details.right
+    [:div.details.right {:blah "{{nextSteps}}"}
+        [:div.ns {:ng-repeat "ns in nextSteps |orderBy:'ns.category.label'" :class "ns{{ns.category.label}} {{$index}}"}
         [:next-step
-         {:ng-repeat "ns in nextSteps"
-          :previous-step "step"
+         {:previous-step "step"
+          :class "next-step"
           :append-step "appView.nextStep(data)"
           :tool "ns.tool"
           :category "ns.category"
           :service "ns.service"
           :ng-show "ns.category.label==ccat.label"
-          :data "ns.data"}]
+          :data "ns.data"}]]
 
         [:div
          {:ng-repeat "idlist in idlists"

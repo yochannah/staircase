@@ -119,18 +119,18 @@
                      :Style {:icons :fontawesome}}}
 
       :web-tool-categories [
+      {:label "Utilites"
+      :icon "fa fa-wrench"
+      :tools [:export :combine-lists]}
+      {:label "Proteins"
+      :icon "fa icon-protein"
+      :tools [:protein-viewer :show-report :list-templates]}
         {:label "Genes"
         :icon "fa fa-3x icon-dna"
-        :tools [:show-report :list-templates :region-search]}
-        {:label "Proteins"
-        :icon "fa icon-protein"
-        :tools [:list-templates :protein-viewer :show-report]}
-        {:label "Utilites"
-        :icon "fa fa-wrench"
-        :tools [:combine-lists :export]}
+        :tools [:show-report :region-search :list-templates]}
         {:label "Interactions"
         :icon "fa icon-interaction"
-        :tools [:list-templates :cytoscape-network]}
+        :tools [:cytoscape-network :list-templates]}
         {:label "Homology"
         :icon "fa fa-tree"
         :tools [:convert-list :list-templates]}
